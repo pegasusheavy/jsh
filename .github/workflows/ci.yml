@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        
+
       - name: Cache cargo registry
         uses: actions/cache@v4
         with:
@@ -30,7 +30,7 @@ jobs:
           key: ${{ runner.os }}-cargo-check-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-check-
-            
+
       - name: Run cargo check
         run: cargo check --all-features
 
@@ -44,12 +44,12 @@ jobs:
         rust: [stable, beta]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          
+
       - name: Cache cargo registry
         uses: actions/cache@v4
         with:
@@ -60,10 +60,10 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.rust }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.rust }}-cargo-test-
-            
+
       - name: Run tests
         run: cargo test --all-features --verbose
-        
+
       - name: Run shell integration tests
         run: |
           cargo build --release
@@ -75,12 +75,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-          
+
       - name: Check formatting
         run: cargo fmt --all -- --check
 
@@ -89,12 +89,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-          
+
       - name: Cache cargo registry
         uses: actions/cache@v4
         with:
@@ -105,7 +105,7 @@ jobs:
           key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-clippy-
-            
+
       - name: Run clippy
         run: cargo clippy --all-features -- -D warnings
 
@@ -114,10 +114,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-          
+
       - name: Check documentation
         run: cargo doc --no-deps --all-features
         env:
@@ -128,12 +128,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: "1.85"
-          
+
       - name: Check MSRV
         run: cargo check --all-features
 
