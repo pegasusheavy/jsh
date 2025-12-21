@@ -1,6 +1,6 @@
-# jsh - ZSH/Bash-Compatible Shell with Enhanced Scripting
+# jsh - Joseph's Shell
 
-> A modern Unix shell written in Rust that provides full Bash/ZSH compatibility while adding match expressions, try/catch, named function parameters, Fish syntax support, and built-in git commands.
+> jsh (Joseph's Shell) is a modern Unix shell written in Rust that provides full Bash/ZSH compatibility while adding match expressions, try/catch, named function parameters, Fish syntax support, and built-in git commands.
 
 ## Quick Reference
 

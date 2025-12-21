@@ -13,6 +13,9 @@ import { RouterLink } from '@angular/router';
           <h1 class="text-5xl md:text-7xl font-bold mb-6">
             <span class="text-[var(--color-primary)]">jsh</span>
           </h1>
+          <p class="text-2xl md:text-3xl text-[var(--color-text)] mb-2 font-medium">
+            Joseph's Shell
+          </p>
           <p class="text-xl md:text-2xl text-[var(--color-text-muted)] mb-4 max-w-3xl mx-auto">
             A modern shell that combines Bash, ZSH, Fish, and Ash compatibility with enhanced scripting features
           </p>

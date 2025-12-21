@@ -1,8 +1,8 @@
-# jsh - A ZSH/Bash-Compatible Shell with Enhanced Scripting
+# jsh - Joseph's Shell
 
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE-MIT)
 
-**jsh** is a modern shell that combines full compatibility with Bash/ZSH scripts while introducing cleaner, more intuitive syntax for flow control and scripting.
+**jsh** (Joseph's Shell) is a modern ZSH/Bash-compatible shell that combines full compatibility with existing scripts while introducing cleaner, more intuitive syntax for flow control and scripting.
 
 ## Features
 

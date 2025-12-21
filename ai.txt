@@ -1,6 +1,7 @@
-# AI Context: jsh Shell
+# AI Context: jsh - Joseph's Shell
 
 name: jsh
+full_name: Joseph's Shell
 type: Unix shell
 language: Rust (Edition 2024)
 version: 0.1.0

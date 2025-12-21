@@ -1,6 +1,6 @@
-# jsh Complete Reference for Language Models
+# jsh - Joseph's Shell - Complete Reference
 
-> This is the comprehensive reference document for jsh shell. For a shorter summary, see llms.txt.
+> This is the comprehensive reference document for jsh (Joseph's Shell). For a shorter summary, see llms.txt.
 
 ## Table of Contents
 
@@ -24,7 +24,7 @@
 
 ## Overview
 
-**jsh** (jay-shell) is a Unix shell written in Rust that provides:
+**jsh** (Joseph's Shell) is a Unix shell written in Rust that provides:
 
 - **Full Bash/ZSH compatibility** - existing scripts run unchanged
 - **Enhanced syntax** - match expressions, try/catch, named parameters
@@ -813,16 +813,16 @@ Pattern matching similar to Rust's match:
 match $value {
     # Literal match
     "hello" => echo "greeting"
-    
+
     # Multiple patterns (OR)
     1 | 2 | 3 => echo "small number"
-    
+
     # Range (numeric)
     10..20 => echo "between 10 and 20"
-    
+
     # Regex pattern
     /^[A-Z]/ => echo "starts with uppercase"
-    
+
     # Wildcard (default)
     * => echo "anything else"
 }
@@ -939,13 +939,13 @@ Infinite loop with break/continue:
 ```bash
 loop {
     read -p "Command: " cmd
-    
+
     # Exit condition
     [ "$cmd" = "quit" ] && break
-    
+
     # Skip condition
     [ -z "$cmd" ] && continue
-    
+
     # Execute command
     eval "$cmd"
 }
@@ -1313,14 +1313,14 @@ git_prompt_custom() {
     if ! in_git_repo; then
         return
     fi
-    
+
     local branch=$(git_branch)
     local dirty=""
     local staged=""
-    
+
     git_status --dirty && dirty="✗"
     git_status --staged && staged="●"
-    
+
     echo " ($branch$dirty$staged)"
 }
 
@@ -1650,13 +1650,13 @@ const ENV = "${2:-production}"
 
 deploy(version, environment) {
     echo "Deploying $version to $environment..."
-    
+
     # Check for clean working tree
     if in_git_repo && git_status --dirty; then
         echo "Error: Working tree is dirty"
         exit 1
     fi
-    
+
     # Verify branch
     match $(git_branch) {
         "main" | "master" => echo "Deploying from main branch"
@@ -1670,7 +1670,7 @@ deploy(version, environment) {
             echo "Warning: Deploying from feature branch"
         }
     }
-    
+
     try {
         # Run deployment
         ./scripts/deploy.sh "$version" "$environment"
@@ -1697,7 +1697,7 @@ parse_config(file) {
         echo "Config file not found: $file"
         return 1
     fi
-    
+
     while read line; do
         # Skip comments and empty lines
         match $line {
@@ -1706,12 +1706,12 @@ parse_config(file) {
                 # Parse key=value
                 local key=${line%%=*}
                 local value=${line#*=}
-                
+
                 # Remove quotes
                 value=$(string trim "$value")
                 value=${value#\"}
                 value=${value%\"}
-                
+
                 # Export
                 export "$key=$value"
             }
@@ -1737,9 +1737,9 @@ for file in $files
     set content (cat "$file")
     set lines (string split "\n" "$content")
     set count (math "${#lines[@]}")
-    
+
     echo "$file: $count lines"
-    
+
     if contains "TODO" $content
         echo "  → Contains TODO items"
     end
@@ -1763,7 +1763,7 @@ show_menu() {
 loop {
     show_menu
     read -p "Choice: " choice
-    
+
     match $choice {
         "1" => ls -la
         "2" => date
@@ -1782,7 +1782,7 @@ loop {
         }
         * => echo "Invalid choice"
     }
-    
+
     echo ""
     read -p "Press Enter to continue..."
 }

@@ -74,7 +74,7 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  
+
   <!-- Extended Documentation for LLMs -->
   <url>
     <loc>https://pegasusheavy.github.io/jsh/llms-full.txt</loc>
@@ -82,6 +82,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  
+
 </urlset>
 
