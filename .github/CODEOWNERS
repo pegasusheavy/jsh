@@ -1,0 +1,28 @@
+# Default owners for everything in the repo
+* @pegasusheavy
+
+# Core shell implementation
+/src/lexer.rs @pegasusheavy
+/src/parser.rs @pegasusheavy
+/src/ast.rs @pegasusheavy
+/src/interpreter.rs @pegasusheavy
+
+# Builtins
+/src/builtins.rs @pegasusheavy
+
+# Shell and REPL
+/src/shell.rs @pegasusheavy
+/src/theme.rs @pegasusheavy
+
+# Documentation
+/docs/ @pegasusheavy
+/README.md @pegasusheavy
+
+# Packaging
+/debian/ @pegasusheavy
+/rpm/ @pegasusheavy
+/packaging/ @pegasusheavy
+
+# CI/CD
+/.github/ @pegasusheavy
+

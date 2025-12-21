@@ -1,0 +1,91 @@
+name: Compatibility Issue
+description: Report a compatibility issue with Bash, ZSH, Fish, or POSIX
+title: "[Compatibility]: "
+labels: ["compatibility", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Found a script that works in another shell but not in jsh? Let us know!
+
+  - type: dropdown
+    id: shell
+    attributes:
+      label: Reference Shell
+      description: Which shell does the script work correctly in?
+      options:
+        - Bash
+        - ZSH
+        - Fish
+        - Dash/Ash (POSIX)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: script
+    attributes:
+      label: Script/Command
+      description: The script or command that doesn't work correctly in jsh.
+      render: bash
+      placeholder: |
+        # Paste the script or command here
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What happens when you run this in the reference shell?
+      placeholder: In Bash, this outputs...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior in jsh
+      description: What happens when you run this in jsh?
+      placeholder: In jsh, this outputs/errors...
+    validations:
+      required: true
+
+  - type: input
+    id: jsh_version
+    attributes:
+      label: jsh Version
+      description: What version of jsh are you using?
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: ref_version
+    attributes:
+      label: Reference Shell Version
+      description: What version of the reference shell?
+      placeholder: "bash 5.1.16"
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this compatibility issue?
+      options:
+        - Minor (cosmetic difference)
+        - Moderate (workaround available)
+        - Major (no workaround)
+        - Critical (breaks common scripts)
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any additional context about the compatibility issue.
+      placeholder: This script is from...
+

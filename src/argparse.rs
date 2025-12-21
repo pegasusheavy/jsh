@@ -433,14 +433,14 @@ impl ArgParser {
 
         if !flags.is_empty() || self.auto_help || self.auto_version {
             help.push_str("Flags:\n");
-            
+
             if self.auto_help {
                 help.push_str("  -h, --help        Show this help message\n");
             }
             if self.auto_version {
                 help.push_str("  -V, --version     Show version information\n");
             }
-            
+
             for arg in flags {
                 let short = arg.short.as_ref().map(|s| format!("{}, ", s)).unwrap_or_default();
                 let long = arg.long.as_ref().map(|s| s.as_str()).unwrap_or("");
@@ -722,16 +722,16 @@ pub fn quick_parse(args: &[String]) -> (HashMap<String, bool>, HashMap<String, S
     let mut flags = HashMap::new();
     let mut options = HashMap::new();
     let mut positionals = Vec::new();
-    
+
     let mut i = 0;
     while i < args.len() {
         let arg = &args[i];
-        
+
         if arg == "--" {
             positionals.extend(args[i + 1..].iter().cloned());
             break;
         }
-        
+
         if arg.starts_with("--") && arg.contains('=') {
             let parts: Vec<&str> = arg.splitn(2, '=').collect();
             let key = parts[0][2..].to_string();
@@ -754,10 +754,10 @@ pub fn quick_parse(args: &[String]) -> (HashMap<String, bool>, HashMap<String, S
         } else {
             positionals.push(arg.clone());
         }
-        
+
         i += 1;
     }
-    
+
     (flags, options, positionals)
 }
 

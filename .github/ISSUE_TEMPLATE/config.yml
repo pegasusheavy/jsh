@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions
+    url: https://github.com/pegasusheavy/jsh/discussions
+    about: Ask questions and discuss jsh
+  - name: Documentation
+    url: https://pegasusheavy.github.io/jsh/
+    about: Check the documentation before opening an issue
+
