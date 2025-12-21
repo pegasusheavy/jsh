@@ -31,6 +31,13 @@
 - ✅ `switch...case...end` statements
 - ✅ `and`, `or`, `not` keywords
 
+### Git Integration
+- ✅ `git_branch` - Get current git branch name
+- ✅ `git_status` - Git status in shell-friendly format
+- ✅ `git_info` - Detailed git repository information
+- ✅ `git_prompt` - Git info formatted for shell prompts
+- ✅ `in_git_repo` - Check if in a git repository
+
 ### Ash/POSIX Compatible
 - ✅ POSIX `set` options (`-e`, `-u`, `-x`, `-n`, `-a`, `-C`, `-b`, `-f`)
 - ✅ `set -o optname` / `set +o optname` for named options
@@ -121,6 +128,37 @@ show(first, second) {
     echo "Named: first=$first second=$second"
     echo "Positional: \$1=$1 \$2=$2"
 }
+```
+
+#### Git Integration in Scripts
+```bash
+# Check if in a git repository
+if in_git_repo; then
+    echo "Current branch: $(git_branch)"
+fi
+
+# Conditional logic based on branch
+if [ "$(git_branch)" = "main" ]; then
+    echo "On main branch - be careful!"
+fi
+
+# Check for uncommitted changes before deploying
+if git_status --dirty; then
+    echo "Error: Uncommitted changes detected"
+    exit 1
+fi
+
+# Get detailed git info
+git_info --query branch    # Just the branch name
+git_info --query hash      # Full commit hash
+git_info --query remote    # Remote name
+
+# Custom formatted output
+git_info --format '%b (%h)'  # "main (abc123)"
+
+# Use git_prompt in your PS1
+PS1="\u@\h:\w$(git_prompt -f ' [%b%d]')$ "
+# Output: user@host:~/project [main✗]$
 ```
 
 ## Installation
