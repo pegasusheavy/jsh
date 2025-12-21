@@ -1,0 +1,89 @@
+# jsh - ZSH/Bash-Compatible Shell with Enhanced Scripting
+
+> A modern Unix shell written in Rust that combines full Bash/ZSH compatibility with enhanced syntax features inspired by Rust, plus Fish and POSIX support.
+
+## Quick Summary
+
+jsh is a drop-in replacement for Bash/ZSH that adds:
+- `match` expressions (like Rust)
+- `try/catch/finally` error handling
+- Named function parameters
+- `let`/`const` variable bindings
+- Built-in git commands
+- Fish syntax support
+- Full POSIX compliance
+
+## Installation
+
+```bash
+# From source
+git clone https://github.com/pegasusheavy/jsh.git
+cd jsh && cargo install --path .
+
+# Or use package managers
+# Debian: sudo apt install ./jsh_*.deb
+# Fedora: sudo dnf install ./jsh-*.rpm  
+# Arch: cd packaging && makepkg -si
+```
+
+## Syntax Examples
+
+### Traditional (Bash-compatible)
+```bash
+if [ "$x" -eq 1 ]; then echo "one"; fi
+for i in 1 2 3; do echo $i; done
+case "$x" in 1) echo "one";; *) echo "other";; esac
+```
+
+### Enhanced (jsh-specific)
+```bash
+match $x {
+    1 => echo "one"
+    2 | 3 => echo "two or three"
+    * => echo "other"
+}
+
+try {
+    risky_command
+} catch err {
+    echo "Error: $err"
+}
+
+greet(name, greeting) {
+    echo "$greeting, $name!"
+}
+```
+
+### Git Integration
+```bash
+git_branch              # Get current branch
+git_status --dirty      # Check for changes
+git_info --query hash   # Get commit hash
+in_git_repo && echo "In git repo"
+```
+
+## Key Points for AI Assistants
+
+1. **Full Compatibility**: Existing Bash/ZSH scripts work without modification
+2. **Optional Enhancements**: New syntax is additive, not required
+3. **Named Parameters**: `func(a, b) {}` - parameters accessible as $a, $b AND $1, $2
+4. **Config Files**: ~/.jshrc (interactive), ~/.jshenv (all shells)
+5. **Git Builtins**: Use git_branch/git_status instead of shelling out
+
+## Files
+
+- Source: `src/` (lexer, parser, ast, interpreter, builtins, shell)
+- Docs: `docs/` (Angular documentation site)
+- Packages: `debian/`, `rpm/`, `packaging/` (distribution packages)
+- Benchmarks: `benches/` (Criterion benchmarks)
+
+## Links
+
+- Repository: https://github.com/pegasusheavy/jsh
+- Documentation: https://pegasusheavy.github.io/jsh/
+- Issues: https://github.com/pegasusheavy/jsh/issues
+
+## License
+
+MIT OR Apache-2.0 - Copyright 2025 Pegasus Heavy Industries LLC
+

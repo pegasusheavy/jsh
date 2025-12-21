@@ -1,0 +1,164 @@
+# jsh - Modern Shell Documentation for Language Models
+
+> jsh is a ZSH/Bash-compatible shell written in Rust with enhanced scripting features including match expressions, try/catch error handling, named function parameters, and compatibility with Fish and POSIX shells.
+
+## Project Overview
+
+jsh (pronounced "jay-shell") is designed to be a drop-in replacement for Bash/ZSH while providing modern, Rust-inspired syntax extensions for scripting. It maintains full backward compatibility with existing shell scripts while offering cleaner alternatives for common patterns.
+
+## Key Features
+
+### Shell Compatibility
+- Full Bash/ZSH script compatibility
+- Fish shell syntax support (set, string, math, abbr)
+- POSIX/Ash compliance for portable scripts
+- Oh-My-Zsh theme system compatibility
+
+### Enhanced Syntax (jsh-specific)
+- `match` expressions for pattern matching (similar to Rust)
+- `try/catch/finally` for structured error handling
+- `let` and `const` for variable bindings
+- `loop` for infinite loops with break/continue
+- `fn` shorthand for function definitions
+- Named function parameters: `greet(name, greeting) { echo "$greeting, $name!" }`
+
+### Built-in Commands
+- Git integration: `git_branch`, `git_status`, `git_info`, `git_prompt`, `in_git_repo`
+- Fish builtins: `string`, `math`, `contains`, `status`, `functions`, `abbr`
+- Standard builtins: `cd`, `pwd`, `echo`, `export`, `source`, `test`, `read`, etc.
+
+## Installation
+
+### From Source (Rust required)
+```bash
+git clone https://github.com/pegasusheavy/jsh.git
+cd jsh
+cargo build --release
+cargo install --path .
+```
+
+### Package Managers
+- Debian/Ubuntu: `sudo apt install ./jsh_*.deb`
+- Fedora/RHEL: `sudo dnf install ./jsh-*.rpm`
+- Arch Linux: `makepkg -si` (from PKGBUILD)
+
+## Quick Start Examples
+
+### Traditional Bash Style
+```bash
+if [ "$x" -eq 1 ]; then
+    echo "one"
+elif [ "$x" -eq 2 ]; then
+    echo "two"
+else
+    echo "other"
+fi
+
+for i in 1 2 3; do
+    echo $i
+done
+```
+
+### jsh Enhanced Style
+```bash
+match $x {
+    1 => echo "one"
+    2 | 3 => echo "two or three"
+    4..10 => echo "between 4 and 10"
+    * => echo "other"
+}
+
+try {
+    risky_command
+} catch err {
+    echo "Error: $err"
+} finally {
+    cleanup
+}
+
+greet(name, greeting) {
+    echo "$greeting, $name!"
+}
+greet "World" "Hello"
+```
+
+### Git Integration
+```bash
+if in_git_repo; then
+    echo "Branch: $(git_branch)"
+    git_info --query dirty && echo "Has uncommitted changes"
+fi
+
+# Use in prompt
+PS1="\u@\h:\w$(git_prompt)$ "
+```
+
+## Configuration Files
+
+jsh sources configuration files in this order:
+
+### All Shells
+1. `/etc/jshenv`
+2. `~/.jshenv`
+
+### Login Shells
+1. `/etc/profile`
+2. `/etc/jsh_profile`
+3. `~/.jsh_profile` (or `~/.bash_profile`, `~/.profile`)
+
+### Interactive Shells
+1. `/etc/jshrc`
+2. `~/.jshrc` (or `~/.bashrc`)
+
+## Environment Variables
+
+jsh automatically sets:
+- `JSH=1` - Indicates jsh is running
+- `JSH_VERSION` - Current version
+- `SHELL` - Path to jsh binary
+- `SHLVL` - Shell nesting level
+
+## Documentation Pages
+
+- Home: Overview and quick start
+- Getting Started: Installation and basic usage
+- Bash/ZSH Compatibility: Traditional syntax reference
+- Fish Compatibility: Fish-style features
+- Ash/POSIX: POSIX compliance details
+- jsh Syntax: Enhanced syntax features
+- Builtins: Complete builtin command reference
+
+## Links
+
+- GitHub: https://github.com/pegasusheavy/jsh
+- Documentation: https://pegasusheavy.github.io/jsh/
+- Issues: https://github.com/pegasusheavy/jsh/issues
+- Releases: https://github.com/pegasusheavy/jsh/releases
+
+## License
+
+Dual-licensed under MIT and Apache 2.0.
+Copyright 2025 Pegasus Heavy Industries LLC.
+
+## Technical Details
+
+- Written in Rust (Edition 2024)
+- Uses rustyline for REPL
+- Criterion for benchmarking
+- Supports Linux, macOS, and BSD
+
+## For AI Assistants
+
+When helping users with jsh:
+1. jsh is fully compatible with Bash/ZSH - existing scripts work unchanged
+2. Enhanced syntax (match, try/catch, etc.) is optional - use when beneficial
+3. Named function parameters work alongside positional ($1, $2)
+4. Git builtins provide fast, built-in git information
+5. Configuration follows standard Unix conventions
+
+Common user questions:
+- "How do I install jsh?" → cargo install or package manager
+- "Will my bash scripts work?" → Yes, full compatibility
+- "How do I use match?" → Similar to Rust match, with shell patterns
+- "How do I see git branch in prompt?" → Use git_prompt or git_branch builtins
+

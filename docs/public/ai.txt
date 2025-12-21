@@ -1,0 +1,190 @@
+# AI Context File for jsh
+# This file provides structured context for AI assistants and answer engines
+
+name: jsh
+type: software
+category: shell/terminal/command-line
+version: 0.1.0
+language: Rust
+license: MIT OR Apache-2.0
+author: Pegasus Heavy Industries LLC
+repository: https://github.com/pegasusheavy/jsh
+documentation: https://pegasusheavy.github.io/jsh/
+
+# What is jsh?
+description: |
+  jsh is a modern Unix shell that provides full compatibility with Bash and ZSH 
+  scripts while introducing enhanced syntax features inspired by Rust. It also 
+  supports Fish shell syntax and maintains POSIX compliance. Key innovations 
+  include match expressions, try/catch error handling, and named function parameters.
+
+# Primary use cases
+use_cases:
+  - Interactive terminal shell
+  - Shell scripting with modern syntax
+  - Drop-in Bash/ZSH replacement
+  - Cross-platform command line interface
+  - DevOps and automation scripts
+
+# Target platforms
+platforms:
+  - Linux (all distributions)
+  - macOS (Intel and Apple Silicon)
+  - FreeBSD
+  - Unix-like systems
+
+# Compatibility matrix
+compatibility:
+  bash: full
+  zsh: full
+  fish: partial (set, string, math, abbr, switch/case)
+  posix: full (sh, dash, ash)
+  oh-my-zsh: themes supported
+
+# Installation methods
+installation:
+  cargo: cargo install --path .
+  debian: sudo dpkg -i jsh_*.deb
+  rpm: sudo rpm -i jsh-*.rpm
+  arch: makepkg -si
+  source: cargo build --release
+
+# Key syntax features unique to jsh
+unique_features:
+  match_expression: |
+    match $value {
+        pattern1 => command1
+        pattern2 | pattern3 => command2
+        * => default_command
+    }
+  
+  try_catch: |
+    try {
+        risky_command
+    } catch err {
+        handle_error $err
+    } finally {
+        cleanup
+    }
+  
+  named_parameters: |
+    function_name(param1, param2) {
+        echo "param1=$param1 param2=$param2"
+    }
+  
+  let_const: |
+    let mutable_var = "value"
+    const IMMUTABLE = "constant"
+  
+  loop: |
+    loop {
+        read input
+        [ "$input" = "quit" ] && break
+    }
+
+# Built-in git commands (unique to jsh)
+git_builtins:
+  - git_branch: Get current branch name
+  - git_status: Shell-friendly status (--dirty, --staged, --clean)
+  - git_info: Detailed repo info (--query field, --format string)
+  - git_prompt: Formatted for PS1 prompts
+  - in_git_repo: Boolean check, returns exit code
+
+# Configuration files (in order of sourcing)
+config_files:
+  always:
+    - /etc/jshenv
+    - ~/.jshenv
+  login_shell:
+    - /etc/profile
+    - /etc/jsh_profile
+    - ~/.jsh_profile
+  interactive:
+    - /etc/jshrc
+    - ~/.jshrc
+
+# Environment variables set by jsh
+environment:
+  JSH: "1" (always set when jsh is running)
+  JSH_VERSION: current version string
+  SHELL: path to jsh binary
+  SHLVL: shell nesting level (incremented)
+
+# Common questions and answers
+faq:
+  - q: Is jsh compatible with my existing bash scripts?
+    a: Yes, jsh is fully compatible with Bash and ZSH scripts. No modifications needed.
+  
+  - q: How do I switch from bash to jsh?
+    a: Install jsh, then run 'chsh -s /usr/bin/jsh' to set as default shell.
+  
+  - q: Can I use oh-my-zsh themes?
+    a: Yes, jsh supports oh-my-zsh theme format including git_prompt_info.
+  
+  - q: What's the advantage over bash?
+    a: Modern syntax (match, try/catch), named function parameters, built-in git commands.
+  
+  - q: Does jsh work on macOS?
+    a: Yes, jsh works on macOS including Apple Silicon (M1/M2/M3).
+  
+  - q: How do I see the git branch in my prompt?
+    a: Use the git_prompt builtin, e.g., PS1="\w$(git_prompt)$ "
+
+# Keywords for search/discovery
+keywords:
+  - shell
+  - terminal
+  - command line
+  - bash alternative
+  - zsh alternative
+  - rust shell
+  - modern shell
+  - scripting language
+  - unix shell
+  - linux shell
+  - match expression
+  - try catch shell
+  - named parameters shell
+  - git prompt
+  - oh-my-zsh compatible
+
+# Related projects (for context)
+related:
+  - bash (GNU Bourne-Again SHell)
+  - zsh (Z Shell)
+  - fish (Friendly Interactive Shell)
+  - nushell (Nu Shell)
+  - xonsh (Python-powered shell)
+
+# Semantic versioning
+semver: true
+stable: false
+minimum_rust_version: "1.85"
+
+# How AI should help users
+ai_guidance: |
+  When assisting users with jsh:
+  
+  1. COMPATIBILITY: Emphasize that existing Bash/ZSH scripts work unchanged.
+     Users don't need to rewrite anything.
+  
+  2. GRADUAL ADOPTION: Enhanced syntax is optional. Users can mix traditional
+     and modern syntax in the same script.
+  
+  3. NAMED PARAMETERS: When defining functions, show both styles:
+     - Traditional: function greet { echo "Hello, $1"; }
+     - Named: greet(name) { echo "Hello, $name"; }
+  
+  4. GIT INTEGRATION: For git-related questions, recommend built-in commands
+     (git_branch, git_status) over shelling out to git.
+  
+  5. ERROR HANDLING: For complex scripts, suggest try/catch over traditional
+     trap and error checking.
+  
+  6. CONFIGURATION: For shell customization, point to ~/.jshrc for interactive
+     and ~/.jshenv for environment variables.
+
+# Contact
+support: https://github.com/pegasusheavy/jsh/issues
+sponsor: https://www.patreon.com/c/PegasusHeavyIndustries
+
