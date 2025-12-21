@@ -30,7 +30,7 @@ anyhow = "1"
 regex = "1"
 
 # Colored output
-colored = "2"
+colored = "3"
 
 # For hostname
 hostname = "0.4"
