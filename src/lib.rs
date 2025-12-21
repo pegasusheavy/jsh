@@ -83,6 +83,7 @@
 //! }
 //! ```
 
+pub mod argparse;
 pub mod ast;
 pub mod builtins;
 pub mod error;
@@ -93,6 +94,7 @@ pub mod shell;
 pub mod theme;
 pub mod token;
 
+pub use argparse::{ArgParser, ParsedArgs, ParseError};
 pub use error::{JshError, Result};
 pub use interpreter::{ExitStatus, Interpreter};
 pub use shell::Shell;

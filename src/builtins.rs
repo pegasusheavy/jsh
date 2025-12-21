@@ -2294,7 +2294,7 @@ fn builtin_git_info(args: &[String], interp: &mut Interpreter) -> Result<ExitSta
 
     // Gather all git info
     let branch = get_git_branch(&interp.cwd).unwrap_or_default();
-    
+
     let short_hash = std::process::Command::new("git")
         .args(["rev-parse", "--short", "HEAD"])
         .current_dir(&interp.cwd)
@@ -2558,14 +2558,14 @@ fn builtin_git_prompt(args: &[String], interp: &mut Interpreter) -> Result<ExitS
     result = result.replace("%b", &branch);
     result = result.replace("%d", if is_dirty { "✗" } else { "" });
     result = result.replace("%c", if !is_dirty { "✓" } else { "" });
-    
+
     let status_symbols = format!("{}{}{}",
         if has_staged { "●" } else { "" },
         if is_dirty && !has_staged { "✚" } else { "" },
         if has_untracked { "…" } else { "" }
     );
     result = result.replace("%s", &status_symbols);
-    
+
     result = result.replace("%a", &if ahead > 0 { format!("↑{}", ahead) } else { String::new() });
     result = result.replace("%A", &if behind > 0 { format!("↓{}", behind) } else { String::new() });
 
