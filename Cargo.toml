@@ -1,0 +1,129 @@
+[package]
+name = "jsh"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["Pegasus Heavy Industries LLC"]
+description = "A ZSH/Bash-compatible shell with enhanced scripting features"
+repository = "https://github.com/pegasusheavy/jsh"
+keywords = ["shell", "bash", "zsh", "scripting", "terminal"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+# Readline-like functionality
+rustyline = { version = "14", features = ["derive"] }
+
+# Directory expansion and globbing
+glob = "0.3"
+
+# Environment and path handling
+dirs = "5"
+
+# Process handling
+nix = { version = "0.29", features = ["process", "signal", "term", "fs"] }
+
+# Error handling
+thiserror = "2"
+anyhow = "1"
+
+# Regex for pattern matching
+regex = "1"
+
+# Colored output
+colored = "2"
+
+# For hostname
+hostname = "0.4"
+
+# For which command lookup
+which = "7"
+
+# For tty detection
+atty = "0.2"
+
+# For time/date in prompts
+chrono = "0.4"
+
+# For async command execution (future use)
+tokio = { version = "1", features = ["full"], optional = true }
+
+[features]
+default = []
+async = ["tokio"]
+
+[[bin]]
+name = "jsh"
+path = "src/main.rs"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "lexer_bench"
+harness = false
+
+[[bench]]
+name = "parser_bench"
+harness = false
+
+[[bench]]
+name = "interpreter_bench"
+harness = false
+
+[[bench]]
+name = "full_pipeline_bench"
+harness = false
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.bench]
+lto = true
+codegen-units = 1
+
+# cargo-deb configuration for Debian packaging
+[package.metadata.deb]
+maintainer = "Pegasus Heavy Industries LLC <support@pegasusheavy.com>"
+copyright = "2025, Pegasus Heavy Industries LLC"
+license-file = ["LICENSE-MIT", "0"]
+extended-description = """\
+jsh is a modern shell that combines full compatibility with Bash/ZSH \
+scripts while introducing cleaner, more intuitive syntax for flow \
+control and scripting. Features include Fish compatibility, POSIX/Ash \
+compatibility, match expressions, try/catch, and named function parameters."""
+depends = "$auto"
+section = "shells"
+priority = "optional"
+assets = [
+    ["target/release/jsh", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/jsh/README", "644"],
+    ["CHANGELOG.md", "usr/share/doc/jsh/CHANGELOG", "644"],
+]
+maintainer-scripts = "debian/"
+
+# cargo-generate-rpm configuration for RPM packaging
+[package.metadata.generate-rpm]
+assets = [
+    { source = "target/release/jsh", dest = "/usr/bin/jsh", mode = "755" },
+    { source = "README.md", dest = "/usr/share/doc/jsh/README.md", mode = "644", doc = true },
+    { source = "CHANGELOG.md", dest = "/usr/share/doc/jsh/CHANGELOG.md", mode = "644", doc = true },
+    { source = "LICENSE-MIT", dest = "/usr/share/licenses/jsh/LICENSE-MIT", mode = "644", doc = true },
+    { source = "LICENSE-APACHE", dest = "/usr/share/licenses/jsh/LICENSE-APACHE", mode = "644", doc = true },
+]
+post_install_script = """
+if [ -f /etc/shells ]; then
+    if ! grep -q "^/usr/bin/jsh$" /etc/shells; then
+        echo "/usr/bin/jsh" >> /etc/shells
+    fi
+fi
+"""
+pre_uninstall_script = """
+if [ -f /etc/shells ]; then
+    sed -i '\\|^/usr/bin/jsh$|d' /etc/shells
+fi
+"""
+
+[package.metadata.generate-rpm.requires]
+glibc = "*"

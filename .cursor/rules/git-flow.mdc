@@ -1,0 +1,178 @@
+# Git-Flow Branching Model
+
+This project follows the Git-Flow branching model for version control and release management.
+
+## Branch Structure
+
+### Main Branches
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Production-ready code. Only receives merges from `release/*` and `hotfix/*` branches. |
+| `develop` | Integration branch for features. Contains the latest delivered development changes. |
+
+### Supporting Branches
+
+| Branch Type | Naming Convention | Branch From | Merge Into |
+|-------------|-------------------|-------------|------------|
+| Feature | `feature/<name>` | `develop` | `develop` |
+| Release | `release/<version>` | `develop` | `main` and `develop` |
+| Hotfix | `hotfix/<name>` | `main` | `main` and `develop` |
+| Bugfix | `bugfix/<name>` | `develop` | `develop` |
+
+## Workflow Rules
+
+### Creating Feature Branches
+
+```bash
+# Start a new feature
+git checkout develop
+git pull origin develop
+git checkout -b feature/my-feature-name
+
+# When complete, merge back to develop
+git checkout develop
+git merge --no-ff feature/my-feature-name
+git push origin develop
+git branch -d feature/my-feature-name
+```
+
+### Creating Release Branches
+
+```bash
+# Start a release (from develop)
+git checkout develop
+git checkout -b release/1.0.0
+
+# Bump version in Cargo.toml, update CHANGELOG.md
+# Only bug fixes allowed on release branches
+
+# Finish release
+git checkout main
+git merge --no-ff release/1.0.0
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin main --tags
+
+git checkout develop
+git merge --no-ff release/1.0.0
+git push origin develop
+
+git branch -d release/1.0.0
+```
+
+### Creating Hotfix Branches
+
+```bash
+# Start a hotfix (from main)
+git checkout main
+git checkout -b hotfix/critical-bug-fix
+
+# Fix the bug, bump patch version
+
+# Finish hotfix
+git checkout main
+git merge --no-ff hotfix/critical-bug-fix
+git tag -a v1.0.1 -m "Hotfix version 1.0.1"
+git push origin main --tags
+
+git checkout develop
+git merge --no-ff hotfix/critical-bug-fix
+git push origin develop
+
+git branch -d hotfix/critical-bug-fix
+```
+
+## Branch Naming Conventions
+
+### Feature Branches
+- `feature/add-fish-compatibility`
+- `feature/lexer-improvements`
+- `feature/theme-support`
+
+### Release Branches
+- `release/0.1.0`
+- `release/1.0.0`
+- `release/2.0.0-beta`
+
+### Hotfix Branches
+- `hotfix/fix-crash-on-startup`
+- `hotfix/security-patch`
+- `hotfix/memory-leak`
+
+### Bugfix Branches
+- `bugfix/parser-edge-case`
+- `bugfix/variable-expansion`
+
+## Commit Message Format
+
+Follow the Conventional Commits specification (see `commitlint.yaml`):
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Types
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation only
+- `style`: Code style (formatting, whitespace)
+- `refactor`: Code change that neither fixes nor adds
+- `perf`: Performance improvement
+- `test`: Adding or correcting tests
+- `build`: Build system or dependencies
+- `ci`: CI configuration
+- `chore`: Other changes
+
+## Version Tagging
+
+- Tags follow semantic versioning: `v<major>.<minor>.<patch>`
+- Tags are only created on the `main` branch
+- Tags are annotated with release notes
+
+```bash
+git tag -a v1.0.0 -m "Release version 1.0.0
+
+Features:
+- Feature 1
+- Feature 2
+
+Bug fixes:
+- Fix 1
+- Fix 2"
+```
+
+## Pull Request Guidelines
+
+1. **Feature PRs**: `feature/*` → `develop`
+2. **Release PRs**: `release/*` → `main` (then also merge to `develop`)
+3. **Hotfix PRs**: `hotfix/*` → `main` (then also merge to `develop`)
+4. **Bugfix PRs**: `bugfix/*` → `develop`
+
+### PR Title Format
+```
+[TYPE] Brief description
+
+Examples:
+[Feature] Add Fish shell compatibility
+[Release] Version 1.0.0
+[Hotfix] Fix crash when parsing empty scripts
+[Bugfix] Correct variable expansion in quoted strings
+```
+
+## Protected Branches
+
+The following branches should be protected:
+
+- `main`: Require PR reviews, no direct pushes
+- `develop`: Require PR reviews for external contributors
+
+## CI/CD Integration
+
+- **Feature branches**: Run tests, linting
+- **Develop branch**: Run tests, linting, build packages
+- **Release branches**: Run full test suite, build packages, generate changelog
+- **Main branch**: Deploy releases, publish packages

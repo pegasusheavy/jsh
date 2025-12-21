@@ -1,0 +1,27 @@
+Source: jsh
+Section: shells
+Priority: optional
+Maintainer: Pegasus Heavy Industries LLC <support@pegasusheavy.com>
+Build-Depends: debhelper-compat (= 13), cargo, rustc (>= 1.75)
+Standards-Version: 4.6.0
+Homepage: https://github.com/pegasusheavy/jsh
+Vcs-Browser: https://github.com/pegasusheavy/jsh
+Vcs-Git: https://github.com/pegasusheavy/jsh.git
+Rules-Requires-Root: no
+
+Package: jsh
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: ZSH/Bash-compatible shell with enhanced scripting
+ jsh is a modern shell that combines full compatibility with Bash/ZSH
+ scripts while introducing cleaner, more intuitive syntax for flow
+ control and scripting.
+ .
+ Features include:
+  - Full Bash/ZSH compatibility
+  - Fish shell compatibility
+  - POSIX/Ash compatibility
+  - Modern syntax: match expressions, try/catch, named function parameters
+  - Oh-My-Zsh compatible theme system
+  - Built-in commands for string manipulation, math, and more
+

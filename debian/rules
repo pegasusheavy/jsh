@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export CARGO_HOME = $(CURDIR)/debian/cargo
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	cargo build --release
+
+override_dh_auto_install:
+	install -D -m 755 target/release/jsh debian/jsh/usr/bin/jsh
+	# Install shell as login shell option
+	install -d debian/jsh/etc/shells.d
+	echo "/usr/bin/jsh" > debian/jsh/etc/shells.d/jsh
+	# Install system config directory
+	install -d debian/jsh/etc/jsh
+	# Install man page
+	install -D -m 644 man/jsh.1 debian/jsh/usr/share/man/man1/jsh.1 || true
+	# Install completions
+	install -d debian/jsh/usr/share/bash-completion/completions
+	install -d debian/jsh/usr/share/zsh/vendor-completions
+
+override_dh_auto_test:
+	cargo test --release
+
+override_dh_auto_clean:
+	cargo clean
+	rm -rf $(CARGO_HOME)
+

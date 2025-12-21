@@ -1,0 +1,451 @@
+# Rust Programming Guidelines
+
+This project follows idiomatic Rust practices and best practices for safe, performant, and maintainable code.
+
+## Code Style
+
+### Formatting
+
+- Always run `cargo fmt` before committing
+- Use `rustfmt.toml` configuration if present
+- Maximum line length: 100 characters
+- Use 4 spaces for indentation (Rust default)
+
+### Naming Conventions
+
+| Item | Convention | Example |
+|------|------------|---------|
+| Crates | `snake_case` | `my_crate` |
+| Modules | `snake_case` | `my_module` |
+| Types (structs, enums, traits) | `PascalCase` | `MyStruct`, `MyEnum` |
+| Functions | `snake_case` | `my_function` |
+| Methods | `snake_case` | `my_method` |
+| Local variables | `snake_case` | `my_variable` |
+| Constants | `SCREAMING_SNAKE_CASE` | `MAX_SIZE` |
+| Static variables | `SCREAMING_SNAKE_CASE` | `GLOBAL_CONFIG` |
+| Type parameters | `PascalCase`, single letter preferred | `T`, `E`, `K`, `V` |
+| Lifetimes | Short lowercase | `'a`, `'de`, `'src` |
+
+### Import Organization
+
+Organize imports in this order, separated by blank lines:
+
+```rust
+// 1. Standard library
+use std::collections::HashMap;
+use std::io::{self, Read, Write};
+
+// 2. External crates
+use anyhow::Result;
+use thiserror::Error;
+
+// 3. Local crate modules
+use crate::ast::Statement;
+use crate::error::JshError;
+```
+
+## Error Handling
+
+### Use `thiserror` for Library Errors
+
+```rust
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum JshError {
+    #[error("Syntax error: {0}")]
+    Syntax(String),
+
+    #[error("Command not found: {0}")]
+    CommandNotFound(String),
+
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+}
+```
+
+### Use `anyhow` for Application Errors
+
+```rust
+use anyhow::{Context, Result};
+
+fn read_config() -> Result<Config> {
+    let content = std::fs::read_to_string("config.toml")
+        .context("Failed to read config file")?;
+    // ...
+}
+```
+
+### Error Handling Rules
+
+1. **Never use `.unwrap()` in library code** - Use `?` or handle errors explicitly
+2. **`.unwrap()` is acceptable** in tests and when the invariant is guaranteed
+3. **Use `.expect("reason")` over `.unwrap()`** when panicking is intentional
+4. **Propagate errors** with `?` operator when possible
+5. **Add context** to errors using `.context()` or `.with_context()`
+
+```rust
+// Good
+let file = File::open(path).context("Failed to open config")?;
+
+// Bad
+let file = File::open(path).unwrap();
+```
+
+## Memory and Performance
+
+### Ownership and Borrowing
+
+1. **Prefer borrowing over ownership** when you don't need to own the data
+2. **Use `&str` instead of `String`** in function parameters when possible
+3. **Use `&[T]` instead of `Vec<T>`** in function parameters when possible
+4. **Clone only when necessary** - prefer references
+
+```rust
+// Good - borrows the string
+fn process(input: &str) -> Result<()> { ... }
+
+// Bad - takes ownership unnecessarily
+fn process(input: String) -> Result<()> { ... }
+```
+
+### Avoid Unnecessary Allocations
+
+```rust
+// Good - reuse buffer
+let mut buffer = String::new();
+for item in items {
+    buffer.clear();
+    write!(&mut buffer, "{}", item)?;
+    process(&buffer)?;
+}
+
+// Bad - allocates on each iteration
+for item in items {
+    let buffer = format!("{}", item);
+    process(&buffer)?;
+}
+```
+
+### Use Iterators Over Loops
+
+```rust
+// Good - idiomatic, often optimized better
+let sum: i32 = numbers.iter().filter(|n| **n > 0).sum();
+
+// Less idiomatic
+let mut sum = 0;
+for n in &numbers {
+    if *n > 0 {
+        sum += n;
+    }
+}
+```
+
+### Prefer `collect()` with Type Annotation
+
+```rust
+// Good - clear intent
+let names: Vec<String> = items.iter().map(|i| i.name.clone()).collect();
+
+// Also good - turbofish syntax
+let names = items.iter().map(|i| i.name.clone()).collect::<Vec<_>>();
+```
+
+## Safety
+
+### Unsafe Code
+
+1. **Minimize `unsafe` blocks** - use safe abstractions when possible
+2. **Document all `unsafe` blocks** with `// SAFETY:` comments
+3. **Isolate unsafe code** into small, well-tested functions
+4. **Never use `unsafe` to bypass borrow checker** unless absolutely necessary
+
+```rust
+// Good - documented unsafe
+// SAFETY: We have exclusive access to the buffer and the pointer is valid
+unsafe {
+    ptr::copy_nonoverlapping(src, dst, len);
+}
+```
+
+### Environment Variables
+
+Environment variable operations are unsafe in Rust 2024. Wrap them properly:
+
+```rust
+// Setting environment variables requires unsafe
+// SAFETY: No other threads are accessing environment variables
+unsafe {
+    std::env::set_var("KEY", "value");
+}
+
+// Reading is safe
+let value = std::env::var("KEY").ok();
+```
+
+## Structs and Enums
+
+### Derive Common Traits
+
+```rust
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Token {
+    pub kind: TokenKind,
+    pub span: Span,
+}
+```
+
+### Use Builder Pattern for Complex Construction
+
+```rust
+pub struct CommandBuilder {
+    name: String,
+    args: Vec<String>,
+    env: HashMap<String, String>,
+}
+
+impl CommandBuilder {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            args: Vec::new(),
+            env: HashMap::new(),
+        }
+    }
+
+    pub fn arg(mut self, arg: impl Into<String>) -> Self {
+        self.args.push(arg.into());
+        self
+    }
+
+    pub fn env(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
+        self.env.insert(key.into(), value.into());
+        self
+    }
+
+    pub fn build(self) -> Command {
+        Command { ... }
+    }
+}
+```
+
+### Use `Default` Trait
+
+```rust
+#[derive(Debug, Default)]
+pub struct Options {
+    pub verbose: bool,
+    pub output: Option<PathBuf>,
+}
+
+// Usage
+let opts = Options::default();
+let opts = Options { verbose: true, ..Default::default() };
+```
+
+## Pattern Matching
+
+### Prefer Pattern Matching Over If-Let Chains
+
+```rust
+// Good
+match result {
+    Ok(value) if value > 0 => handle_positive(value),
+    Ok(value) => handle_non_positive(value),
+    Err(e) => handle_error(e),
+}
+
+// Less clear
+if let Ok(value) = result {
+    if value > 0 {
+        handle_positive(value);
+    } else {
+        handle_non_positive(value);
+    }
+} else if let Err(e) = result {
+    handle_error(e);
+}
+```
+
+### Use `matches!` Macro for Boolean Checks
+
+```rust
+// Good
+if matches!(token.kind, TokenKind::Word(_) | TokenKind::String(_)) {
+    // ...
+}
+
+// Verbose
+if let TokenKind::Word(_) | TokenKind::String(_) = token.kind {
+    // ...
+}
+```
+
+## Documentation
+
+### Document Public API
+
+```rust
+/// Parses a shell script into an AST.
+///
+/// # Arguments
+///
+/// * `input` - The shell script source code
+///
+/// # Returns
+///
+/// Returns the parsed program AST or a syntax error.
+///
+/// # Examples
+///
+/// ```
+/// use jsh::parser::Parser;
+///
+/// let mut parser = Parser::new("echo hello");
+/// let program = parser.parse_program()?;
+/// ```
+///
+/// # Errors
+///
+/// Returns `JshError::Syntax` if the input contains invalid syntax.
+pub fn parse_program(&mut self) -> Result<Program, JshError> {
+    // ...
+}
+```
+
+### Use `#[must_use]` for Important Return Values
+
+```rust
+#[must_use]
+pub fn is_empty(&self) -> bool {
+    self.len() == 0
+}
+```
+
+## Testing
+
+### Unit Tests in Same File
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lexer_basic() {
+        let mut lexer = Lexer::new("echo hello");
+        let tokens = lexer.tokenize().unwrap();
+        assert_eq!(tokens.len(), 2);
+    }
+}
+```
+
+### Use Descriptive Test Names
+
+```rust
+#[test]
+fn lexer_handles_quoted_strings_with_escapes() { ... }
+
+#[test]
+fn parser_rejects_unclosed_braces() { ... }
+
+#[test]
+fn interpreter_expands_variables_in_strings() { ... }
+```
+
+### Test Error Cases
+
+```rust
+#[test]
+fn parser_returns_error_for_invalid_syntax() {
+    let mut parser = Parser::new("if then");
+    let result = parser.parse_program();
+    assert!(result.is_err());
+    assert!(matches!(result, Err(JshError::Syntax(_))));
+}
+```
+
+## Clippy
+
+### Run Clippy Regularly
+
+```bash
+cargo clippy -- -W clippy::all -W clippy::pedantic
+```
+
+### Common Clippy Lints to Address
+
+- `clippy::unwrap_used` - Use `?` or `expect()`
+- `clippy::clone_on_ref_ptr` - Avoid cloning Rc/Arc unnecessarily
+- `clippy::inefficient_to_string` - Use `to_owned()` for `&str`
+- `clippy::needless_collect` - Don't collect iterators unnecessarily
+- `clippy::manual_map` - Use `.map()` instead of match
+
+### Allow Specific Lints When Justified
+
+```rust
+#[allow(clippy::too_many_arguments)]
+fn complex_function(a: i32, b: i32, c: i32, d: i32, e: i32, f: i32) {
+    // Justified because: this maps directly to a system call
+}
+```
+
+## Cargo.toml Best Practices
+
+### Organize Dependencies
+
+```toml
+[dependencies]
+# Core functionality
+anyhow = "1"
+thiserror = "2"
+
+# Shell-specific
+rustyline = { version = "14", features = ["derive"] }
+nix = { version = "0.29", features = ["process", "signal"] }
+
+# Utilities
+regex = "1"
+glob = "0.3"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+```
+
+### Use Workspace for Multi-Crate Projects
+
+### Specify Minimum Rust Version
+
+```toml
+[package]
+rust-version = "1.85"
+```
+
+## Performance Profiling
+
+### Use Criterion for Benchmarks
+
+```rust
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
+
+fn bench_lexer(c: &mut Criterion) {
+    let input = "echo hello world";
+    c.bench_function("lexer_simple", |b| {
+        b.iter(|| {
+            let mut lexer = Lexer::new(black_box(input));
+            lexer.tokenize()
+        })
+    });
+}
+
+criterion_group!(benches, bench_lexer);
+criterion_main!(benches);
+```
+
+### Profile with `cargo flamegraph`
+
+```bash
+cargo install flamegraph
+cargo flamegraph --bin jsh -- -c 'echo hello'
+```

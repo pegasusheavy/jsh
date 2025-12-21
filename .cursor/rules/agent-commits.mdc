@@ -1,0 +1,158 @@
+# Agent Commit Rule
+
+After completing any task or set of related changes, the agent MUST create a git commit before finishing.
+
+## When to Commit
+
+The agent should commit after:
+
+1. **Completing a feature or enhancement**
+2. **Fixing a bug**
+3. **Adding documentation**
+4. **Refactoring code**
+5. **Adding tests**
+6. **Updating dependencies**
+7. **Creating or modifying configuration files**
+
+## Commit Process
+
+### Step 1: Stage Changes
+
+```bash
+# Stage all changes
+git add -A
+
+# Or stage specific files
+git add src/lexer.rs src/parser.rs
+```
+
+### Step 2: Create Commit
+
+Follow the Conventional Commits format (per `commitlint.yaml`):
+
+```bash
+git commit -m "<type>(<scope>): <description>"
+```
+
+### Step 3: Verify Commit
+
+```bash
+git log -1 --oneline
+```
+
+## Commit Message Format
+
+```
+<type>(<scope>): <short description>
+
+[optional body with more details]
+
+[optional footer]
+```
+
+### Types
+
+| Type | Use For |
+|------|---------|
+| `feat` | New features |
+| `fix` | Bug fixes |
+| `docs` | Documentation changes |
+| `style` | Formatting, whitespace |
+| `refactor` | Code restructuring |
+| `perf` | Performance improvements |
+| `test` | Adding or fixing tests |
+| `build` | Build system, dependencies |
+| `ci` | CI/CD configuration |
+| `chore` | Maintenance tasks |
+
+### Scopes (for this project)
+
+- `lexer` - Lexer changes
+- `parser` - Parser changes
+- `ast` - AST definitions
+- `interpreter` - Interpreter/executor
+- `builtins` - Built-in commands
+- `shell` - REPL/shell interface
+- `theme` - Theme system
+- `error` - Error handling
+- `deps` - Dependencies
+- `docs` - Documentation
+- `bench` - Benchmarks
+- `ci` - CI/CD
+
+## Examples
+
+### Single Feature
+
+```bash
+git add -A
+git commit -m "feat(parser): add support for named function parameters"
+```
+
+### Bug Fix
+
+```bash
+git add src/lexer.rs
+git commit -m "fix(lexer): handle escaped quotes in double-quoted strings"
+```
+
+### Multiple Related Changes
+
+```bash
+git add -A
+git commit -m "feat(shell): add system-wide config file support
+
+- Source /etc/jshenv for all shells
+- Source /etc/jsh_profile for login shells
+- Source /etc/jshrc for interactive shells
+- Update README with documentation"
+```
+
+### Documentation
+
+```bash
+git add README.md docs/
+git commit -m "docs: add installation instructions for Arch Linux"
+```
+
+### Build/Packaging
+
+```bash
+git add packaging/ Cargo.toml
+git commit -m "build(deps): add Debian and RPM packaging support"
+```
+
+## Exceptions
+
+Do NOT commit if:
+
+1. **Build fails** - Fix errors first
+2. **Tests fail** - Fix failing tests first
+3. **Work is incomplete** - Only commit working code
+4. **User explicitly asks not to commit**
+
+## Verification Before Commit
+
+Before committing, the agent should verify:
+
+```bash
+# Ensure code compiles
+cargo build --release
+
+# Run quick test (with timeout per shell-testing rule)
+timeout 5 ./target/release/jsh -c 'echo "Build successful"'
+```
+
+## Branch Awareness
+
+- Check current branch before committing
+- Follow git-flow rules (per `git-flow.mdc`)
+- Don't commit directly to `main` or `develop` without PR
+
+```bash
+# Check current branch
+git branch --show-current
+
+# If on main/develop, create feature branch first
+git checkout -b feature/my-changes
+```

@@ -1,0 +1,38 @@
+#!/bin/bash
+# Git commit-msg hook for jsh
+# Validates commit messages against conventional commit format
+#
+# Install: ./scripts/setup-hooks.sh
+# Or manually: cp .githooks/commit-msg .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
+
+# Check if commitlint is installed
+if ! command -v commitlint &> /dev/null; then
+    echo "⚠️  commitlint not found. Install with: cargo install commitlint-rs"
+    echo "   Skipping commit message validation..."
+    exit 0
+fi
+
+# Validate the commit message
+commitlint --config commitlint.yaml < "$1"
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+    echo ""
+    echo "❌ Commit message does not follow conventional commit format."
+    echo ""
+    echo "Expected format: <type>(<scope>): <description>"
+    echo ""
+    echo "Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+    echo ""
+    echo "Examples:"
+    echo "  feat(parser): add match expression support"
+    echo "  fix(lexer): handle escaped quotes"
+    echo "  docs: update README"
+    echo "  chore(deps): update dependencies"
+    echo ""
+    exit 1
+fi
+
+echo "✅ Commit message validated"
+exit 0
+

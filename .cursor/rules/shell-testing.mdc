@@ -1,0 +1,98 @@
+---
+description: Rules for testing jsh shell functionality
+globs:
+  - "src/**/*.rs"
+  - "benches/**/*.rs"
+  - "tests/**/*.rs"
+alwaysApply: true
+---
+
+# Shell Testing Rules
+
+When testing jsh shell functionality via command line, always use timeouts to prevent hanging.
+
+## Command Line Testing
+
+### Always Use Timeout
+
+When running jsh commands for testing, wrap them with `timeout` to prevent hanging:
+
+```bash
+# Good - with timeout
+timeout 5 ./target/debug/jsh -c 'echo hello'
+timeout 3 sh -c 'echo "test" | ./target/debug/jsh'
+
+# Bad - can hang indefinitely
+./target/debug/jsh -c 'echo hello'
+echo "test" | ./target/debug/jsh
+```
+
+### Recommended Timeout Values
+
+- Simple commands (echo, variable expansion): 3 seconds
+- File operations: 5 seconds
+- Loop/control flow tests: 5 seconds
+- Script execution: 10 seconds
+- Complex operations: 15 seconds
+
+### Testing Patterns
+
+1. **For piped input**, use `sh -c` wrapper:
+   ```bash
+   timeout 3 sh -c 'echo "command" | ./target/release/jsh'
+   ```
+
+2. **For inline commands**, use `-c` flag:
+   ```bash
+   timeout 5 ./target/release/jsh -c 'echo "test"'
+   ```
+
+3. **For Rust-based tests**, create test binaries that use the library directly:
+   ```rust
+   use jsh::interpreter::Interpreter;
+   let mut interp = Interpreter::new();
+   interp.execute_string("echo hello").unwrap();
+   ```
+
+### Handling Test Output
+
+- Redirect stderr when needed: `2>&1`
+- Use `|| true` to prevent non-zero exit codes from stopping execution
+- Capture output for verification: `result=$(timeout 3 ./target/debug/jsh -c 'echo test')`
+
+### Example Test Commands
+
+```bash
+# Test basic echo
+timeout 3 ./target/release/jsh -c 'echo "Hello, World!"'
+
+# Test function definition and call
+timeout 5 sh -c 'echo "greet(name) { echo Hello \$name; }; greet World" | ./target/release/jsh'
+
+# Test environment variables
+timeout 3 ./target/release/jsh -c 'echo "SHELL=$SHELL JSH=$JSH"'
+
+# Test arithmetic
+timeout 3 ./target/release/jsh -c 'echo $((2 + 3 * 4))'
+
+# Test control flow
+timeout 5 ./target/release/jsh -c 'for i in 1 2 3; do echo $i; done'
+```
+
+## Why Timeouts Are Important
+
+1. **Interactive mode**: jsh may enter interactive mode if stdin detection fails
+2. **Profile sourcing**: Sourcing user profiles may trigger unexpected prompts
+3. **Infinite loops**: Bugs in loop handling can cause hangs
+4. **Blocking operations**: Some operations may wait for input indefinitely
+
+## CI/CD Considerations
+
+In CI pipelines, always use timeouts with appropriate values:
+
+```yaml
+- name: Test jsh
+  run: |
+    timeout 30 cargo test
+    timeout 5 ./target/release/jsh -c 'echo "CI test passed"'
+```

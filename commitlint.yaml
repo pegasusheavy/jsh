@@ -1,0 +1,97 @@
+# commitlint configuration for jsh
+# https://github.com/KeisukeYamashita/commitlint-rs
+
+# Enforce conventional commit format:
+# <type>(<scope>): <description>
+#
+# Examples:
+#   feat(parser): add match expression support
+#   fix(lexer): handle escaped quotes in strings
+#   docs: update README with Fish compatibility
+#   chore(deps): update rustyline to 14.0
+
+rules:
+  # Type must be one of the allowed values
+  type-enum:
+    level: error
+    options:
+      - feat      # New feature
+      - fix       # Bug fix
+      - docs      # Documentation changes
+      - style     # Code style (formatting, semicolons, etc.)
+      - refactor  # Code refactoring (no functional change)
+      - perf      # Performance improvement
+      - test      # Adding or updating tests
+      - build     # Build system or external dependencies
+      - ci        # CI/CD configuration
+      - chore     # Maintenance tasks
+      - revert    # Revert a previous commit
+
+  # Type cannot be empty
+  type-empty:
+    level: error
+
+  # Type must be lowercase
+  type-case:
+    level: error
+    options:
+      - lower-case
+
+  # Scope is optional but must be lowercase if provided
+  scope-case:
+    level: error
+    options:
+      - lower-case
+
+  # Valid scopes for this project
+  scope-enum:
+    level: warning
+    options:
+      - lexer       # Lexer/tokenizer
+      - parser      # Parser
+      - ast         # Abstract syntax tree
+      - interpreter # Interpreter/executor
+      - builtins    # Built-in commands
+      - shell       # REPL/shell interface
+      - theme       # Theme system
+      - error       # Error handling
+      - deps        # Dependencies
+      - docs        # Documentation site
+      - bench       # Benchmarks
+      - ci          # CI/CD
+
+  # Subject (description) cannot be empty
+  subject-empty:
+    level: error
+
+  # Subject must not end with a period
+  subject-full-stop:
+    level: error
+    options:
+      - "."
+
+  # Subject must be sentence case or lowercase
+  subject-case:
+    level: warning
+    options:
+      - lower-case
+      - sentence-case
+
+  # Header (type + scope + subject) max length
+  header-max-length:
+    level: error
+    options:
+      - 100
+
+  # Body line max length
+  body-max-line-length:
+    level: warning
+    options:
+      - 100
+
+  # Footer line max length
+  footer-max-line-length:
+    level: warning
+    options:
+      - 100
+

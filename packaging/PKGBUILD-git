@@ -1,0 +1,62 @@
+# Maintainer: Pegasus Heavy Industries LLC <support@pegasusheavy.com>
+# Development version - builds from git main branch
+pkgname=jsh-git
+pkgver=0.1.0.r0.g0000000
+pkgrel=1
+pkgdesc="A ZSH/Bash-compatible shell with enhanced scripting features (git version)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/pegasusheavy/jsh"
+license=('MIT' 'Apache-2.0')
+depends=('gcc-libs')
+makedepends=('cargo' 'rust' 'git')
+provides=('jsh')
+conflicts=('jsh')
+install=jsh.install
+source=("$pkgname::git+https://github.com/pegasusheavy/jsh.git")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "$pkgname"
+    git describe --long --tags 2>/dev/null | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g' || \
+    printf "0.1.0.r%s.g%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+    cd "$pkgname"
+    export RUSTUP_TOOLCHAIN=stable
+    cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+    cd "$pkgname"
+    export RUSTUP_TOOLCHAIN=stable
+    export CARGO_TARGET_DIR=target
+    cargo build --frozen --release --all-features
+}
+
+check() {
+    cd "$pkgname"
+    export RUSTUP_TOOLCHAIN=stable
+    cargo test --frozen --all-features
+}
+
+package() {
+    cd "$pkgname"
+
+    # Install binary
+    install -Dm755 "target/release/jsh" "$pkgdir/usr/bin/jsh"
+
+    # Install licenses
+    install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/$pkgname/LICENSE-MIT"
+    install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/$pkgname/LICENSE-APACHE"
+
+    # Install documentation
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+    install -Dm644 CHANGELOG.md "$pkgdir/usr/share/doc/$pkgname/CHANGELOG.md"
+
+    # Install man page if it exists
+    if [ -f man/jsh.1 ]; then
+        install -Dm644 man/jsh.1 "$pkgdir/usr/share/man/man1/jsh.1"
+    fi
+}
+

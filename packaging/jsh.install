@@ -1,0 +1,23 @@
+# jsh install script for Arch Linux
+
+post_install() {
+    # Add jsh to /etc/shells if not present
+    if ! grep -q "^/usr/bin/jsh$" /etc/shells 2>/dev/null; then
+        echo "/usr/bin/jsh" >> /etc/shells
+    fi
+
+    echo "==> jsh has been installed!"
+    echo "==> To set jsh as your default shell, run: chsh -s /usr/bin/jsh"
+}
+
+post_upgrade() {
+    post_install
+}
+
+pre_remove() {
+    # Remove jsh from /etc/shells
+    if [ -f /etc/shells ]; then
+        sed -i '/^\/usr\/bin\/jsh$/d' /etc/shells
+    fi
+}
+

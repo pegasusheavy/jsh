@@ -1,0 +1,95 @@
+# ~/.jshrc - JSH configuration file
+# Copy this to ~/.jshrc to customize your shell
+
+# ============================================================================
+# Theme Configuration
+# ============================================================================
+
+# Set the theme (options: jsh, robbyrussell, agnoster, minimal, powerlevel, simple, pure)
+export JSH_THEME="jsh"
+
+# Or use a custom prompt:
+# export PROMPT='%F{cyan}%n%f@%F{blue}%m%f:%F{yellow}%~%f$ '
+# export RPROMPT='%F{8}%T%f'
+
+# ============================================================================
+# Environment Variables
+# ============================================================================
+
+# Default editor
+export EDITOR="vim"
+export VISUAL="$EDITOR"
+
+# Pager
+export PAGER="less"
+export LESS="-R"
+
+# History
+export HISTSIZE=10000
+export SAVEHIST=10000
+
+# ============================================================================
+# Path
+# ============================================================================
+
+# Add local bin to path
+# export PATH="$HOME/.local/bin:$PATH"
+
+# ============================================================================
+# Aliases
+# ============================================================================
+
+# Navigation
+# alias ..='cd ..'
+# alias ...='cd ../..'
+# alias ~='cd ~'
+
+# Listing
+# alias ls='ls --color=auto'
+# alias ll='ls -alF'
+# alias la='ls -A'
+# alias l='ls -CF'
+
+# Safety
+# alias rm='rm -i'
+# alias cp='cp -i'
+# alias mv='mv -i'
+
+# Git shortcuts
+# alias gs='git status'
+# alias ga='git add'
+# alias gc='git commit'
+# alias gp='git push'
+# alias gl='git log --oneline'
+# alias gd='git diff'
+
+# ============================================================================
+# Functions
+# ============================================================================
+
+# Create directory and cd into it
+# fn mkcd {
+#     mkdir -p "$1" && cd "$1"
+# }
+
+# Quick backup of a file
+# fn backup {
+#     cp "$1" "$1.bak"
+# }
+
+# ============================================================================
+# Shell Options
+# ============================================================================
+
+# Uncomment to enable vi mode
+# set -o vi
+
+# ============================================================================
+# Welcome Message
+# ============================================================================
+
+# Uncomment to show a welcome message
+# echo "Welcome to jsh!"
+# echo "Type 'help' for available commands"
+# echo "Type 'theme list' to see available themes"
+

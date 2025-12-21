@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    remove|purge)
+        # Remove jsh from /etc/shells
+        if [ -f /etc/shells ]; then
+            sed -i '/^\/usr\/bin\/jsh$/d' /etc/shells
+        fi
+        ;;
+    upgrade|deconfigure|failed-upgrade)
+        ;;
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
+
