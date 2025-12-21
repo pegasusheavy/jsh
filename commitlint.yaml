@@ -47,6 +47,7 @@ rules:
   scope-enum:
     level: warning
     options:
+      # Core shell components
       - lexer       # Lexer/tokenizer
       - parser      # Parser
       - ast         # Abstract syntax tree
@@ -55,10 +56,38 @@ rules:
       - shell       # REPL/shell interface
       - theme       # Theme system
       - error       # Error handling
+      
+      # Compatibility layers
+      - bash        # Bash compatibility
+      - zsh         # ZSH compatibility
+      - fish        # Fish compatibility
+      - ash         # Ash/POSIX compatibility
+      - posix       # POSIX compliance
+      
+      # Build and packaging
       - deps        # Dependencies
+      - build       # Build system
+      - packaging   # Package builds (deb, rpm, arch)
+      - deb         # Debian packaging
+      - rpm         # RPM packaging
+      - arch        # Arch Linux packaging
+      
+      # Development and tooling
       - docs        # Documentation site
       - bench       # Benchmarks
-      - ci          # CI/CD
+      - ci          # CI/CD pipelines
+      - test        # Test infrastructure
+      - lint        # Linting configuration
+      
+      # Cursor/IDE integration
+      - cursor      # Cursor IDE rules and config
+      - rules       # Cursor rules specifically
+      - editor      # Editor configuration
+      
+      # Project management
+      - config      # Configuration files
+      - git         # Git hooks, gitignore, etc.
+      - release     # Release process
 
   # Subject (description) cannot be empty
   subject-empty:

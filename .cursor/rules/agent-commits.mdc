@@ -67,18 +67,47 @@ git log -1 --oneline
 
 ### Scopes (for this project)
 
-- `lexer` - Lexer changes
-- `parser` - Parser changes
+**Core Shell Components:**
+- `lexer` - Lexer/tokenizer
+- `parser` - Parser
 - `ast` - AST definitions
 - `interpreter` - Interpreter/executor
 - `builtins` - Built-in commands
 - `shell` - REPL/shell interface
 - `theme` - Theme system
 - `error` - Error handling
+
+**Compatibility Layers:**
+- `bash` - Bash compatibility
+- `zsh` - ZSH compatibility
+- `fish` - Fish compatibility
+- `ash` - Ash/POSIX compatibility
+- `posix` - POSIX compliance
+
+**Build & Packaging:**
 - `deps` - Dependencies
-- `docs` - Documentation
+- `build` - Build system
+- `packaging` - Package builds (deb, rpm, arch)
+- `deb` - Debian packaging
+- `rpm` - RPM packaging
+- `arch` - Arch Linux packaging
+
+**Development & Tooling:**
+- `docs` - Documentation site
 - `bench` - Benchmarks
-- `ci` - CI/CD
+- `ci` - CI/CD pipelines
+- `test` - Test infrastructure
+- `lint` - Linting configuration
+
+**Cursor/IDE Integration:**
+- `cursor` - Cursor IDE rules and config
+- `rules` - Cursor rules specifically
+- `editor` - Editor configuration
+
+**Project Management:**
+- `config` - Configuration files
+- `git` - Git hooks, gitignore, etc.
+- `release` - Release process
 
 ## Examples
 
