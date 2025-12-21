@@ -1,89 +1,107 @@
 # jsh - ZSH/Bash-Compatible Shell with Enhanced Scripting
 
-> A modern Unix shell written in Rust that combines full Bash/ZSH compatibility with enhanced syntax features inspired by Rust, plus Fish and POSIX support.
+> A modern Unix shell written in Rust that provides full Bash/ZSH compatibility while adding match expressions, try/catch, named function parameters, Fish syntax support, and built-in git commands.
 
-## Quick Summary
+## Quick Reference
 
-jsh is a drop-in replacement for Bash/ZSH that adds:
-- `match` expressions (like Rust)
-- `try/catch/finally` error handling
-- Named function parameters
-- `let`/`const` variable bindings
-- Built-in git commands
-- Fish syntax support
-- Full POSIX compliance
+| Feature | Example |
+|---------|---------|
+| Match | `match $x { 1 => echo "one"; * => echo "other" }` |
+| Try/Catch | `try { cmd } catch e { echo $e }` |
+| Named Params | `greet(name) { echo "Hi, $name"; }` |
+| Let/Const | `let x = 1; const PI = "3.14"` |
+| Loop | `loop { read x; [ "$x" = "q" ] && break }` |
+| Git Branch | `git_branch` or `$(git_branch)` |
+| Git Prompt | `PS1='\w$(git_prompt)$ '` |
 
 ## Installation
 
 ```bash
 # From source
-git clone https://github.com/pegasusheavy/jsh.git
-cd jsh && cargo install --path .
+git clone https://github.com/pegasusheavy/jsh.git && cd jsh
+cargo install --path .
 
-# Or use package managers
-# Debian: sudo apt install ./jsh_*.deb
-# Fedora: sudo dnf install ./jsh-*.rpm  
-# Arch: cd packaging && makepkg -si
+# Packages
+sudo apt install ./jsh_*.deb      # Debian/Ubuntu
+sudo dnf install ./jsh-*.rpm      # Fedora/RHEL
+cd packaging && makepkg -si       # Arch Linux
 ```
 
-## Syntax Examples
+## Compatibility
+
+- **Bash/ZSH**: Full compatibility - existing scripts run unchanged
+- **Fish**: Partial - set, string, math, abbr, switch/case/end
+- **POSIX**: Full - sh/dash/ash compatible
+
+## 59 Built-in Commands
+
+**Navigation**: cd, pwd, pushd, popd, dirs
+
+**Output**: echo, printf
+
+**Variables**: export, unset, set, local, readonly, declare, typeset
+
+**Control**: exit, return, true, false, :
+
+**Jobs**: jobs, fg, bg, wait
+
+**Scripts**: source, ., eval, exec, trap, shift, read, getopts
+
+**Tests**: test, [, type, which, command, builtin, help
+
+**Misc**: alias, unalias, hash, umask, ulimit, times, enable, shopt, let, history
+
+**Fish**: string, math, contains, status, functions, abbr
+
+**Git**: git_branch, git_status, git_info, git_prompt, in_git_repo
+
+## Configuration Files
+
+| File | When Sourced |
+|------|--------------|
+| `~/.jshenv` | All shells (including scripts) |
+| `~/.jshrc` | Interactive shells |
+| `~/.jsh_profile` | Login shells |
+
+## Key Syntax
 
 ### Traditional (Bash-compatible)
 ```bash
 if [ "$x" -eq 1 ]; then echo "one"; fi
 for i in 1 2 3; do echo $i; done
-case "$x" in 1) echo "one";; *) echo "other";; esac
+case "$x" in 1) echo "one";; esac
+greet() { echo "Hello, $1"; }
 ```
 
-### Enhanced (jsh-specific)
+### jsh Enhanced
 ```bash
-match $x {
-    1 => echo "one"
-    2 | 3 => echo "two or three"
-    * => echo "other"
-}
-
-try {
-    risky_command
-} catch err {
-    echo "Error: $err"
-}
-
-greet(name, greeting) {
-    echo "$greeting, $name!"
-}
+match $x { 1 => echo "one"; * => echo "other" }
+try { cmd } catch e { echo "Error: $e" }
+greet(name) { echo "Hello, $name"; }
+let x = 1; const Y = 2
+fn helper { echo "short form"; }
 ```
 
-### Git Integration
+### Fish-style
 ```bash
-git_branch              # Get current branch
-git_status --dirty      # Check for changes
-git_info --query hash   # Get commit hash
-in_git_repo && echo "In git repo"
+set -x PATH /usr/local/bin $PATH
+string upper "hello"
+math "2 ^ 10"
 ```
-
-## Key Points for AI Assistants
-
-1. **Full Compatibility**: Existing Bash/ZSH scripts work without modification
-2. **Optional Enhancements**: New syntax is additive, not required
-3. **Named Parameters**: `func(a, b) {}` - parameters accessible as $a, $b AND $1, $2
-4. **Config Files**: ~/.jshrc (interactive), ~/.jshenv (all shells)
-5. **Git Builtins**: Use git_branch/git_status instead of shelling out
-
-## Files
-
-- Source: `src/` (lexer, parser, ast, interpreter, builtins, shell)
-- Docs: `docs/` (Angular documentation site)
-- Packages: `debian/`, `rpm/`, `packaging/` (distribution packages)
-- Benchmarks: `benches/` (Criterion benchmarks)
 
 ## Links
 
-- Repository: https://github.com/pegasusheavy/jsh
-- Documentation: https://pegasusheavy.github.io/jsh/
-- Issues: https://github.com/pegasusheavy/jsh/issues
+- **Repository**: https://github.com/pegasusheavy/jsh
+- **Documentation**: https://pegasusheavy.github.io/jsh/
+- **Issues**: https://github.com/pegasusheavy/jsh/issues
+
+## For AI Assistants
+
+1. **Compatibility**: Bash/ZSH scripts work unchanged
+2. **Named params**: `func(a, b) {}` - accessible as $a AND $1
+3. **Git builtins**: Use git_branch/git_status instead of `$(git ...)`
+4. **Config**: .jshenv for all shells, .jshrc for interactive only
 
 ## License
 
 MIT OR Apache-2.0 - Copyright 2025 Pegasus Heavy Industries LLC
-

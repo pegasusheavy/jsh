@@ -1,0 +1,1831 @@
+# jsh Complete Reference for Language Models
+
+> This is the comprehensive reference document for jsh shell. For a shorter summary, see llms.txt.
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Compatibility](#compatibility)
+3. [Installation](#installation)
+4. [Command Line Usage](#command-line-usage)
+5. [Syntax Reference](#syntax-reference)
+6. [Built-in Commands](#built-in-commands)
+7. [Variable Expansion](#variable-expansion)
+8. [Control Flow](#control-flow)
+9. [jsh Enhanced Syntax](#jsh-enhanced-syntax)
+10. [Fish Compatibility](#fish-compatibility)
+11. [Git Integration](#git-integration)
+12. [Themes and Prompts](#themes-and-prompts)
+13. [Configuration](#configuration)
+14. [Shell Options](#shell-options)
+15. [Examples](#examples)
+
+---
+
+## Overview
+
+**jsh** (jay-shell) is a Unix shell written in Rust that provides:
+
+- **Full Bash/ZSH compatibility** - existing scripts run unchanged
+- **Enhanced syntax** - match expressions, try/catch, named parameters
+- **Fish support** - set, string, math, abbreviations
+- **POSIX compliance** - sh/dash/ash compatible
+- **Built-in git** - git_branch, git_status, git_prompt
+
+### Technical Details
+
+- **Language**: Rust (Edition 2024)
+- **Version**: 0.1.0
+- **License**: MIT OR Apache-2.0
+- **Author**: Pegasus Heavy Industries LLC
+- **Minimum Rust**: 1.85
+- **Platforms**: Linux, macOS, BSD, Unix-like systems
+
+---
+
+## Compatibility
+
+### Bash Compatibility (Full)
+
+| Feature | Syntax | Status |
+|---------|--------|--------|
+| If statements | `if [ cond ]; then ... fi` | ✅ |
+| Elif/else | `elif [ cond ]; then ... else ...` | ✅ |
+| For loops | `for x in list; do ... done` | ✅ |
+| C-style for | `for ((i=0; i<10; i++)); do ... done` | ✅ |
+| While loops | `while [ cond ]; do ... done` | ✅ |
+| Until loops | `until [ cond ]; do ... done` | ✅ |
+| Case statements | `case $x in pattern) ... ;; esac` | ✅ |
+| Select | `select x in list; do ... done` | ✅ |
+| Functions | `function name { }` or `name() { }` | ✅ |
+| Pipes | `cmd1 | cmd2 | cmd3` | ✅ |
+| Redirections | `>`, `>>`, `<`, `2>`, `2>&1`, `&>` | ✅ |
+| Here documents | `<<EOF ... EOF` | ✅ |
+| Here strings | `<<<string` | ✅ |
+| Command subst | `$(cmd)` or `` `cmd` `` | ✅ |
+| Process subst | `<(cmd)` and `>(cmd)` | ✅ |
+| Arithmetic | `$((expr))` | ✅ |
+| Arrays | `arr=(a b c)`, `${arr[0]}` | ✅ |
+| Associative | `declare -A map; map[key]=val` | ✅ |
+| Globs | `*.txt`, `file?`, `[abc]*`, `**/*.rs` | ✅ |
+| Brace expansion | `{a,b,c}`, `{1..10}` | ✅ |
+| Tilde expansion | `~`, `~user` | ✅ |
+| Background | `cmd &` | ✅ |
+| Logical ops | `&&`, `||`, `!` | ✅ |
+| Subshells | `(cmd1; cmd2)` | ✅ |
+| Grouping | `{ cmd1; cmd2; }` | ✅ |
+
+### ZSH Compatibility (Full)
+
+All Bash features plus:
+
+| Feature | Syntax | Status |
+|---------|--------|--------|
+| Prompt escapes | `%n`, `%m`, `%~`, `%c`, `%T` | ✅ |
+| Prompt colors | `%F{color}text%f`, `%K{bg}%k` | ✅ |
+| Prompt conditionals | `%(?.true.false)` | ✅ |
+| Bold/effects | `%B...%b`, `%U...%u` | ✅ |
+| oh-my-zsh themes | Theme format compatibility | ✅ |
+| git_prompt_info | `$(git_prompt_info)` | ✅ |
+
+### Fish Compatibility (Partial)
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| `set var value` | ✅ | Variable assignment |
+| `set -x var value` | ✅ | Export variable |
+| `set -e var` | ✅ | Erase variable |
+| `set -q var` | ✅ | Query (check if set) |
+| `set -g var value` | ✅ | Global scope |
+| `string length` | ✅ | String length |
+| `string upper/lower` | ✅ | Case conversion |
+| `string split` | ✅ | Split string |
+| `string join` | ✅ | Join strings |
+| `string replace` | ✅ | Replace substring |
+| `string match` | ✅ | Pattern matching |
+| `string sub` | ✅ | Substring |
+| `math expr` | ✅ | Arithmetic |
+| `contains item list` | ✅ | List membership |
+| `status is-interactive` | ✅ | Check interactive |
+| `status is-login` | ✅ | Check login shell |
+| `functions` | ✅ | List functions |
+| `functions -q name` | ✅ | Query function |
+| `functions -e name` | ✅ | Erase function |
+| `abbr --add` | ✅ | Add abbreviation |
+| `abbr --list` | ✅ | List abbreviations |
+| `abbr --erase` | ✅ | Remove abbreviation |
+| `switch/case/end` | ✅ | Fish-style switch |
+| `begin/end` | ✅ | Block grouping |
+| `and`, `or`, `not` | ✅ | Logical operators |
+| Fish autoloading | ❌ | Not supported |
+| Fish completions | ❌ | Not supported |
+| `function --argument-names` | ❌ | Use jsh named params |
+
+### POSIX Compatibility (Full)
+
+| Feature | Status |
+|---------|--------|
+| `set -e` (errexit) | ✅ |
+| `set -u` (nounset) | ✅ |
+| `set -x` (xtrace) | ✅ |
+| `set -n` (noexec) | ✅ |
+| `set -a` (allexport) | ✅ |
+| `set -C` (noclobber) | ✅ |
+| `set -b` (notify) | ✅ |
+| `set -f` (noglob) | ✅ |
+| `set -o optname` | ✅ |
+| `set +o optname` | ✅ |
+| `set --` | ✅ |
+| `test` / `[` | ✅ |
+| `.` (source) | ✅ |
+| `trap` | ✅ |
+| `readonly` | ✅ |
+| `local` | ✅ |
+| `getopts` | ✅ |
+
+---
+
+## Installation
+
+### From Source (Recommended)
+
+```bash
+# Clone repository
+git clone https://github.com/pegasusheavy/jsh.git
+cd jsh
+
+# Build release binary
+cargo build --release
+
+# Install to ~/.cargo/bin
+cargo install --path .
+
+# Or copy manually
+sudo cp target/release/jsh /usr/local/bin/
+```
+
+### Pre-built Packages
+
+#### Debian/Ubuntu
+
+```bash
+wget https://github.com/pegasusheavy/jsh/releases/latest/download/jsh_0.1.0_amd64.deb
+sudo apt install ./jsh_0.1.0_amd64.deb
+```
+
+#### Fedora/RHEL/CentOS
+
+```bash
+wget https://github.com/pegasusheavy/jsh/releases/latest/download/jsh-0.1.0-1.x86_64.rpm
+sudo dnf install ./jsh-0.1.0-1.x86_64.rpm
+```
+
+#### Arch Linux
+
+```bash
+# From AUR
+yay -S jsh
+
+# Or manually
+git clone https://github.com/pegasusheavy/jsh.git
+cd jsh/packaging
+makepkg -si
+```
+
+### Set as Default Shell
+
+```bash
+# Add to system shells
+echo /usr/local/bin/jsh | sudo tee -a /etc/shells
+
+# Change your shell
+chsh -s /usr/local/bin/jsh
+```
+
+---
+
+## Command Line Usage
+
+```
+USAGE:
+    jsh [OPTIONS] [SCRIPT] [ARGS...]
+
+OPTIONS:
+    -c COMMAND      Execute COMMAND string and exit
+    -s              Read commands from standard input
+    -i              Force interactive mode
+    -l, --login     Start as a login shell
+    -h, --help      Print help information
+    -V, --version   Print version information
+
+EXAMPLES:
+    jsh                         # Interactive shell
+    jsh script.sh               # Run script
+    jsh script.sh arg1 arg2     # Run script with arguments
+    jsh -c 'echo hello'         # Execute command
+    echo 'echo hi' | jsh -s     # Read from stdin
+    jsh -l                      # Login shell
+```
+
+---
+
+## Syntax Reference
+
+### Comments
+
+```bash
+# This is a comment
+echo "hello"  # Inline comment
+```
+
+### Variables
+
+```bash
+# Assignment (no spaces around =)
+name="value"
+name=value
+
+# Export to environment
+export PATH="/usr/local/bin:$PATH"
+
+# Local (function scope)
+local var="value"
+
+# Readonly
+readonly CONST="immutable"
+
+# jsh: let and const
+let mutable = "can change"
+const IMMUTABLE = "cannot change"
+```
+
+### Quoting
+
+```bash
+# Single quotes - literal (no expansion)
+echo 'Hello $name'  # Output: Hello $name
+
+# Double quotes - allows expansion
+echo "Hello $name"  # Output: Hello World
+
+# Escape characters
+echo "Line1\nLine2"
+echo $'Line1\nLine2'  # ANSI-C quoting
+
+# No quotes - word splitting and glob expansion
+echo *.txt
+```
+
+### Command Separators
+
+```bash
+# Semicolon - sequential
+cmd1; cmd2; cmd3
+
+# Newline - sequential
+cmd1
+cmd2
+
+# && - AND (run next if previous succeeds)
+cmd1 && cmd2
+
+# || - OR (run next if previous fails)
+cmd1 || cmd2
+
+# & - background
+cmd1 &
+
+# | - pipe
+cmd1 | cmd2
+```
+
+### Redirections
+
+```bash
+# Output
+cmd > file          # Overwrite
+cmd >> file         # Append
+cmd 2> file         # Stderr
+cmd &> file         # Both stdout and stderr
+cmd > file 2>&1     # Both (alternative)
+
+# Input
+cmd < file          # From file
+cmd <<EOF           # Here document
+line1
+line2
+EOF
+cmd <<<string       # Here string
+
+# File descriptors
+exec 3> file        # Open fd 3 for writing
+echo "text" >&3     # Write to fd 3
+exec 3>&-           # Close fd 3
+```
+
+---
+
+## Built-in Commands
+
+### Navigation Commands
+
+#### cd - Change Directory
+
+```bash
+cd                  # Go to $HOME
+cd /path/to/dir     # Go to directory
+cd -                # Go to $OLDPWD
+cd ~                # Go to $HOME
+cd ~user            # Go to user's home
+cd ..               # Go to parent
+```
+
+#### pwd - Print Working Directory
+
+```bash
+pwd                 # Print current directory
+pwd -P              # Physical path (resolve symlinks)
+pwd -L              # Logical path (default)
+```
+
+#### pushd/popd/dirs - Directory Stack
+
+```bash
+pushd /path         # Push dir and cd
+popd                # Pop dir and cd
+dirs                # List stack
+dirs -c             # Clear stack
+```
+
+### Variable Commands
+
+#### export - Export Variables
+
+```bash
+export VAR="value"  # Export with value
+export VAR          # Export existing
+export -n VAR       # Unexport
+export -p           # Print all exports
+```
+
+#### set - Shell Options and Parameters
+
+```bash
+set -e              # Exit on error
+set -u              # Error on unset vars
+set -x              # Print commands
+set -o errexit      # Same as -e
+set +e              # Disable -e
+set -- a b c        # Set positional params
+set                 # Print all variables
+
+# Fish-style (when used with set command)
+set name value      # Set variable
+set -x name value   # Export
+set -e name         # Erase
+set -q name         # Query
+```
+
+#### local/readonly/declare
+
+```bash
+local var="value"               # Function-local
+readonly CONST="immutable"      # Read-only
+declare var="value"             # Declare variable
+declare -x var="value"          # Declare and export
+declare -r var="value"          # Declare readonly
+declare -i var=42               # Integer
+declare -a arr=(1 2 3)          # Array
+declare -A map=([k]=v)          # Associative array
+```
+
+### Control Flow Commands
+
+#### exit/return
+
+```bash
+exit                # Exit with last status
+exit 0              # Exit success
+exit 1              # Exit failure
+return              # Return from function
+return 0            # Return success
+return 1            # Return failure
+```
+
+#### true/false/:
+
+```bash
+true                # Return 0
+false               # Return 1
+:                   # No-op, return 0
+```
+
+### Job Control
+
+#### jobs/fg/bg/wait
+
+```bash
+jobs                # List jobs
+jobs -l             # With PIDs
+fg                  # Foreground last job
+fg %1               # Foreground job 1
+bg                  # Background last job
+bg %1               # Background job 1
+wait                # Wait for all jobs
+wait $pid           # Wait for specific PID
+wait %1             # Wait for job 1
+```
+
+### Source and Eval
+
+#### source/.
+
+```bash
+source script.sh    # Execute in current shell
+. script.sh         # Same as source
+source script.sh arg1 arg2  # With arguments
+```
+
+#### eval
+
+```bash
+eval "echo hello"   # Evaluate string
+cmd="ls -la"
+eval "$cmd"         # Execute variable content
+```
+
+#### exec
+
+```bash
+exec /bin/bash      # Replace shell
+exec 3> file        # Open file descriptor
+exec 3>&-           # Close file descriptor
+```
+
+### Test Commands
+
+#### test/[
+
+```bash
+test -f file        # File exists and is regular
+test -d dir         # Directory exists
+test -e path        # Path exists
+test -r file        # Readable
+test -w file        # Writable
+test -x file        # Executable
+test -s file        # Non-empty file
+test -z "$str"      # String is empty
+test -n "$str"      # String is non-empty
+test "$a" = "$b"    # Strings equal
+test "$a" != "$b"   # Strings not equal
+test $n -eq $m      # Numeric equal
+test $n -ne $m      # Not equal
+test $n -lt $m      # Less than
+test $n -le $m      # Less or equal
+test $n -gt $m      # Greater than
+test $n -ge $m      # Greater or equal
+test ! expr         # Logical NOT
+test e1 -a e2       # Logical AND
+test e1 -o e2       # Logical OR
+
+# [ is alias for test (requires ] at end)
+[ -f file ]
+[ "$a" = "$b" ]
+```
+
+### Information Commands
+
+#### type/which/command
+
+```bash
+type ls             # Describe command
+type -t ls          # Just type (file, builtin, etc.)
+which ls            # Path to command
+command -v ls       # Path or empty
+command ls          # Run command, skip functions/aliases
+```
+
+#### help
+
+```bash
+help                # List builtins
+help cd             # Help for specific builtin
+```
+
+### Miscellaneous
+
+#### alias/unalias
+
+```bash
+alias ll='ls -la'   # Create alias
+alias               # List aliases
+unalias ll          # Remove alias
+unalias -a          # Remove all
+```
+
+#### read
+
+```bash
+read var            # Read line into var
+read -p "Prompt: " var  # With prompt
+read -s var         # Silent (for passwords)
+read -n 1 var       # Read single char
+read -t 5 var       # Timeout 5 seconds
+read -a arr         # Read into array
+read v1 v2 v3       # Multiple variables
+```
+
+#### shift
+
+```bash
+shift               # Shift by 1
+shift 2             # Shift by 2
+```
+
+#### trap
+
+```bash
+trap 'cleanup' EXIT      # Run on exit
+trap 'handler' INT       # On Ctrl-C
+trap 'handler' TERM      # On termination
+trap '' INT              # Ignore signal
+trap - INT               # Reset to default
+```
+
+#### getopts
+
+```bash
+while getopts "ab:c" opt; do
+    case $opt in
+        a) echo "Option a";;
+        b) echo "Option b: $OPTARG";;
+        c) echo "Option c";;
+        ?) echo "Invalid option";;
+    esac
+done
+shift $((OPTIND-1))
+```
+
+#### umask
+
+```bash
+umask               # Show current mask
+umask 022           # Set mask
+```
+
+#### let
+
+```bash
+let x=1+2           # Arithmetic
+let x++             # Increment
+let x+=5            # Add and assign
+```
+
+#### history
+
+```bash
+history             # Show history
+history -c          # Clear history
+```
+
+---
+
+## Variable Expansion
+
+### Basic Expansion
+
+```bash
+$var                # Value of var
+${var}              # Same, with delimiters
+"$var"              # Value in double quotes
+'$var'              # Literal $var (no expansion)
+```
+
+### Default Values
+
+```bash
+${var:-default}     # Use default if unset or empty
+${var:=default}     # Assign default if unset or empty
+${var:+alternate}   # Use alternate if set and non-empty
+${var:?error msg}   # Error if unset or empty
+${var-default}      # Use default if unset (not empty)
+${var=default}      # Assign default if unset
+${var+alternate}    # Use alternate if set
+${var?error msg}    # Error if unset
+```
+
+### String Operations
+
+```bash
+${#var}             # Length of string
+${var%pattern}      # Remove shortest suffix
+${var%%pattern}     # Remove longest suffix
+${var#pattern}      # Remove shortest prefix
+${var##pattern}     # Remove longest prefix
+${var/pat/repl}     # Replace first match
+${var//pat/repl}    # Replace all matches
+${var/#pat/repl}    # Replace prefix
+${var/%pat/repl}    # Replace suffix
+${var:offset}       # Substring from offset
+${var:offset:len}   # Substring with length
+${var^}             # Uppercase first char
+${var^^}            # Uppercase all
+${var,}             # Lowercase first char
+${var,,}            # Lowercase all
+```
+
+### Array Operations
+
+```bash
+${arr[0]}           # First element
+${arr[@]}           # All elements
+${arr[*]}           # All as single word
+${#arr[@]}          # Number of elements
+${!arr[@]}          # All indices
+${arr[@]:1:2}       # Slice from index 1, length 2
+```
+
+### Special Variables
+
+```bash
+$0                  # Script name
+$1, $2, ...         # Positional parameters
+$#                  # Number of parameters
+$@                  # All parameters (separate words)
+$*                  # All parameters (single word)
+$?                  # Last exit status
+$$                  # Current shell PID
+$!                  # Last background PID
+$-                  # Current options
+$_                  # Last argument of previous command
+```
+
+---
+
+## Control Flow
+
+### If Statement
+
+```bash
+if condition; then
+    commands
+elif condition; then
+    commands
+else
+    commands
+fi
+
+# One-line
+if [ -f file ]; then echo "exists"; fi
+
+# With test
+if test -f file; then echo "exists"; fi
+
+# With command
+if grep -q pattern file; then echo "found"; fi
+```
+
+### For Loop
+
+```bash
+# List iteration
+for item in list of items; do
+    echo $item
+done
+
+# Range
+for i in {1..10}; do echo $i; done
+
+# C-style
+for ((i=0; i<10; i++)); do
+    echo $i
+done
+
+# Files
+for file in *.txt; do
+    process "$file"
+done
+```
+
+### While/Until Loops
+
+```bash
+# While
+while condition; do
+    commands
+done
+
+# Until (opposite of while)
+until condition; do
+    commands
+done
+
+# Read lines
+while read line; do
+    echo "$line"
+done < file.txt
+
+# Infinite
+while true; do
+    # ...
+    sleep 1
+done
+```
+
+### Case Statement
+
+```bash
+case "$var" in
+    pattern1)
+        commands
+        ;;
+    pattern2|pattern3)
+        commands
+        ;;
+    *)
+        default commands
+        ;;
+esac
+
+# Patterns
+case "$file" in
+    *.txt) echo "text";;
+    *.sh)  echo "script";;
+    [0-9]*) echo "starts with digit";;
+    *)     echo "other";;
+esac
+```
+
+### Select Statement
+
+```bash
+select choice in option1 option2 option3; do
+    echo "You chose: $choice"
+    break
+done
+```
+
+### Functions
+
+```bash
+# Traditional syntax
+function name {
+    commands
+    return 0
+}
+
+# POSIX syntax
+name() {
+    commands
+}
+
+# jsh: Named parameters
+greet(name, greeting) {
+    echo "$greeting, $name!"
+}
+
+# jsh: fn shorthand
+fn helper {
+    echo "helper function"
+}
+
+# Call function
+name arg1 arg2
+
+# Access arguments
+function show {
+    echo "First: $1"
+    echo "Second: $2"
+    echo "All: $@"
+    echo "Count: $#"
+}
+```
+
+---
+
+## jsh Enhanced Syntax
+
+### Match Expression
+
+Pattern matching similar to Rust's match:
+
+```bash
+match $value {
+    # Literal match
+    "hello" => echo "greeting"
+    
+    # Multiple patterns (OR)
+    1 | 2 | 3 => echo "small number"
+    
+    # Range (numeric)
+    10..20 => echo "between 10 and 20"
+    
+    # Regex pattern
+    /^[A-Z]/ => echo "starts with uppercase"
+    
+    # Wildcard (default)
+    * => echo "anything else"
+}
+
+# With commands
+match $status {
+    0 => {
+        echo "Success"
+        log_success
+    }
+    1 => echo "General error"
+    * => {
+        echo "Unknown error: $status"
+        exit 1
+    }
+}
+```
+
+### Try/Catch/Finally
+
+Structured error handling:
+
+```bash
+try {
+    # Commands that might fail
+    risky_command
+    another_risky_command
+} catch err {
+    # Handle error (err contains message)
+    echo "Error occurred: $err"
+    log_error "$err"
+} finally {
+    # Always runs (cleanup)
+    cleanup_resources
+}
+
+# Without finally
+try {
+    cmd
+} catch e {
+    echo "Failed: $e"
+}
+
+# Nested
+try {
+    try {
+        inner_risky
+    } catch e {
+        echo "Inner failed"
+        raise_error
+    }
+} catch e {
+    echo "Outer caught: $e"
+}
+```
+
+### Named Function Parameters
+
+Functions with named parameters:
+
+```bash
+# Basic named parameters
+greet(name, greeting) {
+    echo "$greeting, $name!"
+}
+greet "World" "Hello"  # Output: Hello, World!
+
+# Parameters are also positional
+show(first, second) {
+    echo "Named: first=$first second=$second"
+    echo "Positional: \$1=$1 \$2=$2"
+}
+
+# Works with all function syntaxes
+fn add(a, b) {
+    echo $((a + b))
+}
+
+function multiply(x, y) {
+    echo $((x * y))
+}
+
+# Default values (use expansion)
+greet(name, greeting) {
+    name=${name:-"Guest"}
+    greeting=${greeting:-"Hello"}
+    echo "$greeting, $name!"
+}
+```
+
+### Let/Const Bindings
+
+Variable bindings with mutability control:
+
+```bash
+# Mutable binding
+let counter = 0
+let counter = $((counter + 1))  # Can reassign
+
+# Immutable binding
+const PI = "3.14159"
+const VERSION = "1.0.0"
+# const PI = "3.0"  # Error: cannot reassign const
+
+# In expressions
+let result = $(calculate)
+const CONFIG = $(cat config.json)
+```
+
+### Loop Statement
+
+Infinite loop with break/continue:
+
+```bash
+loop {
+    read -p "Command: " cmd
+    
+    # Exit condition
+    [ "$cmd" = "quit" ] && break
+    
+    # Skip condition
+    [ -z "$cmd" ] && continue
+    
+    # Execute command
+    eval "$cmd"
+}
+
+# With counter
+let i = 0
+loop {
+    let i = $((i + 1))
+    echo "Iteration $i"
+    [ $i -ge 10 ] && break
+}
+```
+
+### Fn Shorthand
+
+Short function definition syntax:
+
+```bash
+fn greet {
+    echo "Hello, $1!"
+}
+
+fn process {
+    cat "$1" | sort | uniq
+}
+
+# With named parameters
+fn add(a, b) {
+    echo $((a + b))
+}
+```
+
+---
+
+## Fish Compatibility
+
+### Set Command
+
+```bash
+# Set variable
+set name "value"
+set path "/usr/local/bin"
+
+# Export (add to environment)
+set -x PATH "/usr/local/bin" $PATH
+set -x EDITOR "vim"
+
+# Erase variable
+set -e name
+
+# Query (check if set)
+set -q name && echo "name is set"
+
+# Global scope
+set -g global_var "value"
+
+# Multiple values (array-like)
+set fruits apple banana cherry
+echo $fruits[1]  # apple
+```
+
+### String Builtin
+
+```bash
+# Length
+string length "hello"           # 5
+
+# Case conversion
+string upper "hello"            # HELLO
+string lower "HELLO"            # hello
+
+# Split
+string split "," "a,b,c"        # a\nb\nc
+string split "" "hello"         # h\ne\nl\nl\no
+
+# Join
+string join "-" a b c           # a-b-c
+string join ", " $items
+
+# Replace
+string replace "old" "new" "old text"
+string replace -a "o" "0" "foo"  # f00 (all)
+string replace -r "^h" "H" "hello"  # Regex
+
+# Match
+string match "*.txt" "file.txt"
+string match -r "[0-9]+" "abc123def"
+
+# Substring
+string sub -s 1 -l 3 "hello"    # hel
+string sub -s 2 "hello"         # ello
+
+# Trim
+string trim "  hello  "         # hello
+string trim -l "  hello"        # "hello"
+string trim -r "hello  "        # "hello"
+```
+
+### Math Builtin
+
+```bash
+# Basic arithmetic
+math "2 + 3"          # 5
+math "10 - 3"         # 7
+math "4 * 5"          # 20
+math "20 / 4"         # 5
+math "17 % 5"         # 2
+
+# Exponents
+math "2 ^ 10"         # 1024
+math "2 ** 8"         # 256
+
+# Functions
+math "sqrt(16)"       # 4
+math "abs(-5)"        # 5
+math "sin(3.14159)"   # ~0
+math "cos(0)"         # 1
+math "log(100)"       # ~4.6
+math "floor(3.7)"     # 3
+math "ceil(3.2)"      # 4
+math "round(3.5)"     # 4
+
+# Comparison (returns 0 or 1)
+math "5 > 3"          # 1
+math "2 == 2"         # 1
+```
+
+### Contains Builtin
+
+```bash
+set fruits apple banana cherry
+
+# Check membership
+contains apple $fruits && echo "Found apple"
+contains grape $fruits || echo "No grape"
+
+# In conditions
+if contains "$item" $list; then
+    echo "Item is in list"
+fi
+```
+
+### Status Builtin
+
+```bash
+# Check shell state
+status is-interactive && echo "Interactive"
+status is-login && echo "Login shell"
+status is-command-substitution
+status is-block
+status is-breakpoint
+
+# Get information
+status --current-filename
+status --current-line-number
+status --current-function
+```
+
+### Functions Builtin
+
+```bash
+# List all functions
+functions
+
+# Query if function exists
+functions -q myfunction && echo "Exists"
+
+# Erase function
+functions -e myfunction
+
+# Get function definition
+functions myfunction
+```
+
+### Abbreviations
+
+```bash
+# Add abbreviation
+abbr --add gc "git commit"
+abbr --add gp "git push"
+abbr --add ll "ls -la"
+
+# List abbreviations
+abbr --list
+abbr
+
+# Erase abbreviation
+abbr --erase gc
+```
+
+### Switch/Case/End
+
+```bash
+switch $command
+    case start
+        echo "Starting service..."
+        start_service
+    case stop
+        echo "Stopping service..."
+        stop_service
+    case restart
+        echo "Restarting..."
+        stop_service
+        start_service
+    case status
+        check_status
+    case '*'
+        echo "Unknown command: $command"
+        echo "Usage: $0 {start|stop|restart|status}"
+end
+```
+
+### Begin/End Blocks
+
+```bash
+begin
+    set local_var "value"
+    process_something
+    echo $local_var
+end
+
+# Variables inside begin/end are scoped
+```
+
+### And/Or/Not
+
+```bash
+# Logical operators
+test -f file
+and echo "File exists"
+or echo "File missing"
+
+# Chain commands
+cmd1
+and cmd2
+and cmd3
+
+# Negation
+not test -f file && echo "File missing"
+```
+
+---
+
+## Git Integration
+
+### in_git_repo
+
+Check if current directory is in a git repository:
+
+```bash
+if in_git_repo; then
+    echo "Inside a git repository"
+else
+    echo "Not in a git repo"
+fi
+
+# Use in conditions
+in_git_repo && git_branch
+```
+
+### git_branch
+
+Get the current branch name:
+
+```bash
+# Simple usage
+git_branch                    # main
+
+# In command substitution
+echo "Branch: $(git_branch)"
+
+# In conditions
+if [ "$(git_branch)" = "main" ]; then
+    echo "On main branch!"
+fi
+```
+
+### git_status
+
+Check repository status:
+
+```bash
+# Print status summary
+git_status
+
+# Check for uncommitted changes
+git_status --dirty && echo "Has uncommitted changes"
+
+# Check for staged changes
+git_status --staged && echo "Has staged changes"
+
+# Check if clean
+git_status --clean && echo "Working tree is clean"
+
+# Use in deployment scripts
+if git_status --dirty; then
+    echo "Error: Uncommitted changes"
+    exit 1
+fi
+```
+
+### git_info
+
+Get detailed git repository information:
+
+```bash
+# All information
+git_info
+
+# Query specific fields
+git_info --query branch       # Branch name
+git_info --query hash         # Full commit hash
+git_info --query short-hash   # Short hash (7 chars)
+git_info --query remote       # Remote name (origin)
+git_info --query upstream     # Upstream branch
+git_info --query ahead        # Commits ahead of upstream
+git_info --query behind       # Commits behind upstream
+git_info --query stash        # Stash count
+git_info --query tag          # Current tag
+
+# Custom format
+git_info --format '%b'        # Just branch
+git_info --format '%b (%h)'   # "main (abc1234)"
+git_info --format '%b +%a -%z'  # "main +2 -1"
+
+# Format specifiers
+# %b - branch name
+# %h - short hash
+# %H - full hash
+# %r - remote
+# %u - upstream
+# %a - ahead count
+# %z - behind count
+# %s - stash count
+# %t - tag
+# %d - dirty indicator (✗ if dirty)
+# %c - staged indicator (● if staged)
+```
+
+### git_prompt
+
+Git information formatted for shell prompts:
+
+```bash
+# Default format
+git_prompt                    # (main)
+
+# Custom format
+git_prompt -f ' [%b%d]'       # [main✗]
+git_prompt -f ' %b%d%c'       # main✗●
+
+# In PS1
+PS1='\u@\h:\w$(git_prompt)$ '
+PS1='\w$(git_prompt -f " [%b%d]")$ '
+
+# Only if in repo
+PS1='\w$(in_git_repo && git_prompt -f " (%b)")$ '
+```
+
+### Example: Complete Git Prompt
+
+```bash
+# ~/.jshrc
+git_prompt_custom() {
+    if ! in_git_repo; then
+        return
+    fi
+    
+    local branch=$(git_branch)
+    local dirty=""
+    local staged=""
+    
+    git_status --dirty && dirty="✗"
+    git_status --staged && staged="●"
+    
+    echo " ($branch$dirty$staged)"
+}
+
+PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[33m\]$(git_prompt_custom)\[\033[00m\]$ '
+```
+
+---
+
+## Themes and Prompts
+
+### Theme System
+
+jsh includes an oh-my-zsh compatible theme system:
+
+```bash
+# Set theme in .jshrc
+export JSH_THEME="robbyrussell"
+
+# Set theme interactively
+theme robbyrussell
+theme set agnoster
+
+# List available themes
+theme list
+
+# Preview themes
+theme preview
+```
+
+### Built-in Themes
+
+| Theme | Description |
+|-------|-------------|
+| jsh | Default two-line with git |
+| robbyrussell | Classic oh-my-zsh default |
+| agnoster | Powerline-style segments |
+| minimal | Clean and simple |
+| powerlevel | Powerline with time |
+| simple | Basic user@host:path$ |
+| pure | Inspired by ZSH Pure |
+
+### Prompt Escape Sequences
+
+| Sequence | Description |
+|----------|-------------|
+| `%n` | Username |
+| `%m` | Short hostname |
+| `%M` | Full hostname |
+| `%~` | Current directory (~ for home) |
+| `%c` / `%1~` | Current directory name only |
+| `%/` | Full path |
+| `%T` | Time (HH:MM) |
+| `%*` | Time (HH:MM:SS) |
+| `%D{format}` | Custom date format |
+| `%?` | Last exit status |
+| `%#` | `#` for root, `%` for user |
+| `%!` | History number |
+| `%%` | Literal % |
+
+### Colors
+
+| Sequence | Description |
+|----------|-------------|
+| `%F{color}` | Start foreground color |
+| `%f` | End foreground color |
+| `%K{color}` | Start background color |
+| `%k` | End background color |
+| `%B` | Start bold |
+| `%b` | End bold |
+| `%U` | Start underline |
+| `%u` | End underline |
+
+#### Color Names
+
+- Basic: black, red, green, yellow, blue, magenta, cyan, white
+- Bright: bright_red, bright_green, etc.
+- 256-color: 0-255
+- True color: #ff5500
+
+### Conditional Prompts
+
+```bash
+# Based on exit status
+%(?.success.failure)
+%(?.%F{green}✓.%F{red}✗)%f
+
+# Based on UID
+%(!.#.$)  # # for root, $ otherwise
+```
+
+### Custom Prompt Examples
+
+```bash
+# Simple
+export PROMPT='%n@%m:%~$ '
+
+# With colors
+export PROMPT='%F{cyan}%n%f@%F{blue}%m%f:%F{yellow}%~%f$ '
+
+# Two-line with git
+export PROMPT='%F{green}%n@%m%f %F{blue}%~%f $(git_prompt_info)
+%F{yellow}❯%f '
+
+# With right prompt
+export RPROMPT='%F{8}%T%f'
+
+# With exit status indicator
+export PROMPT='%(?.%F{green}✓.%F{red}✗)%f %~ $ '
+```
+
+---
+
+## Configuration
+
+### Configuration File Locations
+
+#### All Shells (sourced for every invocation)
+
+1. `/etc/jshenv` - System-wide environment
+2. `~/.jshenv` - User environment
+3. `$XDG_CONFIG_HOME/jsh/env` - XDG location
+
+#### Login Shells (add to above)
+
+1. `/etc/environment` - System environment (KEY=VALUE)
+2. `/etc/profile` - System profile
+3. `/etc/profile.d/*.sh` - Additional system scripts
+4. `/etc/jsh_profile` - jsh-specific system profile
+5. `~/.jsh_profile` OR `~/.bash_profile` OR `~/.bash_login` OR `~/.profile`
+
+#### Interactive Shells (add to all shells)
+
+1. `/etc/jshrc` OR `/etc/jsh.jshrc` OR `/etc/bash.bashrc`
+2. `~/.jshrc` OR `$XDG_CONFIG_HOME/jsh/jshrc` OR `~/.bashrc` OR `~/.zshrc`
+
+### Example ~/.jshenv
+
+```bash
+# ~/.jshenv - Sourced for ALL shells including non-interactive scripts
+
+# Path modifications
+export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Editor and tools
+export EDITOR="vim"
+export VISUAL="vim"
+export PAGER="less"
+
+# Language
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+
+# Application settings
+export CARGO_HOME="$HOME/.cargo"
+export RUSTUP_HOME="$HOME/.rustup"
+export GOPATH="$HOME/go"
+
+# Less options
+export LESS="-R"
+export LESSHISTFILE=-
+```
+
+### Example ~/.jshrc
+
+```bash
+# ~/.jshrc - Interactive shell configuration
+
+# Theme
+export JSH_THEME="robbyrussell"
+
+# Aliases - Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ~='cd ~'
+alias -- -='cd -'
+
+# Aliases - Listing
+alias ls='ls --color=auto'
+alias ll='ls -la'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Aliases - Safety
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Aliases - Git
+alias g='git'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+alias gs='git status'
+alias gd='git diff'
+alias gb='git branch'
+alias gco='git checkout'
+
+# Functions
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# jsh functions with named parameters
+greet(name) {
+    echo "Hello, ${name:-World}!"
+}
+
+# Extract any archive
+extract(file) {
+    match ${file##*.} {
+        "tar" | "tgz" | "tbz2" | "txz" => tar xf "$file"
+        "gz" => gunzip "$file"
+        "bz2" => bunzip2 "$file"
+        "zip" => unzip "$file"
+        "rar" => unrar x "$file"
+        "7z" => 7z x "$file"
+        * => echo "Unknown archive format"
+    }
+}
+
+# Custom prompt with git
+PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[33m\]$(git_prompt -f " [%b%d]")\[\033[00m\]$ '
+
+# Key bindings (if supported)
+# bind '"\e[A": history-search-backward'
+# bind '"\e[B": history-search-forward'
+
+# Startup message
+echo "Welcome to jsh!"
+```
+
+### Example ~/.jsh_profile
+
+```bash
+# ~/.jsh_profile - Login shell initialization (sourced once at login)
+
+# Source environment first
+[ -f ~/.jshenv ] && source ~/.jshenv
+
+# Start SSH agent if not running
+if [ -z "$SSH_AUTH_SOCK" ]; then
+    eval $(ssh-agent -s) > /dev/null
+fi
+
+# Load secrets
+[ -f ~/.secrets ] && source ~/.secrets
+
+# Load any work-specific config
+[ -f ~/.jsh_profile.work ] && source ~/.jsh_profile.work
+
+# Welcome
+echo "Welcome back, $USER!"
+date
+echo ""
+
+# Source interactive config
+[ -f ~/.jshrc ] && source ~/.jshrc
+```
+
+---
+
+## Shell Options
+
+### Set Options (Bash/POSIX Compatible)
+
+| Short | Long | Description |
+|-------|------|-------------|
+| `-e` | `errexit` | Exit immediately if command fails |
+| `-u` | `nounset` | Treat unset variables as error |
+| `-x` | `xtrace` | Print commands before execution |
+| `-n` | `noexec` | Parse but don't execute |
+| `-a` | `allexport` | Export all variables automatically |
+| `-C` | `noclobber` | Don't overwrite files with > |
+| `-b` | `notify` | Notify immediately when jobs complete |
+| `-f` | `noglob` | Disable filename globbing |
+
+### Additional Options
+
+| Option | Description |
+|--------|-------------|
+| `vi` | Vi editing mode |
+| `emacs` | Emacs editing mode (default) |
+| `ignoreeof` | Don't exit on Ctrl-D |
+| `posix` | POSIX compatibility mode |
+
+### Setting Options
+
+```bash
+# Enable with -
+set -e                  # Short form
+set -o errexit          # Long form
+
+# Disable with +
+set +e
+set +o errexit
+
+# Multiple options
+set -eux
+
+# Check option status
+set -o                  # Show all options
+
+# In scripts (recommended at top)
+#!/usr/bin/env jsh
+set -euo pipefail
+
+# jsh also supports ShellOptions struct internally
+# options.errexit, options.nounset, etc.
+```
+
+---
+
+## Examples
+
+### Complete Script Examples
+
+#### Deployment Script
+
+```bash
+#!/usr/bin/env jsh
+set -euo pipefail
+
+const VERSION = "$1"
+const ENV = "${2:-production}"
+
+deploy(version, environment) {
+    echo "Deploying $version to $environment..."
+    
+    # Check for clean working tree
+    if in_git_repo && git_status --dirty; then
+        echo "Error: Working tree is dirty"
+        exit 1
+    fi
+    
+    # Verify branch
+    match $(git_branch) {
+        "main" | "master" => echo "Deploying from main branch"
+        "develop" => {
+            if [ "$environment" = "production" ]; then
+                echo "Error: Cannot deploy develop to production"
+                exit 1
+            fi
+        }
+        * => {
+            echo "Warning: Deploying from feature branch"
+        }
+    }
+    
+    try {
+        # Run deployment
+        ./scripts/deploy.sh "$version" "$environment"
+    } catch err {
+        echo "Deployment failed: $err"
+        ./scripts/rollback.sh
+        exit 1
+    } finally {
+        # Notify regardless of outcome
+        ./scripts/notify.sh "$version" "$environment"
+    }
+}
+
+deploy "$VERSION" "$ENV"
+```
+
+#### Configuration Parser
+
+```bash
+#!/usr/bin/env jsh
+
+parse_config(file) {
+    if ! [ -f "$file" ]; then
+        echo "Config file not found: $file"
+        return 1
+    fi
+    
+    while read line; do
+        # Skip comments and empty lines
+        match $line {
+            "#*" | "" => continue
+            *"="* => {
+                # Parse key=value
+                local key=${line%%=*}
+                local value=${line#*=}
+                
+                # Remove quotes
+                value=$(string trim "$value")
+                value=${value#\"}
+                value=${value%\"}
+                
+                # Export
+                export "$key=$value"
+            }
+            * => echo "Warning: Invalid line: $line"
+        }
+    done < "$file"
+}
+
+# Usage
+parse_config "app.conf"
+echo "DATABASE: $DATABASE"
+echo "PORT: $PORT"
+```
+
+#### File Processor with Fish-style
+
+```bash
+#!/usr/bin/env jsh
+
+set files (find . -name "*.txt")
+
+for file in $files
+    set content (cat "$file")
+    set lines (string split "\n" "$content")
+    set count (math "${#lines[@]}")
+    
+    echo "$file: $count lines"
+    
+    if contains "TODO" $content
+        echo "  → Contains TODO items"
+    end
+end
+```
+
+#### Interactive Menu
+
+```bash
+#!/usr/bin/env jsh
+
+show_menu() {
+    echo "=== Main Menu ==="
+    echo "1. List files"
+    echo "2. Show date"
+    echo "3. System info"
+    echo "4. Git status"
+    echo "q. Quit"
+}
+
+loop {
+    show_menu
+    read -p "Choice: " choice
+    
+    match $choice {
+        "1" => ls -la
+        "2" => date
+        "3" => uname -a
+        "4" => {
+            if in_git_repo; then
+                echo "Branch: $(git_branch)"
+                git_status
+            else
+                echo "Not in a git repository"
+            fi
+        }
+        "q" | "Q" => {
+            echo "Goodbye!"
+            break
+        }
+        * => echo "Invalid choice"
+    }
+    
+    echo ""
+    read -p "Press Enter to continue..."
+}
+```
+
+---
+
+## Additional Resources
+
+### Links
+
+- **Repository**: https://github.com/pegasusheavy/jsh
+- **Documentation**: https://pegasusheavy.github.io/jsh/
+- **Issues**: https://github.com/pegasusheavy/jsh/issues
+- **Releases**: https://github.com/pegasusheavy/jsh/releases
+- **Sponsor**: https://www.patreon.com/c/PegasusHeavyIndustries
+
+### File Structure
+
+```
+jsh/
+├── src/
+│   ├── main.rs          # CLI entry point
+│   ├── lib.rs           # Library exports
+│   ├── lexer.rs         # Tokenization
+│   ├── parser.rs        # AST construction
+│   ├── ast.rs           # AST nodes
+│   ├── interpreter.rs   # Execution engine
+│   ├── builtins.rs      # Built-in commands
+│   ├── shell.rs         # REPL/interactive
+│   ├── theme.rs         # Prompt themes
+│   ├── error.rs         # Error types
+│   ├── token.rs         # Token definitions
+│   └── argparse.rs      # Argument parser
+├── docs/                # Documentation site
+├── benches/             # Benchmarks
+├── packaging/           # Distribution packages
+├── examples/            # Example scripts
+└── tests/               # Integration tests
+```
+
+### License
+
+Dual-licensed under MIT and Apache 2.0.
+Copyright 2025 Pegasus Heavy Industries LLC.
+

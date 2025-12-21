@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
                             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-  
+
   <!-- Home Page -->
   <url>
     <loc>https://pegasusheavy.github.io/jsh/</loc>
@@ -11,7 +11,7 @@
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-  
+
   <!-- Getting Started -->
   <url>
     <loc>https://pegasusheavy.github.io/jsh/getting-started</loc>
@@ -19,7 +19,7 @@
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  
+
   <!-- Bash/ZSH Compatibility -->
   <url>
     <loc>https://pegasusheavy.github.io/jsh/bash-zsh</loc>
@@ -27,7 +27,7 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  
+
   <!-- Fish Compatibility -->
   <url>
     <loc>https://pegasusheavy.github.io/jsh/fish</loc>
@@ -35,7 +35,7 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  
+
   <!-- Ash/POSIX Compatibility -->
   <url>
     <loc>https://pegasusheavy.github.io/jsh/ash-posix</loc>
@@ -43,7 +43,7 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  
+
   <!-- jsh Syntax -->
   <url>
     <loc>https://pegasusheavy.github.io/jsh/jsh-syntax</loc>
@@ -51,7 +51,7 @@
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  
+
   <!-- Builtins Reference -->
   <url>
     <loc>https://pegasusheavy.github.io/jsh/builtins</loc>
@@ -59,7 +59,7 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  
+
   <!-- AI/LLM Context Files -->
   <url>
     <loc>https://pegasusheavy.github.io/jsh/llms.txt</loc>
@@ -67,9 +67,17 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  
+
   <url>
     <loc>https://pegasusheavy.github.io/jsh/ai.txt</loc>
+    <lastmod>2024-12-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Extended Documentation for LLMs -->
+  <url>
+    <loc>https://pegasusheavy.github.io/jsh/llms-full.txt</loc>
     <lastmod>2024-12-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
