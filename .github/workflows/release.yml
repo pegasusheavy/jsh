@@ -64,7 +64,7 @@ jobs:
           cd ../../..
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.name }}.tar.gz
@@ -94,13 +94,13 @@ jobs:
         run: cargo generate-rpm
 
       - name: Upload Debian package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: debian-package
           path: target/debian/*.deb
 
       - name: Upload RPM package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: rpm-package
           path: target/generate-rpm/*.rpm
