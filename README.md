@@ -571,6 +571,117 @@ jsh includes many built-in commands:
 | `type` / `which` | Describe command |
 | `help` | Display help |
 | `ssh_agent` | SSH agent control |
+| `fzf` | Fuzzy finder passthrough |
+| `fzf_history` | Fuzzy search command history |
+| `fzf_file` | Fuzzy file selection |
+| `fzf_dir` | Fuzzy directory selection |
+| `fzf_cd` | Fuzzy cd with preview |
+| `fzf_git_branch` | Fuzzy git branch selection |
+| `fzf_git_log` | Fuzzy git log selection |
+| `fzf_process` | Fuzzy process selection |
+| `fzf_kill` | Fuzzy process kill |
+
+## FZF Integration
+
+jsh includes built-in support for [fzf](https://github.com/junegunn/fzf), the command-line fuzzy finder.
+
+### Requirements
+
+Install fzf: https://github.com/junegunn/fzf#installation
+
+Optional but recommended:
+- `fd` - faster alternative to `find` for file/directory listing
+
+### Built-in FZF Commands
+
+```bash
+# Fuzzy search command history
+fzf_history
+fzf_history --multi  # Select multiple entries
+
+# Fuzzy file selection
+fzf_file             # Current directory
+fzf_file ~/projects  # Specific directory
+fzf_file --preview   # With file preview
+fzf_file --multi     # Select multiple files
+
+# Fuzzy directory selection
+fzf_dir              # Current directory
+fzf_dir ~ --preview  # Home with ls preview
+
+# Fuzzy cd (changes directory)
+fzf_cd               # Select and cd to directory
+fzf_cd ~/projects    # From specific base
+
+# Fuzzy git branch selection
+fzf_git_branch       # Local branches
+fzf_git_branch --all # Include remote branches
+
+# Fuzzy git log selection (returns commit hash)
+fzf_git_log          # Current branch
+fzf_git_log --all    # All branches
+
+# Fuzzy process selection
+fzf_process          # Returns PID
+fzf_process --multi  # Select multiple
+
+# Fuzzy kill process
+fzf_kill             # SIGTERM (default)
+fzf_kill -9          # SIGKILL
+```
+
+### Using FZF Results
+
+All fzf commands set `$FZF_RESULT` with the selection:
+
+```bash
+# Edit selected file
+vim $(fzf_file)
+
+# Checkout selected branch
+git checkout $(fzf_git_branch)
+
+# Use the result variable
+fzf_file
+echo "Selected: $FZF_RESULT"
+
+# Cherry-pick selected commit
+git cherry-pick $(fzf_git_log)
+```
+
+### Example Shell Functions
+
+Add these to your `~/.jshrc` for enhanced fzf workflows:
+
+```bash
+# fe - fuzzy edit
+fn fe {
+    local file=$(fzf_file --preview)
+    if [ -n "$file" ]; then
+        ${EDITOR:-vim} "$file"
+    fi
+}
+
+# fco - fuzzy checkout branch
+fn fco {
+    local branch=$(fzf_git_branch --all)
+    if [ -n "$branch" ]; then
+        git checkout "$branch"
+    fi
+}
+
+# fkill - fuzzy kill with confirmation
+fn fkill {
+    local pid=$(fzf_process)
+    if [ -n "$pid" ]; then
+        echo "Kill process $pid? [y/N]"
+        read -r confirm
+        if [ "$confirm" = "y" ]; then
+            kill -9 "$pid"
+        fi
+    fi
+}
+```
 
 ## SSH Agent Integration
 

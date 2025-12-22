@@ -12,9 +12,11 @@
 //! - `misc` - Miscellaneous (alias, hash, umask, ulimit, let, history)
 //! - `fish` - Fish-compatible (string, math, contains, status, functions, abbr)
 //! - `git` - Git integration (git_branch, git_status, git_info, git_prompt, in_git_repo)
+//! - `fzf` - FZF integration (fzf_history, fzf_file, fzf_dir, fzf_git_branch, fzf_cd, fzf_kill)
 
 mod control;
 mod fish;
+mod fzf;
 mod git;
 mod info;
 mod jobs;
@@ -136,6 +138,17 @@ impl Builtins {
 
         // SSH agent integration
         commands.insert("ssh_agent".to_string(), misc::builtin_ssh_agent);
+
+        // FZF integration
+        commands.insert("fzf".to_string(), fzf::builtin_fzf);
+        commands.insert("fzf_history".to_string(), fzf::builtin_fzf_history);
+        commands.insert("fzf_file".to_string(), fzf::builtin_fzf_file);
+        commands.insert("fzf_dir".to_string(), fzf::builtin_fzf_dir);
+        commands.insert("fzf_cd".to_string(), fzf::builtin_fzf_cd);
+        commands.insert("fzf_git_branch".to_string(), fzf::builtin_fzf_git_branch);
+        commands.insert("fzf_git_log".to_string(), fzf::builtin_fzf_git_log);
+        commands.insert("fzf_process".to_string(), fzf::builtin_fzf_process);
+        commands.insert("fzf_kill".to_string(), fzf::builtin_fzf_kill);
 
         Self { commands }
     }
