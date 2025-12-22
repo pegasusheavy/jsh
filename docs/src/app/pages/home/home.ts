@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faGithub, faRust } from '@fortawesome/free-brands-svg-icons';
+import { faTerminal, faFish, faCubes, faPalette, faRocket, faCode, faBolt, faShield, faGears } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, FontAwesomeModule],
   template: `
     <!-- Hero Section -->
     <section class="relative overflow-hidden">
@@ -11,6 +14,7 @@ import { RouterLink } from '@angular/router';
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative">
         <div class="text-center">
           <h1 class="text-5xl md:text-7xl font-bold mb-6">
+            <fa-icon [icon]="faTerminal" class="text-[var(--color-primary)] mr-4"></fa-icon>
             <span class="text-[var(--color-primary)]">jsh</span>
           </h1>
           <p class="text-2xl md:text-3xl text-[var(--color-text)] mb-2 font-medium">
@@ -19,16 +23,18 @@ import { RouterLink } from '@angular/router';
           <p class="text-xl md:text-2xl text-[var(--color-text-muted)] mb-4 max-w-3xl mx-auto">
             A modern shell that combines Bash, ZSH, Fish, and Ash compatibility with enhanced scripting features
           </p>
-          <p class="text-lg text-[var(--color-text-muted)] mb-8">
-            Written in Rust 🦀 for speed and safety
+          <p class="text-lg text-[var(--color-text-muted)] mb-8 flex items-center justify-center gap-2">
+            Written in <fa-icon [icon]="faRust" class="text-[var(--rust-orange)]"></fa-icon> Rust for speed and safety
           </p>
           <div class="flex flex-wrap justify-center gap-4">
             <a routerLink="/getting-started"
-               class="px-8 py-3 bg-[var(--color-primary)] text-white rounded-lg font-semibold hover:bg-[var(--color-primary-dark)] transition-colors hover:no-underline">
+               class="px-8 py-3 bg-[var(--color-primary)] text-white rounded-lg font-semibold hover:bg-[var(--color-primary-dark)] transition-colors hover:no-underline flex items-center gap-2">
+              <fa-icon [icon]="faRocket"></fa-icon>
               Get Started
             </a>
             <a href="https://github.com/pegasusheavy/jsh" target="_blank"
-               class="px-8 py-3 border border-[var(--color-border)] text-[var(--color-text)] rounded-lg font-semibold hover:border-[var(--color-primary)] transition-colors hover:no-underline">
+               class="px-8 py-3 border border-[var(--color-border)] text-[var(--color-text)] rounded-lg font-semibold hover:border-[var(--color-primary)] transition-colors hover:no-underline flex items-center gap-2">
+              <fa-icon [icon]="faGithub"></fa-icon>
               View on GitHub
             </a>
           </div>
@@ -41,29 +47,37 @@ import { RouterLink } from '@angular/router';
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-bold text-center mb-12">Multi-Shell Compatibility</h2>
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div class="p-6 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)]">
-            <div class="text-3xl mb-4">🐚</div>
+          <div class="p-6 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors">
+            <div class="text-3xl mb-4 text-[var(--color-primary)]">
+              <fa-icon [icon]="faTerminal"></fa-icon>
+            </div>
             <h3 class="text-xl font-semibold mb-2">Bash/ZSH</h3>
             <p class="text-[var(--color-text-muted)] text-sm">
               Full compatibility with existing shell scripts. if/for/while/case statements, pipes, redirections, and more.
             </p>
           </div>
-          <div class="p-6 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)]">
-            <div class="text-3xl mb-4">🐟</div>
+          <div class="p-6 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors">
+            <div class="text-3xl mb-4 text-[var(--color-primary)]">
+              <fa-icon [icon]="faFish"></fa-icon>
+            </div>
             <h3 class="text-xl font-semibold mb-2">Fish</h3>
             <p class="text-[var(--color-text-muted)] text-sm">
               Fish-style set command, string manipulation, math operations, and user-friendly syntax.
             </p>
           </div>
-          <div class="p-6 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)]">
-            <div class="text-3xl mb-4">📦</div>
+          <div class="p-6 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors">
+            <div class="text-3xl mb-4 text-[var(--color-primary)]">
+              <fa-icon [icon]="faCubes"></fa-icon>
+            </div>
             <h3 class="text-xl font-semibold mb-2">Ash/POSIX</h3>
             <p class="text-[var(--color-text-muted)] text-sm">
               POSIX-compliant set options, errexit, nounset, xtrace, and portable scripting support.
             </p>
           </div>
-          <div class="p-6 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)]">
-            <div class="text-3xl mb-4">🎨</div>
+          <div class="p-6 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors">
+            <div class="text-3xl mb-4 text-[var(--color-primary)]">
+              <fa-icon [icon]="faPalette"></fa-icon>
+            </div>
             <h3 class="text-xl font-semibold mb-2">Oh-My-Zsh Themes</h3>
             <p class="text-[var(--color-text-muted)] text-sm">
               Compatible with ZSH-style prompt escape sequences and theme customization.
@@ -163,4 +177,17 @@ cargo build --release
     </section>
   `
 })
-export class HomePage {}
+export class HomePage {
+  // FontAwesome icons
+  faGithub = faGithub;
+  faRust = faRust;
+  faTerminal = faTerminal;
+  faFish = faFish;
+  faCubes = faCubes;
+  faPalette = faPalette;
+  faRocket = faRocket;
+  faCode = faCode;
+  faBolt = faBolt;
+  faShield = faShield;
+  faGears = faGears;
+}

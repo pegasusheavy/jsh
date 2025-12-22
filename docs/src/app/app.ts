@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faGithub, faPatreon } from '@fortawesome/free-brands-svg-icons';
+import { faBook, faTerminal, faFish, faCode, faCog, faRocket, faBug, faHeart } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FontAwesomeModule],
   template: `
     <div class="min-h-screen flex flex-col">
       <!-- Header -->
@@ -12,12 +15,13 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
           <div class="flex items-center justify-between h-16">
             <div class="flex items-center gap-8">
               <a routerLink="/" class="flex items-center gap-3 text-xl font-bold text-[var(--color-primary)] hover:no-underline">
-                <span class="text-2xl">🦀</span>
+                <fa-icon [icon]="faTerminal" class="text-2xl"></fa-icon>
                 <span>jsh</span>
               </a>
               <div class="hidden md:flex items-center gap-6">
                 <a routerLink="/getting-started" routerLinkActive="text-[var(--color-primary)]"
-                   class="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+                   class="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
+                  <fa-icon [icon]="faRocket" class="text-xs"></fa-icon>
                   Getting Started
                 </a>
                 <a routerLink="/bash-zsh" routerLinkActive="text-[var(--color-primary)]"
@@ -33,21 +37,22 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
                   Ash/POSIX
                 </a>
                 <a routerLink="/jsh-syntax" routerLinkActive="text-[var(--color-primary)]"
-                   class="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+                   class="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
+                  <fa-icon [icon]="faCode" class="text-xs"></fa-icon>
                   jsh Syntax
                 </a>
                 <a routerLink="/builtins" routerLinkActive="text-[var(--color-primary)]"
-                   class="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+                   class="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
+                  <fa-icon [icon]="faCog" class="text-xs"></fa-icon>
                   Builtins
                 </a>
               </div>
             </div>
             <div class="flex items-center gap-4">
               <a href="https://github.com/pegasusheavy/jsh" target="_blank" rel="noopener"
-                 class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                </svg>
+                 class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                 title="View on GitHub">
+                <fa-icon [icon]="faGithub" class="text-xl"></fa-icon>
               </a>
             </div>
           </div>
@@ -67,13 +72,16 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
               © 2025 Pegasus Heavy Industries LLC. Dual-licensed under MIT and Apache 2.0.
             </div>
             <div class="flex items-center gap-6 text-sm">
-              <a href="https://github.com/pegasusheavy/jsh" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+              <a href="https://github.com/pegasusheavy/jsh" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
+                <fa-icon [icon]="faGithub"></fa-icon>
                 GitHub
               </a>
-              <a href="https://github.com/pegasusheavy/jsh/issues" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+              <a href="https://github.com/pegasusheavy/jsh/issues" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
+                <fa-icon [icon]="faBug"></fa-icon>
                 Issues
               </a>
-              <a href="https://patreon.com/c/PegasusHeavyIndustries" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+              <a href="https://patreon.com/c/PegasusHeavyIndustries" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
+                <fa-icon [icon]="faHeart"></fa-icon>
                 Support
               </a>
             </div>
@@ -84,4 +92,20 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
   `,
   styles: ``
 })
-export class App {}
+export class App {
+  // FontAwesome icons
+  faGithub = faGithub;
+  faPatreon = faPatreon;
+  faBook = faBook;
+  faTerminal = faTerminal;
+  faCode = faCode;
+  faCog = faCog;
+  faRocket = faRocket;
+  faBug = faBug;
+  faHeart = faHeart;
+
+  constructor(library: FaIconLibrary) {
+    // Add icons to the library for use throughout the app
+    library.addIcons(faGithub, faPatreon, faBook, faTerminal, faCode, faCog, faRocket, faBug, faHeart);
+  }
+}
