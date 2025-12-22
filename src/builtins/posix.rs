@@ -194,7 +194,7 @@ pub fn builtin_fc(args: &[String], interp: &mut Interpreter) -> Result<ExitStatu
     // Edit mode - would normally invoke editor on history
     eprintln!("fc: edit mode requires history integration (would use {})", editor);
     let _ = (first, last); // Suppress unused warnings
-    
+
     Ok(ExitStatus::failure(1))
 }
 
@@ -218,24 +218,24 @@ pub fn builtin_times_posix(_args: &[String], _interp: &mut Interpreter) -> Resul
     #[cfg(unix)]
     {
         use std::mem::MaybeUninit;
-        
+
         let mut tms = MaybeUninit::<libc::tms>::uninit();
         let clock_tick = unsafe { libc::sysconf(libc::_SC_CLK_TCK) } as f64;
-        
+
         if unsafe { libc::times(tms.as_mut_ptr()) } != -1 {
             let tms = unsafe { tms.assume_init() };
             let user_time = tms.tms_utime as f64 / clock_tick;
             let sys_time = tms.tms_stime as f64 / clock_tick;
             let child_user = tms.tms_cutime as f64 / clock_tick;
             let child_sys = tms.tms_cstime as f64 / clock_tick;
-            
+
             // Shell times
             let user_min = (user_time / 60.0) as u64;
             let user_sec = user_time % 60.0;
             let sys_min = (sys_time / 60.0) as u64;
             let sys_sec = sys_time % 60.0;
             println!("{}m{:.3}s {}m{:.3}s", user_min, user_sec, sys_min, sys_sec);
-            
+
             // Children times
             let cuser_min = (child_user / 60.0) as u64;
             let cuser_sec = child_user % 60.0;
@@ -247,13 +247,13 @@ pub fn builtin_times_posix(_args: &[String], _interp: &mut Interpreter) -> Resul
             println!("0m0.000s 0m0.000s");
         }
     }
-    
+
     #[cfg(not(unix))]
     {
         println!("0m0.000s 0m0.000s");
         println!("0m0.000s 0m0.000s");
     }
-    
+
     Ok(ExitStatus::success())
 }
 
@@ -264,7 +264,7 @@ pub fn builtin_newgrp(args: &[String], _interp: &mut Interpreter) -> Result<Exit
         eprintln!("newgrp: usage: newgrp [-] [group]");
         return Ok(ExitStatus::failure(1));
     }
-    
+
     // newgrp needs to be an external command as it needs to set the group ID
     // and exec a new shell. This is a placeholder.
     eprintln!("newgrp: must be run as external command (use /usr/bin/newgrp)");

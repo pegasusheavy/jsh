@@ -85,7 +85,7 @@ impl Parser {
                 | TokenKind::When
                 // Fish-compatible
                 | TokenKind::End
-                | TokenKind::Case
+                // Note: Case is NOT a terminator - it starts a new case statement
         ) {
             return true;
         }

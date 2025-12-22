@@ -154,16 +154,16 @@ impl Interpreter {
             _ => Ok(String::new()),
         }
     }
-    
+
     /// Expand brace content from within a string (handles ${var:-default} etc)
     fn expand_brace_content(&self, content: &str) -> String {
         let content = content.trim();
-        
+
         // Length ${#var}
         if let Some(var) = content.strip_prefix('#') {
             return self.get_var(var).unwrap_or("").len().to_string();
         }
-        
+
         // Check for operators (in order of length to match longer first)
         // Default with null check :-
         if let Some(idx) = content.find(":-") {
@@ -175,7 +175,7 @@ impl Interpreter {
             }
             return value.unwrap_or("").to_string();
         }
-        
+
         // Default without null check -
         if let Some(idx) = content.find('-') {
             // Make sure it's not :- or ## or %%
@@ -188,7 +188,7 @@ impl Interpreter {
                 return self.get_var(var).unwrap_or("").to_string();
             }
         }
-        
+
         // Alternative with null check :+
         if let Some(idx) = content.find(":+") {
             let var = &content[..idx];
@@ -199,7 +199,7 @@ impl Interpreter {
             }
             return String::new();
         }
-        
+
         // Alternative without null check +
         if let Some(idx) = content.find('+') {
             if idx > 0 && !content[..idx].ends_with(':') {
@@ -211,7 +211,7 @@ impl Interpreter {
                 return String::new();
             }
         }
-        
+
         // Greedy prefix removal ##
         if let Some(idx) = content.find("##") {
             let var = &content[..idx];
@@ -225,7 +225,7 @@ impl Interpreter {
             }
             return value;
         }
-        
+
         // Non-greedy prefix removal #
         if let Some(idx) = content.find('#') {
             if idx > 0 {
@@ -241,7 +241,7 @@ impl Interpreter {
                 return value;
             }
         }
-        
+
         // Greedy suffix removal %%
         if let Some(idx) = content.find("%%") {
             let var = &content[..idx];
@@ -255,7 +255,7 @@ impl Interpreter {
             }
             return value;
         }
-        
+
         // Non-greedy suffix removal %
         if let Some(idx) = content.find('%') {
             if idx > 0 {
@@ -271,7 +271,7 @@ impl Interpreter {
                 return value;
             }
         }
-        
+
         // Simple variable expansion
         self.get_var(content).unwrap_or("").to_string()
     }
@@ -407,21 +407,21 @@ impl Interpreter {
 
         result
     }
-    
+
     /// Evaluate arithmetic without mutation (for use in const contexts)
     fn eval_arithmetic_const(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
         if expr.is_empty() {
             return Ok(0);
         }
-        
+
         // Simple recursive descent for arithmetic with proper precedence
         self.eval_arith_ternary(expr)
     }
-    
+
     fn eval_arith_ternary(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
-        
+
         // Find ? at top level for ternary
         let mut depth = 0;
         let bytes = expr.as_bytes();
@@ -451,10 +451,10 @@ impl Interpreter {
                 _ => {}
             }
         }
-        
+
         self.eval_arith_logical_or(expr)
     }
-    
+
     fn eval_arith_logical_or(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
         let mut depth = 0;
@@ -476,7 +476,7 @@ impl Interpreter {
         }
         self.eval_arith_logical_and(expr)
     }
-    
+
     fn eval_arith_logical_and(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
         let mut depth = 0;
@@ -498,12 +498,12 @@ impl Interpreter {
         }
         self.eval_arith_comparison(expr)
     }
-    
+
     fn eval_arith_comparison(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
         let mut depth = 0;
         let bytes = expr.as_bytes();
-        
+
         // Check for ==, !=, <=, >=, <, >
         for i in (1..bytes.len()).rev() {
             match bytes[i] {
@@ -544,13 +544,13 @@ impl Interpreter {
                 _ => {}
             }
         }
-        
+
         self.eval_arith_additive(expr)
     }
-    
+
     fn eval_arith_additive(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
-        
+
         // Find last + or - at top level
         let mut depth = 0;
         let bytes = expr.as_bytes();
@@ -570,13 +570,13 @@ impl Interpreter {
                 _ => {}
             }
         }
-        
+
         self.eval_arith_multiplicative(expr)
     }
-    
+
     fn eval_arith_multiplicative(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
-        
+
         let mut depth = 0;
         let bytes = expr.as_bytes();
         for i in (1..bytes.len()).rev() {
@@ -609,13 +609,13 @@ impl Interpreter {
                 _ => {}
             }
         }
-        
+
         self.eval_arith_power(expr)
     }
-    
+
     fn eval_arith_power(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
-        
+
         // ** is right-associative, so scan left to right
         let mut depth = 0;
         let bytes = expr.as_bytes();
@@ -631,13 +631,13 @@ impl Interpreter {
                 _ => {}
             }
         }
-        
+
         self.eval_arith_unary(expr)
     }
-    
+
     fn eval_arith_unary(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
-        
+
         if expr.starts_with('-') {
             return Ok(-self.eval_arith_unary(&expr[1..])?);
         }
@@ -651,18 +651,18 @@ impl Interpreter {
         if expr.starts_with('~') {
             return Ok(!self.eval_arith_unary(&expr[1..])?);
         }
-        
+
         self.eval_arith_primary(expr)
     }
-    
+
     fn eval_arith_primary(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
-        
+
         // Parentheses
         if expr.starts_with('(') && expr.ends_with(')') {
             return self.eval_arith_ternary(&expr[1..expr.len() - 1]);
         }
-        
+
         // Variable
         if expr.starts_with('$') {
             let var = &expr[1..];
@@ -670,21 +670,21 @@ impl Interpreter {
                 .and_then(|v| v.parse().ok())
                 .unwrap_or(0));
         }
-        
+
         // Bare variable name
-        if expr.chars().next().is_some_and(|c| c.is_alphabetic() || c == '_') 
-            && expr.chars().all(|c| c.is_alphanumeric() || c == '_') 
+        if expr.chars().next().is_some_and(|c| c.is_alphabetic() || c == '_')
+            && expr.chars().all(|c| c.is_alphanumeric() || c == '_')
         {
             return Ok(self.get_var(expr)
                 .and_then(|v| v.parse().ok())
                 .unwrap_or(0));
         }
-        
+
         // Number
         if let Some(hex) = expr.strip_prefix("0x").or_else(|| expr.strip_prefix("0X")) {
             return i64::from_str_radix(hex, 16).map_err(|_| crate::error::JshError::Arithmetic(format!("invalid hex: {}", expr)));
         }
-        
+
         expr.parse().map_err(|_| crate::error::JshError::Arithmetic(format!("invalid number: {}", expr)))
     }
 

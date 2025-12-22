@@ -102,7 +102,7 @@ impl Parser {
             let expr = &content[3..content.len() - 2];
             return Ok(WordPart::Literal(format!("$__ARITH__{}__", expr)));
         }
-        
+
         // Check for command substitution $(...)
         if content.starts_with("$(") && content.ends_with(')') {
             let inner = &content[2..content.len() - 1];

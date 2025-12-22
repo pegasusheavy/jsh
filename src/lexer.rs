@@ -731,21 +731,21 @@ mod tests {
         let mut lexer = Lexer::new("if");
         let tokens = lexer.tokenize().unwrap();
         assert!(matches!(tokens[0].kind, TokenKind::If));
-        
+
         let mut lexer = Lexer::new("for");
         let tokens = lexer.tokenize().unwrap();
         assert!(matches!(tokens[0].kind, TokenKind::For));
-        
+
         let mut lexer = Lexer::new("while");
         let tokens = lexer.tokenize().unwrap();
         assert!(matches!(tokens[0].kind, TokenKind::While));
-        
+
         // Test keywords after semicolon (command start)
         let mut lexer = Lexer::new("; if");
         let tokens = lexer.tokenize().unwrap();
         assert!(matches!(tokens[0].kind, TokenKind::Semi));
         assert!(matches!(tokens[1].kind, TokenKind::If));
-        
+
         // Test keywords in proper syntactic positions
         let mut lexer = Lexer::new("if x; then echo; fi");
         let tokens = lexer.tokenize().unwrap();

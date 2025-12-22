@@ -114,15 +114,9 @@ pub enum TokenKind {
     Return,
     Break,
     Continue,
-    Local,
-    Export,
-    Readonly,
-    Declare,
-    Typeset,
-    Unset,
-    Shift,
     Time,
     Coproc,
+    // Note: local, export, readonly, declare, typeset, unset, shift are builtins, not keywords
 
     // jsh-specific keywords (enhanced syntax)
     Match_,                 // match keyword (different from =~ operator)
@@ -227,13 +221,6 @@ impl fmt::Display for TokenKind {
             TokenKind::Return => write!(f, "return"),
             TokenKind::Break => write!(f, "break"),
             TokenKind::Continue => write!(f, "continue"),
-            TokenKind::Local => write!(f, "local"),
-            TokenKind::Export => write!(f, "export"),
-            TokenKind::Readonly => write!(f, "readonly"),
-            TokenKind::Declare => write!(f, "declare"),
-            TokenKind::Typeset => write!(f, "typeset"),
-            TokenKind::Unset => write!(f, "unset"),
-            TokenKind::Shift => write!(f, "shift"),
             TokenKind::Time => write!(f, "time"),
             TokenKind::Coproc => write!(f, "coproc"),
             TokenKind::Match_ => write!(f, "match"),
@@ -345,7 +332,8 @@ pub fn keyword_from_str(s: &str) -> Option<TokenKind> {
         // "typeset" => Some(TokenKind::Typeset),
         // "unset" is handled as builtin, not keyword
         // "unset" => Some(TokenKind::Unset),
-        "shift" => Some(TokenKind::Shift),
+        // "shift" is handled as builtin, not keyword
+        // "shift" => Some(TokenKind::Shift),
         "time" => Some(TokenKind::Time),
         "coproc" => Some(TokenKind::Coproc),
         // jsh-specific

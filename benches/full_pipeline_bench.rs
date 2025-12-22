@@ -90,11 +90,9 @@ esac
 "#;
 
     let large = r#"
-#!/usr/bin/env jsh
-set -e
-
 VERSION="1.0.0"
 DEBUG=0
+ARGS=""
 
 log() {
     if [ "$DEBUG" = "1" ]; then
@@ -107,7 +105,7 @@ info() {
 }
 
 error() {
-    echo "[ERROR] $*" >&2
+    echo "[ERROR] $*"
 }
 
 parse_args() {
@@ -121,7 +119,7 @@ parse_args() {
                 return 0
                 ;;
             -h|--help)
-                echo "Usage: $0 [options]"
+                echo "Usage: script [options]"
                 return 0
                 ;;
             *)
@@ -133,7 +131,7 @@ parse_args() {
 }
 
 process_item() {
-    local item="$1"
+    item=$1
     log "Processing: $item"
 
     if [ -z "$item" ]; then
@@ -148,7 +146,7 @@ process_item() {
 main() {
     info "Starting with version $VERSION"
 
-    local count=0
+    count=0
     for arg in $ARGS; do
         process_item "$arg"
         count=$((count + 1))
@@ -275,14 +273,14 @@ done
 
     // Bash style
     let bash_style = r#"
-declare -r CONST=42
+readonly CONST=42
 export PATH="$PATH:/custom"
 function greet {
     local name="$1"
     echo "Hello, $name!"
 }
 greet World
-[[ -n "$CONST" ]] && echo "Set"
+[ -n "$CONST" ] && echo "Set"
 "#;
 
     // Fish style

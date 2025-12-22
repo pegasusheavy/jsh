@@ -265,17 +265,17 @@ impl Interpreter {
             .or_else(|| self.consts.get(name))
             .map(|s| s.as_str())
     }
-    
+
     /// Update dynamic POSIX variables (call before variable expansion)
     pub fn update_dynamic_vars(&mut self) {
         // Update LINENO
         self.env.insert("LINENO".to_string(), self.lineno.to_string());
-        
+
         // Update _ (last argument)
         if !self.last_arg.is_empty() {
             self.env.insert("_".to_string(), self.last_arg.clone());
         }
-        
+
         // Update RANDOM (pseudo-random 0-32767)
         let random = (std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
