@@ -487,6 +487,7 @@ jsh includes an oh-my-zsh compatible theme system with prompt escape sequences, 
 | `powerlevel` | Powerline-inspired with time |
 | `simple` | Basic `user@host:path$` format |
 | `pure` | ZSH Pure theme inspired |
+| `gallifrey` | Doctor Who inspired - gold/orange time theme |
 
 ### Setting a Theme
 

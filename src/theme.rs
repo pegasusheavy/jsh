@@ -618,6 +618,23 @@ pub fn get_builtin_theme(name: &str) -> Option<Theme> {
             prompt2: "❯ ".to_string(),
             colors: HashMap::new(),
         }),
+        "gallifrey" => Some(Theme {
+            // Gallifrey theme - inspired by Doctor Who's Time Lord homeworld
+            // Orange/gold twin suns, deep red grass, silver citadel
+            prompt: concat!(
+                "%F{208}⧖%f ",                           // Orange hourglass (time symbol)
+                "%F{yellow}%n%f",                        // Golden username
+                "%F{8}@%f",                              // Dim separator
+                "%F{red}%m%f ",                          // Red hostname (red grass of Gallifrey)
+                "%F{white}%~%f",                         // Silver/white path (citadel)
+                "$(git_prompt_info)\n",                  // Git info on same line
+                "%F{208}[%f%F{yellow}%T%f%F{208}]%f ",   // Time in orange brackets
+                "%(?.%F{214}⚙%f.%F{red}✗%f) "           // Gold gear (success) or red X (fail)
+            ).to_string(),
+            rprompt: Some("%F{8}∞ %D{%Y.%m.%d}%f".to_string()), // Infinity + date
+            prompt2: "%F{208}⧗%f ".to_string(),          // Orange hourglass continuation
+            colors: HashMap::new(),
+        }),
         _ => None,
     }
 }
@@ -632,6 +649,7 @@ pub fn list_builtin_themes() -> Vec<&'static str> {
         "powerlevel",
         "simple",
         "pure",
+        "gallifrey",
     ]
 }
 
