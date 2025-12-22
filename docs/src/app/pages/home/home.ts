@@ -28,12 +28,12 @@ import { faTerminal, faFish, faCubes, faPalette, faRocket, faCode, faBolt, faShi
           </p>
           <div class="flex flex-wrap justify-center gap-4">
             <a routerLink="/getting-started"
-               class="px-8 py-3 bg-[var(--color-primary)] text-white rounded-lg font-semibold hover:bg-[var(--color-primary-dark)] transition-colors hover:no-underline flex items-center gap-2">
+               class="btn-primary px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
               <fa-icon [icon]="faRocket"></fa-icon>
               Get Started
             </a>
             <a href="https://github.com/pegasusheavy/jsh" target="_blank"
-               class="px-8 py-3 border border-[var(--color-border)] text-[var(--color-text)] rounded-lg font-semibold hover:border-[var(--color-primary)] transition-colors hover:no-underline flex items-center gap-2">
+               class="btn-outline px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
               <fa-icon [icon]="faGithub"></fa-icon>
               View on GitHub
             </a>
