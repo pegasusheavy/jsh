@@ -141,17 +141,40 @@ try &#123;
       <section class="mb-12">
         <h2 class="text-2xl font-semibold mb-4 text-[var(--color-primary)]">fn - Function Shorthand</h2>
         <p class="text-[var(--color-text-muted)] mb-4">
-          A concise syntax for defining functions.
+          A concise syntax for defining functions, with optional named parameters.
         </p>
 
-        <pre class="bg-[var(--color-code-bg)] rounded-lg p-4 mb-4 overflow-x-auto"><code># Simple function
+        <h3 class="text-lg font-medium mb-3">Basic fn Syntax</h3>
+        <pre class="bg-[var(--color-code-bg)] rounded-lg p-4 mb-4 overflow-x-auto"><code># Simple function (uses $1, $2, etc.)
 fn greet &#123;
     echo "Hello, $1!"
 &#125;
 
-# Function with logic
-fn is_even &#123;
-    let num = $1
+greet "World"  # Output: Hello, World!</code></pre>
+
+        <h3 class="text-lg font-medium mb-3 mt-6">fn with Named Parameters</h3>
+        <pre class="bg-[var(--color-code-bg)] rounded-lg p-4 mb-4 overflow-x-auto"><code># Function with named parameters
+fn greet(name, greeting) &#123;
+    echo "$greeting, $name!"
+&#125;
+
+greet "World" "Hello"  # Output: Hello, World!
+
+# More examples
+fn add(a, b) &#123;
+    echo $((a + b))
+&#125;
+
+fn mkcd(dir) &#123;
+    mkdir -p "$dir"
+    cd "$dir"
+&#125;
+
+add 10 20    # Output: 30
+mkcd mydir   # Creates and enters 'mydir'</code></pre>
+
+        <h3 class="text-lg font-medium mb-3 mt-6">Function with Logic</h3>
+        <pre class="bg-[var(--color-code-bg)] rounded-lg p-4 mb-4 overflow-x-auto"><code>fn is_even(num) &#123;
     if [ $((num % 2)) -eq 0 ]; then
         return 0
     else
@@ -159,16 +182,14 @@ fn is_even &#123;
     fi
 &#125;
 
-# Call functions
-greet "World"
 if is_even 4; then
     echo "4 is even"
 fi</code></pre>
 
         <div class="bg-[var(--color-surface)] rounded-lg p-4 mt-4 border border-[var(--color-border)]">
           <p class="text-sm text-[var(--color-text-muted)]">
-            <strong>Note:</strong> <code>fn</code> is equivalent to the traditional
-            <code>name() &#123; &#125;</code> syntax but provides a cleaner, more modern look.
+            <strong>Note:</strong> <code>fn name(params)</code> combines the modern <code>fn</code> keyword
+            with named parameters for maximum readability. Parameters are also accessible as <code>$1</code>, <code>$2</code>, etc.
           </p>
         </div>
       </section>

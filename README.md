@@ -95,11 +95,22 @@ try {
 
 #### Function Shorthand with `fn`
 ```bash
+# Simple fn (uses $1, $2 for args)
 fn greet {
     echo "Hello, $1!"
 }
-
 greet "World"
+
+# fn with named parameters
+fn greet(name, greeting) {
+    echo "$greeting, $name!"
+}
+greet "World" "Hello"  # Output: Hello, World!
+
+fn add(a, b) {
+    echo $((a + b))
+}
+add 10 20  # Output: 30
 ```
 
 #### Named Function Parameters
