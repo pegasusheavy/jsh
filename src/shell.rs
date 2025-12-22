@@ -532,7 +532,7 @@ impl Shell {
         match output {
             Ok(output) if output.status.success() => {
                 let stdout = String::from_utf8_lossy(&output.stdout);
-                
+
                 // Parse ssh-agent output to get SSH_AUTH_SOCK and SSH_AGENT_PID
                 for line in stdout.lines() {
                     if line.starts_with("SSH_AUTH_SOCK=") {
@@ -619,7 +619,7 @@ impl Shell {
         // User profile (first one that exists, in order)
         // Include XDG location in the search
         let xdg_profile = jsh_config_dir().join("profile");
-        
+
         if let Some(home) = dirs::home_dir() {
             // Check ~/.jsh_profile first (legacy)
             let jsh_profile = home.join(".jsh_profile");
