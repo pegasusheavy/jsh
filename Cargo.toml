@@ -56,7 +56,7 @@ name = "jsh"
 path = "src/main.rs"
 
 [dev-dependencies]
-criterion = { version = "0.5", features = ["html_reports"] }
+criterion = { version = "0.8", features = ["html_reports"] }
 cargo-husky = { version = "1", default-features = false, features = ["precommit-hook", "run-cargo-check", "run-cargo-clippy", "run-cargo-fmt"] }
 
 [[bench]]
