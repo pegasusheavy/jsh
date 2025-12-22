@@ -13,6 +13,7 @@
 //! - `fish` - Fish-compatible (string, math, contains, status, functions, abbr)
 //! - `git` - Git integration (git_branch, git_status, git_info, git_prompt, in_git_repo)
 //! - `fzf` - FZF integration (fzf_history, fzf_file, fzf_dir, fzf_git_branch, fzf_cd, fzf_kill)
+//! - `plugins` - Plugin manager (plug, plug_install, plug_update, plug_list, plug_load)
 
 mod control;
 mod fish;
@@ -23,6 +24,7 @@ mod jobs;
 mod misc;
 mod navigation;
 mod output;
+mod plugins;
 mod posix;
 mod scripting;
 mod test;
@@ -149,6 +151,16 @@ impl Builtins {
         commands.insert("fzf_git_log".to_string(), fzf::builtin_fzf_git_log);
         commands.insert("fzf_process".to_string(), fzf::builtin_fzf_process);
         commands.insert("fzf_kill".to_string(), fzf::builtin_fzf_kill);
+
+        // Plugin manager
+        commands.insert("plug".to_string(), plugins::builtin_plug);
+        commands.insert("plug_install".to_string(), plugins::builtin_plug_install);
+        commands.insert("plug_update".to_string(), plugins::builtin_plug_update);
+        commands.insert("plug_clean".to_string(), plugins::builtin_plug_clean);
+        commands.insert("plug_list".to_string(), plugins::builtin_plug_list);
+        commands.insert("plug_load".to_string(), plugins::builtin_plug_load);
+        commands.insert("plug_source".to_string(), plugins::builtin_plug_source);
+        commands.insert("plug_info".to_string(), plugins::builtin_plug_info);
 
         Self { commands }
     }

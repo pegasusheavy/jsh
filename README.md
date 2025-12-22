@@ -580,6 +580,192 @@ jsh includes many built-in commands:
 | `fzf_git_log` | Fuzzy git log selection |
 | `fzf_process` | Fuzzy process selection |
 | `fzf_kill` | Fuzzy process kill |
+| `plug` | Register a plugin |
+| `plug_install` | Install registered plugins |
+| `plug_update` | Update installed plugins |
+| `plug_clean` | Remove unused plugins |
+| `plug_list` | List plugins |
+| `plug_load` | Load all plugins |
+| `plug_source` | Source a specific plugin |
+| `plug_info` | Show plugin info |
+
+## Plugin Manager
+
+jsh includes a built-in plugin manager inspired by zplug/zinit for managing Oh-My-Zsh, Fish, Bash, and GitHub plugins.
+
+### Quick Start
+
+Add to your `~/.jshrc`:
+
+```bash
+# Register plugins
+plug "zsh-users/zsh-autosuggestions"
+plug "zsh-users/zsh-syntax-highlighting"
+plug "oh-my-zsh:plugins/git"
+plug "oh-my-zsh:plugins/docker"
+
+# Install and load
+plug_install
+plug_load
+```
+
+### Plugin Sources
+
+```bash
+# GitHub repository (user/repo)
+plug "zsh-users/zsh-autosuggestions"
+
+# Oh-My-Zsh plugins
+plug "oh-my-zsh:plugins/git"
+plug "omz:plugins/docker"            # shorthand
+
+# Oh-My-Zsh themes
+plug "oh-my-zsh:themes/robbyrussell"
+plug "omz:themes/agnoster"           # shorthand
+
+# Fish plugins
+plug "fish:jorgebucaran/fisher"
+plug "fish:PatrickF1/fzf.fish"
+
+# Direct Git URL
+plug "https://github.com/romkatv/powerlevel10k.git"
+
+# Local directory
+plug "local:/path/to/my-plugin"
+```
+
+### Plugin Options
+
+```bash
+# Load as theme
+plug "romkatv/powerlevel10k" as:theme
+
+# Use specific branch
+plug "zsh-users/zsh-autosuggestions" branch:develop
+
+# Use specific tag/version
+plug "zsh-users/zsh-autosuggestions" tag:v0.7.0
+
+# Lazy loading (defer)
+plug "heavy-plugin/slow-load" as:defer
+
+# Specific file to source
+plug "user/repo" use:init.sh
+
+# Run hook after loading
+plug "user/repo" hook:"echo Loaded!"
+
+# Don't update this plugin
+plug "user/repo" frozen
+
+# Multiple options
+plug "zsh-users/zsh-syntax-highlighting" branch:master depth:1
+```
+
+### Commands
+
+```bash
+# Register a plugin (in .jshrc)
+plug "source" [options...]
+
+# Install all registered plugins
+plug_install
+
+# Update all plugins (respects frozen)
+plug_update
+
+# Remove plugins not in config
+plug_clean
+
+# List plugins
+plug_list              # Registered plugins
+plug_list --installed  # Installed only
+
+# Load all plugins
+plug_load
+
+# Source specific plugin
+plug_source "plugin-name"
+
+# Show plugin info
+plug_info              # General help
+plug_info "plugin-name" # Specific plugin
+```
+
+### Example Configuration
+
+Full `~/.jshrc` example:
+
+```bash
+#!/usr/bin/env jsh
+# ~/.jshrc - jsh interactive configuration
+
+# ============================================
+# Plugin Manager
+# ============================================
+
+# Syntax highlighting (load early)
+plug "zsh-users/zsh-syntax-highlighting"
+
+# Autosuggestions
+plug "zsh-users/zsh-autosuggestions"
+
+# Oh-My-Zsh plugins
+plug "oh-my-zsh:plugins/git"
+plug "oh-my-zsh:plugins/docker"
+plug "oh-my-zsh:plugins/kubectl"
+plug "oh-my-zsh:plugins/npm"
+
+# Theme
+plug "romkatv/powerlevel10k" as:theme
+
+# Fish-like features
+plug "fish:PatrickF1/fzf.fish"
+
+# Install missing plugins
+plug_install
+
+# Load all plugins
+plug_load
+
+# ============================================
+# Shell Configuration
+# ============================================
+
+export EDITOR="nvim"
+export JSH_THEME="powerlevel10k"
+
+# Aliases
+alias ll="ls -la"
+alias g="git"
+alias k="kubectl"
+
+# Functions
+fn mkcd {
+    mkdir -p "$1" && cd "$1"
+}
+```
+
+### Directories
+
+Plugins are stored in XDG-compliant locations:
+
+- **Plugins**: `$XDG_DATA_HOME/jsh/plugins/` (default: `~/.local/share/jsh/plugins/`)
+- **Oh-My-Zsh**: `$XDG_DATA_HOME/jsh/oh-my-zsh/` (auto-installed when needed)
+- **Cache**: `$XDG_CACHE_HOME/jsh/plugins/` (default: `~/.cache/jsh/plugins/`)
+
+### Compatibility
+
+The plugin manager is compatible with plugins from:
+
+| Source | Example |
+|--------|---------|
+| Oh-My-Zsh | `plug "omz:plugins/git"` |
+| Prezto | `plug "sorin-ionescu/prezto"` |
+| Fish/Oh-My-Fish | `plug "fish:oh-my-fish/theme-bobthefish"` |
+| Antigen bundles | `plug "user/repo"` |
+| Zplug plugins | `plug "user/repo"` |
+| Generic Git repos | `plug "https://..."` |
 
 ## FZF Integration
 

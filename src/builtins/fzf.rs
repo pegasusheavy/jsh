@@ -438,13 +438,13 @@ pub fn builtin_fzf_kill(args: &[String], interp: &mut Interpreter) -> Result<Exi
                 let status = Command::new("kill")
                     .args([signal, pid])
                     .status();
-                
+
                 if status.map(|s| s.success()).unwrap_or(false) {
                     killed.push(pid.to_string());
                 }
             }
         }
-        
+
         if !killed.is_empty() {
             println!("Killed: {}", killed.join(", "));
             interp.set_var("FZF_RESULT", &killed.join(" "));
