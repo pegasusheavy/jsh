@@ -18,7 +18,7 @@
 //!     .positional("extra", "Extra arguments", false);
 //!
 //! let args = vec!["mycommand", "-v", "-o", "out.txt", "input.txt"];
-//! let result = parser.parse(&args)?;
+//! let result = parser.parse(&args).unwrap();
 //!
 //! if result.has("verbose") {
 //!     println!("Verbose mode enabled");

@@ -51,6 +51,9 @@ pub enum JshError {
     #[error("Runtime error: {0}")]
     Runtime(String),
 
+    #[error("Arithmetic error: {0}")]
+    Arithmetic(String),
+
     #[error("Exit with code {0}")]
     Exit(i32),
 

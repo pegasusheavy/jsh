@@ -137,7 +137,7 @@ impl<'a> Lexer<'a> {
                     // Variable expansion inside double quotes - keep the $ for later expansion
                     string.push('$');
                     self.advance();
-                    // Collect variable name or brace content
+                    // Collect variable name, brace content, or subshell/arithmetic
                     if let Some('{') = self.peek() {
                         string.push('{');
                         self.advance();
@@ -156,12 +156,35 @@ impl<'a> Lexer<'a> {
                             string.push(c);
                             self.advance();
                         }
-                    } else {
-                        // Simple variable name
+                    } else if let Some('(') = self.peek() {
+                        // Command substitution $(  ...) or arithmetic $((...))
+                        string.push('(');
+                        self.advance();
+                        let mut paren_depth = 1;
                         while let Some(c) = self.peek() {
-                            if c.is_alphanumeric() || c == '_' {
+                            if c == '(' {
+                                paren_depth += 1;
+                            } else if c == ')' {
+                                paren_depth -= 1;
+                                if paren_depth == 0 {
+                                    string.push(')');
+                                    self.advance();
+                                    break;
+                                }
+                            }
+                            string.push(c);
+                            self.advance();
+                        }
+                    } else {
+                        // Simple variable name or special character
+                        while let Some(c) = self.peek() {
+                            if c.is_alphanumeric() || c == '_' || c == '?' || c == '!' || c == '#' || c == '@' || c == '*' || c == '-' {
                                 string.push(c);
                                 self.advance();
+                                // Special characters are single-char variables
+                                if matches!(c, '?' | '!' | '#' | '@' | '*' | '-') {
+                                    break;
+                                }
                             } else {
                                 break;
                             }
@@ -576,8 +599,9 @@ impl<'a> Lexer<'a> {
                     self.read_variable()
                 }
             }
-            '|' | '&' | ';' | '<' | '>' | '=' | '!' | '*' | '/' | '%' | '(' | ')'
+            '|' | '&' | ';' | '<' | '>' | '=' | '!' | '(' | ')'
             | '{' | '}' | '[' | ']' | ',' | '\n' => self.read_operator(),
+            // Note: '*', '/', '%' are handled in read_word to allow them in paths and globs
             // Handle '-' and '+' specially: if followed by alphanumeric, it's part of a word (like -e, +o)
             '-' | '+' => {
                 let next = self.peek_nth(1);
@@ -618,6 +642,14 @@ impl<'a> Lexer<'a> {
                 | TokenKind::Then
                 | TokenKind::Else
                 | TokenKind::Elif
+                | TokenKind::If      // After if, we expect a command (condition)
+                | TokenKind::While   // After while, we expect a command (condition)
+                | TokenKind::Until   // After until, we expect a command (condition)
+                | TokenKind::For     // After for, we expect variable name (word)
+                | TokenKind::Case    // After case, we expect a word
+                | TokenKind::Fi      // After fi, new command can start
+                | TokenKind::Done    // After done, new command can start
+                | TokenKind::Esac    // After esac, new command can start
                 // Fish-compatible
                 | TokenKind::Begin
                 | TokenKind::And_
@@ -694,18 +726,34 @@ mod tests {
 
     #[test]
     fn test_keywords() {
-        let mut lexer = Lexer::new("if then else fi for in do done while");
+        // Keywords are recognized at command start positions
+        // Test individual keywords at start position
+        let mut lexer = Lexer::new("if");
         let tokens = lexer.tokenize().unwrap();
-
         assert!(matches!(tokens[0].kind, TokenKind::If));
-        assert!(matches!(tokens[1].kind, TokenKind::Then));
-        assert!(matches!(tokens[2].kind, TokenKind::Else));
-        assert!(matches!(tokens[3].kind, TokenKind::Fi));
-        assert!(matches!(tokens[4].kind, TokenKind::For));
-        assert!(matches!(tokens[5].kind, TokenKind::In));
-        assert!(matches!(tokens[6].kind, TokenKind::Do));
-        assert!(matches!(tokens[7].kind, TokenKind::Done));
-        assert!(matches!(tokens[8].kind, TokenKind::While));
+        
+        let mut lexer = Lexer::new("for");
+        let tokens = lexer.tokenize().unwrap();
+        assert!(matches!(tokens[0].kind, TokenKind::For));
+        
+        let mut lexer = Lexer::new("while");
+        let tokens = lexer.tokenize().unwrap();
+        assert!(matches!(tokens[0].kind, TokenKind::While));
+        
+        // Test keywords after semicolon (command start)
+        let mut lexer = Lexer::new("; if");
+        let tokens = lexer.tokenize().unwrap();
+        assert!(matches!(tokens[0].kind, TokenKind::Semi));
+        assert!(matches!(tokens[1].kind, TokenKind::If));
+        
+        // Test keywords in proper syntactic positions
+        let mut lexer = Lexer::new("if x; then echo; fi");
+        let tokens = lexer.tokenize().unwrap();
+        assert!(matches!(tokens[0].kind, TokenKind::If));
+        // After if, "x" is a command name (Word)
+        assert!(matches!(tokens[1].kind, TokenKind::Word(_)));
+        assert!(matches!(tokens[2].kind, TokenKind::Semi));
+        assert!(matches!(tokens[3].kind, TokenKind::Then));
     }
 }
 

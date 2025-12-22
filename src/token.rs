@@ -343,7 +343,8 @@ pub fn keyword_from_str(s: &str) -> Option<TokenKind> {
         // "declare" => Some(TokenKind::Declare),
         // "typeset" is handled as builtin, not keyword
         // "typeset" => Some(TokenKind::Typeset),
-        "unset" => Some(TokenKind::Unset),
+        // "unset" is handled as builtin, not keyword
+        // "unset" => Some(TokenKind::Unset),
         "shift" => Some(TokenKind::Shift),
         "time" => Some(TokenKind::Time),
         "coproc" => Some(TokenKind::Coproc),
