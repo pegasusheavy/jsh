@@ -27,6 +27,10 @@ pub struct ShellConfig {
     pub theme_name: String,
     pub is_login_shell: bool,
     pub is_interactive: bool,
+    /// Automatically start ssh-agent if not already running
+    pub ssh_agent_auto_start: bool,
+    /// Path to ssh-agent socket (if custom)
+    pub ssh_agent_socket: Option<PathBuf>,
 }
 
 impl Default for ShellConfig {
@@ -44,6 +48,8 @@ impl Default for ShellConfig {
             theme_name: "jsh".to_string(),
             is_login_shell: false,
             is_interactive: true,
+            ssh_agent_auto_start: false, // Disabled by default, enable in .jshrc
+            ssh_agent_socket: None,
         }
     }
 }
@@ -378,6 +384,111 @@ impl Shell {
         // Source interactive shell profiles if this is interactive
         if self.config.is_interactive {
             self.source_interactive_profiles();
+        }
+
+        // Check for ssh-agent configuration after sourcing profiles
+        self.check_ssh_agent_config();
+
+        // Start ssh-agent if configured
+        if self.config.ssh_agent_auto_start {
+            self.start_ssh_agent();
+        }
+    }
+
+    /// Check if SSH_AGENT_AUTO_START is set in environment/config
+    fn check_ssh_agent_config(&mut self) {
+        // Check if user enabled ssh-agent via environment variable
+        if let Some(val) = self.interpreter.get_var("JSH_SSH_AGENT_AUTO_START") {
+            self.config.ssh_agent_auto_start = matches!(val.to_lowercase().as_str(), "1" | "true" | "yes" | "on");
+        }
+
+        // Check for custom socket path
+        if let Some(socket) = self.interpreter.get_var("JSH_SSH_AGENT_SOCKET") {
+            if !socket.is_empty() {
+                self.config.ssh_agent_socket = Some(PathBuf::from(socket));
+            }
+        }
+    }
+
+    /// Start ssh-agent if not already running
+    fn start_ssh_agent(&mut self) {
+        use std::process::{Command, Stdio};
+
+        // Check if SSH_AUTH_SOCK is already set and valid
+        if let Ok(sock) = std::env::var("SSH_AUTH_SOCK") {
+            let sock_path = PathBuf::from(&sock);
+            if sock_path.exists() {
+                // Agent already running, nothing to do
+                return;
+            }
+        }
+
+        // Check if custom socket is specified and exists
+        if let Some(ref custom_sock) = self.config.ssh_agent_socket {
+            if custom_sock.exists() {
+                // SAFETY: We're setting environment variables in a single-threaded initialization context
+                unsafe { std::env::set_var("SSH_AUTH_SOCK", custom_sock) };
+                self.interpreter.set_var("SSH_AUTH_SOCK", &custom_sock.to_string_lossy());
+                self.interpreter.export_var("SSH_AUTH_SOCK", Some(&custom_sock.to_string_lossy()));
+                return;
+            }
+        }
+
+        // Try to start ssh-agent
+        let output = Command::new("ssh-agent")
+            .arg("-s") // Output Bourne shell commands
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .output();
+
+        match output {
+            Ok(output) if output.status.success() => {
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                
+                // Parse ssh-agent output to get SSH_AUTH_SOCK and SSH_AGENT_PID
+                for line in stdout.lines() {
+                    if line.starts_with("SSH_AUTH_SOCK=") {
+                        if let Some(sock) = line
+                            .strip_prefix("SSH_AUTH_SOCK=")
+                            .and_then(|s| s.strip_suffix("; export SSH_AUTH_SOCK;"))
+                        {
+                            // SAFETY: We're in single-threaded shell initialization
+                            unsafe { std::env::set_var("SSH_AUTH_SOCK", sock) };
+                            self.interpreter.set_var("SSH_AUTH_SOCK", sock);
+                            self.interpreter.export_var("SSH_AUTH_SOCK", Some(sock));
+                        }
+                    } else if line.starts_with("SSH_AGENT_PID=") {
+                        if let Some(pid) = line
+                            .strip_prefix("SSH_AGENT_PID=")
+                            .and_then(|s| s.strip_suffix("; export SSH_AGENT_PID;"))
+                        {
+                            // SAFETY: We're in single-threaded shell initialization
+                            unsafe { std::env::set_var("SSH_AGENT_PID", pid) };
+                            self.interpreter.set_var("SSH_AGENT_PID", pid);
+                            self.interpreter.export_var("SSH_AGENT_PID", Some(pid));
+                        }
+                    }
+                }
+
+                // Optionally notify the user
+                if self.config.is_interactive {
+                    if let Some(pid) = self.interpreter.get_var("SSH_AGENT_PID") {
+                        eprintln!("jsh: ssh-agent started (pid {})", pid);
+                    }
+                }
+            }
+            Ok(_) => {
+                // ssh-agent failed to start
+                if self.config.is_interactive {
+                    eprintln!("jsh: warning: failed to start ssh-agent");
+                }
+            }
+            Err(_) => {
+                // ssh-agent not found
+                if self.config.is_interactive {
+                    eprintln!("jsh: warning: ssh-agent not found in PATH");
+                }
+            }
         }
     }
 

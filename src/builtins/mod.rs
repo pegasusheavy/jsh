@@ -134,6 +134,9 @@ impl Builtins {
         commands.insert("fc".to_string(), posix::builtin_fc);
         commands.insert("newgrp".to_string(), posix::builtin_newgrp);
 
+        // SSH agent integration
+        commands.insert("ssh_agent".to_string(), misc::builtin_ssh_agent);
+
         Self { commands }
     }
 

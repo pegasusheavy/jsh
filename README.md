@@ -388,10 +388,11 @@ export PROMPT='%F{cyan}%n%f@%F{blue}%m%f:%F{yellow}%~%f$ '
 ```bash
 # ~/.jsh_profile - Login shell settings (sourced once at login)
 
-# Start ssh-agent if not running
-if [ -z "$SSH_AUTH_SOCK" ]; then
-    eval $(ssh-agent -s)
-fi
+# Enable automatic ssh-agent startup (jsh built-in feature)
+export JSH_SSH_AGENT_AUTO_START=true
+
+# Or use a custom socket path
+# export JSH_SSH_AGENT_SOCKET="/run/user/$UID/ssh-agent.socket"
 
 # Load any secrets
 if [ -f ~/.secrets ]; then
@@ -514,6 +515,61 @@ jsh includes many built-in commands:
 | `read` | Read input |
 | `type` / `which` | Describe command |
 | `help` | Display help |
+| `ssh_agent` | SSH agent control |
+
+## SSH Agent Integration
+
+jsh includes built-in support for automatic ssh-agent management.
+
+### Automatic Startup
+
+Enable automatic ssh-agent startup in your `~/.jshrc`, `~/.jsh_profile`, or `~/.jshenv`:
+
+```bash
+# Enable automatic ssh-agent startup
+export JSH_SSH_AGENT_AUTO_START=true
+
+# Optional: Use a custom socket path (e.g., for systemd user units)
+export JSH_SSH_AGENT_SOCKET="/run/user/$UID/ssh-agent.socket"
+```
+
+When enabled, jsh will:
+1. Check if `SSH_AUTH_SOCK` is set and the socket exists
+2. If not, automatically start `ssh-agent`
+3. Export `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables
+
+### Manual Control with `ssh_agent` Builtin
+
+```bash
+ssh_agent              # Show status (default)
+ssh_agent status       # Show status and loaded keys
+ssh_agent start        # Start ssh-agent if not running
+ssh_agent stop         # Stop the current ssh-agent
+ssh_agent add          # Add default SSH keys (~/.ssh/id_*)
+```
+
+### Example Configuration
+
+**For Login Shells (`~/.jsh_profile`):**
+```bash
+# Automatically start ssh-agent on login
+export JSH_SSH_AGENT_AUTO_START=true
+
+# Optionally auto-add keys (requires ssh-add to be set up with keychain or similar)
+ssh_agent add 2>/dev/null
+```
+
+**For systemd User Units:**
+```bash
+# Use systemd-managed ssh-agent socket
+export JSH_SSH_AGENT_SOCKET="$XDG_RUNTIME_DIR/ssh-agent.socket"
+```
+
+**For GPG-Agent SSH Support:**
+```bash
+# Use gpg-agent for SSH (if gpg-agent is configured with enable-ssh-support)
+export JSH_SSH_AGENT_SOCKET="$(gpgconf --list-dirs agent-ssh-socket)"
+```
 
 ## Examples
 
