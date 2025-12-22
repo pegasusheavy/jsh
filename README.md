@@ -429,6 +429,49 @@ export JSH_THEME="pure"
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
+### XDG Base Directory Support
+
+jsh follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) by default:
+
+| Variable | Default | jsh Directory | Purpose |
+|----------|---------|---------------|---------|
+| `XDG_CONFIG_HOME` | `~/.config` | `~/.config/jsh/` | Configuration files |
+| `XDG_DATA_HOME` | `~/.local/share` | `~/.local/share/jsh/` | User data (plugins, completions) |
+| `XDG_STATE_HOME` | `~/.local/state` | `~/.local/state/jsh/` | State data (history) |
+| `XDG_CACHE_HOME` | `~/.cache` | `~/.cache/jsh/` | Cache files |
+
+**XDG Configuration Files:**
+
+```
+$XDG_CONFIG_HOME/jsh/
+├── env           # Environment (always sourced, like ~/.jshenv)
+├── profile       # Login shell config (like ~/.jsh_profile)
+└── jshrc         # Interactive shell config (like ~/.jshrc)
+```
+
+**XDG State Files:**
+
+```
+$XDG_STATE_HOME/jsh/
+└── history       # Command history (default location for new installs)
+```
+
+**Migration from Legacy Locations:**
+
+jsh automatically detects existing files in legacy locations (`~/.jshrc`, `~/.jsh_history`, etc.) and continues to use them. New installations default to XDG-compliant paths.
+
+To migrate manually:
+```bash
+# Create XDG directories
+mkdir -p ~/.config/jsh ~/.local/state/jsh ~/.local/share/jsh ~/.cache/jsh
+
+# Move configuration files
+mv ~/.jshrc ~/.config/jsh/jshrc
+mv ~/.jshenv ~/.config/jsh/env
+mv ~/.jsh_profile ~/.config/jsh/profile
+mv ~/.jsh_history ~/.local/state/jsh/history
+```
+
 ## Themes (Oh-My-Zsh Compatible)
 
 jsh includes an oh-my-zsh compatible theme system with prompt escape sequences, colors, and git integration.

@@ -16,6 +16,98 @@ use rustyline::{Context, Editor, Helper};
 use std::borrow::Cow;
 use std::path::PathBuf;
 
+// ============================================================================
+// XDG Base Directory Specification Support
+// ============================================================================
+
+/// Get XDG_CONFIG_HOME or default to ~/.config
+pub fn xdg_config_home() -> PathBuf {
+    std::env::var("XDG_CONFIG_HOME")
+        .ok()
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            dirs::home_dir()
+                .unwrap_or_else(|| PathBuf::from("/tmp"))
+                .join(".config")
+        })
+}
+
+/// Get XDG_DATA_HOME or default to ~/.local/share
+pub fn xdg_data_home() -> PathBuf {
+    std::env::var("XDG_DATA_HOME")
+        .ok()
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            dirs::home_dir()
+                .unwrap_or_else(|| PathBuf::from("/tmp"))
+                .join(".local")
+                .join("share")
+        })
+}
+
+/// Get XDG_STATE_HOME or default to ~/.local/state
+pub fn xdg_state_home() -> PathBuf {
+    std::env::var("XDG_STATE_HOME")
+        .ok()
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            dirs::home_dir()
+                .unwrap_or_else(|| PathBuf::from("/tmp"))
+                .join(".local")
+                .join("state")
+        })
+}
+
+/// Get XDG_CACHE_HOME or default to ~/.cache
+pub fn xdg_cache_home() -> PathBuf {
+    std::env::var("XDG_CACHE_HOME")
+        .ok()
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            dirs::home_dir()
+                .unwrap_or_else(|| PathBuf::from("/tmp"))
+                .join(".cache")
+        })
+}
+
+/// Get jsh config directory ($XDG_CONFIG_HOME/jsh)
+pub fn jsh_config_dir() -> PathBuf {
+    xdg_config_home().join("jsh")
+}
+
+/// Get jsh data directory ($XDG_DATA_HOME/jsh)
+pub fn jsh_data_dir() -> PathBuf {
+    xdg_data_home().join("jsh")
+}
+
+/// Get jsh state directory ($XDG_STATE_HOME/jsh)
+pub fn jsh_state_dir() -> PathBuf {
+    xdg_state_home().join("jsh")
+}
+
+/// Get jsh cache directory ($XDG_CACHE_HOME/jsh)
+pub fn jsh_cache_dir() -> PathBuf {
+    xdg_cache_home().join("jsh")
+}
+
+/// Get default history file path (XDG-compliant)
+/// Uses $XDG_STATE_HOME/jsh/history, falls back to ~/.jsh_history if exists
+pub fn default_history_file() -> PathBuf {
+    // Check for legacy ~/.jsh_history first (migration support)
+    if let Some(home) = dirs::home_dir() {
+        let legacy = home.join(".jsh_history");
+        if legacy.exists() {
+            return legacy;
+        }
+    }
+
+    // Use XDG-compliant path
+    let state_dir = jsh_state_dir();
+    // Create directory if it doesn't exist
+    let _ = std::fs::create_dir_all(&state_dir);
+    state_dir.join("history")
+}
+
 /// Shell configuration
 #[derive(Debug, Clone)]
 pub struct ShellConfig {
@@ -35,12 +127,8 @@ pub struct ShellConfig {
 
 impl Default for ShellConfig {
     fn default() -> Self {
-        let history_file = dirs::home_dir()
-            .unwrap_or_else(|| PathBuf::from("/tmp"))
-            .join(".jsh_history");
-
         Self {
-            history_file,
+            history_file: default_history_file(),
             history_size: 10000,
             prompt: String::new(), // Will be computed dynamically by theme
             continuation_prompt: "> ".to_string(),
@@ -498,7 +586,7 @@ impl Shell {
         // System-wide jshenv
         self.source_file_if_exists("/etc/jshenv");
 
-        // User jshenv
+        // User jshenv (legacy location)
         if let Some(home) = dirs::home_dir() {
             let jshenv = home.join(".jshenv");
             if jshenv.exists() {
@@ -506,22 +594,15 @@ impl Shell {
             }
         }
 
-        // XDG location: ~/.config/jsh/env
-        let xdg_config = std::env::var("XDG_CONFIG_HOME")
-            .ok()
-            .map(PathBuf::from)
-            .or_else(|| dirs::home_dir().map(|h| h.join(".config")));
-
-        if let Some(xdg) = xdg_config {
-            let xdg_env = xdg.join("jsh").join("env");
-            if xdg_env.exists() {
-                self.source_file_if_exists(&xdg_env.to_string_lossy());
-            }
+        // XDG location: $XDG_CONFIG_HOME/jsh/env
+        let xdg_env = jsh_config_dir().join("env");
+        if xdg_env.exists() {
+            self.source_file_if_exists(&xdg_env.to_string_lossy());
         }
     }
 
     /// Source login shell profile files
-    /// Order: /etc/environment, /etc/profile, then first of ~/.bash_profile, ~/.bash_login, ~/.profile
+    /// Order: /etc/environment, /etc/profile, then first of ~/.jsh_profile, XDG profile, ~/.bash_profile, etc.
     fn source_login_profiles(&mut self) {
         // Parse /etc/environment (simple KEY=VALUE format, not a shell script)
         self.parse_environment_file("/etc/environment");
@@ -536,10 +617,25 @@ impl Shell {
         self.source_file_if_exists("/etc/jsh_profile");
 
         // User profile (first one that exists, in order)
-        let home = dirs::home_dir();
-        if let Some(ref home) = home {
+        // Include XDG location in the search
+        let xdg_profile = jsh_config_dir().join("profile");
+        
+        if let Some(home) = dirs::home_dir() {
+            // Check ~/.jsh_profile first (legacy)
+            let jsh_profile = home.join(".jsh_profile");
+            if jsh_profile.exists() {
+                self.source_file_if_exists(&jsh_profile.to_string_lossy());
+                return;
+            }
+
+            // Check XDG location: $XDG_CONFIG_HOME/jsh/profile
+            if xdg_profile.exists() {
+                self.source_file_if_exists(&xdg_profile.to_string_lossy());
+                return;
+            }
+
+            // Fall back to other profiles
             let profiles = [
-                home.join(".jsh_profile"),    // jsh-specific first
                 home.join(".bash_profile"),
                 home.join(".bash_login"),
                 home.join(".profile"),
@@ -631,20 +727,15 @@ impl Shell {
 
         // User rc file - check in priority order
         if let Some(home) = dirs::home_dir() {
-            // 1. ~/.jshrc takes highest priority
+            // 1. ~/.jshrc takes highest priority (legacy location)
             let jshrc = home.join(".jshrc");
             if jshrc.exists() {
                 self.source_file_if_exists(&jshrc.to_string_lossy());
                 return;
             }
 
-            // 2. XDG location: ~/.config/jsh/jshrc
-            let xdg_config = std::env::var("XDG_CONFIG_HOME")
-                .ok()
-                .map(PathBuf::from)
-                .unwrap_or_else(|| home.join(".config"));
-
-            let xdg_jshrc = xdg_config.join("jsh").join("jshrc");
+            // 2. XDG location: $XDG_CONFIG_HOME/jsh/jshrc
+            let xdg_jshrc = jsh_config_dir().join("jshrc");
             if xdg_jshrc.exists() {
                 self.source_file_if_exists(&xdg_jshrc.to_string_lossy());
                 return;
