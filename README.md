@@ -588,6 +588,14 @@ jsh includes many built-in commands:
 | `plug_load` | Load all plugins |
 | `plug_source` | Source a specific plugin |
 | `plug_info` | Show plugin info |
+| `tmux` | Terminal multiplexer (tmux-compatible) |
+| `tmux-new` | Create new tmux session |
+| `tmux-ls` | List tmux sessions |
+| `tmux-attach` | Attach to tmux session |
+| `tmux-kill` | Kill tmux session |
+| `tmux-split` | Split tmux pane |
+| `tmux-theme` | Apply/list tmux themes |
+| `tmux-plugins` | Tmux plugin management |
 
 ## Plugin Manager
 
@@ -766,6 +774,237 @@ The plugin manager is compatible with plugins from:
 | Antigen bundles | `plug "user/repo"` |
 | Zplug plugins | `plug "user/repo"` |
 | Generic Git repos | `plug "https://..."` |
+
+## Tmux Integration
+
+jsh includes a fully tmux-compatible terminal multiplexer module. Use your existing `.tmux.conf` and TPM plugins!
+
+### Quick Start
+
+```bash
+# Create a new session
+tmux new-session -s work
+
+# Or use shortcuts
+tmux-new -s work
+
+# List sessions
+tmux-ls
+
+# Attach to session
+tmux-attach -t work
+```
+
+### Session Management
+
+```bash
+# Create session
+tmux new-session [-d] [-s name]
+tmux-new -s myproject
+
+# List sessions
+tmux list-sessions
+tmux-ls
+
+# Attach/detach
+tmux attach -t session
+tmux detach
+
+# Kill session
+tmux kill-session -t session
+tmux-kill -t session
+
+# Rename session
+tmux rename-session new-name
+
+# Switch sessions
+tmux switch-client -n    # Next session
+tmux switch-client -p    # Previous session
+```
+
+### Window Management
+
+```bash
+# Create window
+tmux new-window [-n name]
+
+# Navigate windows
+tmux select-window -t 0
+tmux next-window
+tmux previous-window
+tmux last-window
+
+# Rename window
+tmux rename-window new-name
+
+# Kill window
+tmux kill-window
+
+# List windows
+tmux list-windows
+```
+
+### Pane Management
+
+```bash
+# Split panes
+tmux split-window         # Horizontal split
+tmux split-window -h      # Vertical split
+tmux-split -h             # Shortcut
+
+# Navigate panes
+tmux select-pane -U       # Up
+tmux select-pane -D       # Down
+tmux select-pane -L       # Left
+tmux select-pane -R       # Right
+tmux last-pane
+
+# Resize panes
+tmux resize-pane -U 5     # Up 5 cells
+tmux resize-pane -D 5     # Down
+tmux resize-pane -L 5     # Left
+tmux resize-pane -R 5     # Right
+
+# Kill pane
+tmux kill-pane
+
+# Display pane numbers
+tmux display-panes
+```
+
+### Layouts
+
+```bash
+# Set layout
+tmux select-layout even-horizontal
+tmux select-layout even-vertical
+tmux select-layout main-horizontal
+tmux select-layout main-vertical
+tmux select-layout tiled
+
+# Cycle layouts
+tmux next-layout
+```
+
+### Configuration
+
+jsh reads configuration from (in order):
+1. `$XDG_CONFIG_HOME/jsh/tmux.conf`
+2. `~/.tmux.conf`
+3. `~/.config/tmux/tmux.conf`
+
+```bash
+# Example ~/.tmux.conf
+set -g mouse on
+set -g base-index 1
+set -g history-limit 10000
+set -g prefix C-a
+
+# Pane navigation
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# Split shortcuts
+bind | split-window -h
+bind - split-window -v
+
+# Reload config
+bind r source-file ~/.tmux.conf \; display-message "Reloaded!"
+
+# Status bar
+set -g status-style 'bg=colour234 fg=colour137'
+set -g status-left '#[fg=colour233,bg=colour245,bold] #S '
+set -g status-right '#[fg=colour233,bg=colour245,bold] %H:%M '
+```
+
+### Themes
+
+jsh includes popular tmux themes:
+
+```bash
+# List available themes
+tmux list-themes
+tmux-theme
+
+# Apply a theme
+tmux set-theme dracula
+tmux-theme nord
+
+# Available themes:
+# - default
+# - powerline
+# - dracula
+# - nord
+# - gruvbox
+# - catppuccin-mocha
+# - tokyo-night
+# - one-dark
+# - minimal
+```
+
+### TPM Plugin Support
+
+jsh is compatible with [TPM (Tmux Plugin Manager)](https://github.com/tmux-plugins/tpm) plugins:
+
+```bash
+# In ~/.tmux.conf
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'dracula/tmux'
+
+# Install plugins
+tmux tpm-install
+tmux-plugins install
+
+# Update plugins
+tmux tpm-update
+tmux-plugins update
+
+# Clean unused plugins
+tmux tpm-clean
+tmux-plugins clean
+
+# List installed plugins
+tmux tpm-list
+tmux-plugins list
+```
+
+### Key Bindings
+
+Default prefix key is `C-b`. Common bindings:
+
+| Key | Action |
+|-----|--------|
+| `C-b c` | New window |
+| `C-b ,` | Rename window |
+| `C-b n` | Next window |
+| `C-b p` | Previous window |
+| `C-b 0-9` | Select window |
+| `C-b "` | Split horizontal |
+| `C-b %` | Split vertical |
+| `C-b o` | Next pane |
+| `C-b ;` | Last pane |
+| `C-b x` | Kill pane |
+| `C-b z` | Toggle zoom |
+| `C-b [` | Copy mode |
+| `C-b d` | Detach |
+| `C-b :` | Command prompt |
+| `C-b ?` | List keys |
+
+### Popular Plugin Compatibility
+
+| Plugin | Description |
+|--------|-------------|
+| tmux-sensible | Sensible defaults |
+| tmux-resurrect | Save/restore sessions |
+| tmux-continuum | Automatic saving |
+| tmux-yank | Copy to clipboard |
+| tmux-pain-control | Better pane navigation |
+| dracula/tmux | Dracula theme |
+| catppuccin/tmux | Catppuccin theme |
 
 ## FZF Integration
 

@@ -280,7 +280,7 @@ pub fn builtin_plug_info(args: &[String], _interp: &mut Interpreter) -> Result<E
                 println!("Tag: {}", tag);
             }
             println!("Directory: {}", plugin.install_dir().display());
-            
+
             let files = plugin.get_source_files();
             if !files.is_empty() {
                 println!("Source files:");

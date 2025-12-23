@@ -219,7 +219,7 @@ impl PluginManager {
 
         let source_str = &args[0];
         let (source, default_name) = parse_plugin_source(source_str)?;
-        
+
         let mut plugin = Plugin::new(&default_name, source);
 
         // Parse options
@@ -267,7 +267,7 @@ impl PluginManager {
     /// Install all registered plugins
     pub fn install_all(&self) -> Result<Vec<String>> {
         let mut installed = vec![];
-        
+
         // Create plugins directory
         let _ = fs::create_dir_all(plugins_dir());
 
@@ -278,7 +278,7 @@ impl PluginManager {
             if plugin.is_installed() {
                 continue;
             }
-            
+
             match self.install_plugin(plugin) {
                 Ok(_) => {
                     installed.push(plugin.name.clone());

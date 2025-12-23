@@ -14,6 +14,7 @@
 //! - `git` - Git integration (git_branch, git_status, git_info, git_prompt, in_git_repo)
 //! - `fzf` - FZF integration (fzf_history, fzf_file, fzf_dir, fzf_git_branch, fzf_cd, fzf_kill)
 //! - `plugins` - Plugin manager (plug, plug_install, plug_update, plug_list, plug_load)
+//! - `tmux` - Terminal multiplexer (tmux, tmux-new, tmux-ls, tmux-attach, tmux-theme)
 
 mod control;
 mod fish;
@@ -28,6 +29,7 @@ mod plugins;
 mod posix;
 mod scripting;
 mod test;
+mod tmux;
 mod variables;
 
 use crate::error::Result;
@@ -161,6 +163,16 @@ impl Builtins {
         commands.insert("plug_load".to_string(), plugins::builtin_plug_load);
         commands.insert("plug_source".to_string(), plugins::builtin_plug_source);
         commands.insert("plug_info".to_string(), plugins::builtin_plug_info);
+
+        // Tmux integration
+        commands.insert("tmux".to_string(), tmux::builtin_tmux);
+        commands.insert("tmux-new".to_string(), tmux::builtin_tmux_new);
+        commands.insert("tmux-ls".to_string(), tmux::builtin_tmux_ls);
+        commands.insert("tmux-attach".to_string(), tmux::builtin_tmux_attach);
+        commands.insert("tmux-kill".to_string(), tmux::builtin_tmux_kill);
+        commands.insert("tmux-split".to_string(), tmux::builtin_tmux_split);
+        commands.insert("tmux-theme".to_string(), tmux::builtin_tmux_theme);
+        commands.insert("tmux-plugins".to_string(), tmux::builtin_tmux_plugins);
 
         Self { commands }
     }

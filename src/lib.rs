@@ -93,6 +93,7 @@ pub mod parser;
 pub mod plugins;
 pub mod shell;
 pub mod theme;
+pub mod tmux;
 pub mod token;
 
 pub use argparse::{ArgParser, ParsedArgs, ParseError};
