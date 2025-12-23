@@ -1,2 +1,0 @@
-   Compiling cargo-husky v1.5.0
-   Compiling jsh v0.1.0 (/home/joseph/PegasusHeavyIndustries/jsh)
