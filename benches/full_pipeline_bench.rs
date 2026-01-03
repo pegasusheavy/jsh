@@ -1,14 +1,15 @@
-//! Full pipeline benchmarks for jsh
+//! Full pipeline benchmarks for Franken Shell
 //!
 //! Benchmarks the complete lex -> parse -> execute pipeline.
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use jsh::interpreter::Interpreter;
-use jsh::lexer::Lexer;
-use jsh::parser::Parser;
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use std::hint::black_box;
+use franken_shell::interpreter::Interpreter;
+use franken_shell::lexer::Lexer;
+use franken_shell::parser::Parser;
 
 /// Full pipeline: lex -> parse -> execute
-fn full_pipeline(input: &str) -> jsh::interpreter::ExitStatus {
+fn full_pipeline(input: &str) -> franken_shell::interpreter::ExitStatus {
     let mut lexer = Lexer::new(input);
     let tokens = lexer.tokenize().unwrap();
     let mut parser = Parser::new(tokens);
@@ -71,7 +72,7 @@ echo "Hello, $name!"
 "#;
 
     let medium = r#"
-#!/usr/bin/env jsh
+#!/usr/bin/env franken
 name="${1:-World}"
 count=5
 
@@ -293,7 +294,7 @@ math '2 + 3 * 4'
 contains apple apple banana cherry
 "#;
 
-    // jsh enhanced style
+    // franken enhanced style
     let jsh_style = r#"
 let name = "World"
 let count = 5

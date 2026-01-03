@@ -1,4 +1,6 @@
 //! Compound statement parsing: if, for, while, case, select, function, etc.
+//!
+//! Optimized to use references for token access.
 
 use crate::ast::*;
 use crate::error::{JshError, Result};
@@ -8,55 +10,63 @@ use super::Parser;
 
 impl Parser {
     // ========================================================================
-    // Keyword detection helpers
+    // Keyword detection helpers (optimized to use peek_kind)
     // ========================================================================
 
     /// Check if current token is the `in` keyword
+    #[inline]
     pub(crate) fn is_in_keyword(&self) -> bool {
-        matches!(self.peek().kind, TokenKind::In)
-            || matches!(&self.peek().kind, TokenKind::Word(s) if s == "in")
+        matches!(self.peek_kind(), TokenKind::In)
+            || matches!(self.peek_kind(), TokenKind::Word(s) if s == "in")
     }
 
     /// Check if current token is the `do` keyword
+    #[inline]
     pub(crate) fn is_do_keyword(&self) -> bool {
-        matches!(self.peek().kind, TokenKind::Do)
-            || matches!(&self.peek().kind, TokenKind::Word(s) if s == "do")
+        matches!(self.peek_kind(), TokenKind::Do)
+            || matches!(self.peek_kind(), TokenKind::Word(s) if s == "do")
     }
 
     /// Check if current token is the `done` keyword
+    #[inline]
     pub(crate) fn is_done_keyword(&self) -> bool {
-        matches!(self.peek().kind, TokenKind::Done)
-            || matches!(&self.peek().kind, TokenKind::Word(s) if s == "done")
+        matches!(self.peek_kind(), TokenKind::Done)
+            || matches!(self.peek_kind(), TokenKind::Word(s) if s == "done")
     }
 
     /// Check if current token is the `then` keyword
+    #[inline]
     pub(crate) fn is_then_keyword(&self) -> bool {
-        matches!(self.peek().kind, TokenKind::Then)
-            || matches!(&self.peek().kind, TokenKind::Word(s) if s == "then")
+        matches!(self.peek_kind(), TokenKind::Then)
+            || matches!(self.peek_kind(), TokenKind::Word(s) if s == "then")
     }
 
     /// Check if current token is the `fi` keyword
+    #[inline]
     pub(crate) fn is_fi_keyword(&self) -> bool {
-        matches!(self.peek().kind, TokenKind::Fi)
-            || matches!(&self.peek().kind, TokenKind::Word(s) if s == "fi")
+        matches!(self.peek_kind(), TokenKind::Fi)
+            || matches!(self.peek_kind(), TokenKind::Word(s) if s == "fi")
     }
 
     /// Check if current token is the `else` keyword
+    #[inline]
     pub(crate) fn is_else_keyword(&self) -> bool {
-        matches!(self.peek().kind, TokenKind::Else)
-            || matches!(&self.peek().kind, TokenKind::Word(s) if s == "else")
+        matches!(self.peek_kind(), TokenKind::Else)
+            || matches!(self.peek_kind(), TokenKind::Word(s) if s == "else")
     }
 
     /// Check if current token is the `elif` keyword
+    #[inline]
     pub(crate) fn is_elif_keyword(&self) -> bool {
-        matches!(self.peek().kind, TokenKind::Elif)
-            || matches!(&self.peek().kind, TokenKind::Word(s) if s == "elif")
+        matches!(self.peek_kind(), TokenKind::Elif)
+            || matches!(self.peek_kind(), TokenKind::Word(s) if s == "elif")
     }
 
     /// Check if current token is the `esac` keyword
+    #[inline]
     pub(crate) fn is_esac_keyword(&self) -> bool {
-        matches!(self.peek().kind, TokenKind::Esac)
-            || matches!(&self.peek().kind, TokenKind::Word(s) if s == "esac")
+        matches!(self.peek_kind(), TokenKind::Esac)
+            || matches!(self.peek_kind(), TokenKind::Word(s) if s == "esac")
     }
 
     // ========================================================================
@@ -69,9 +79,9 @@ impl Parser {
             return true;
         }
 
-        // Check TokenKind first
+        // Check TokenKind first (uses peek_kind for no cloning)
         if matches!(
-            self.peek().kind,
+            self.peek_kind(),
             TokenKind::Then
                 | TokenKind::Else
                 | TokenKind::Elif
@@ -91,9 +101,9 @@ impl Parser {
         }
 
         // Also check for keyword words
-        if let TokenKind::Word(s) = &self.peek().kind {
+        if let TokenKind::Word(s) = self.peek_kind() {
             matches!(
-                s.as_str(),
+                s.as_ref(),
                 "then" | "else" | "elif" | "fi" | "do" | "done" | "esac" | "in"
             )
         } else {
@@ -103,7 +113,8 @@ impl Parser {
 
     /// Parse compound list (multiple statements)
     pub(crate) fn parse_compound_list(&mut self) -> Result<Vec<Statement>> {
-        let mut statements = Vec::new();
+        // Most compound lists have 3-8 statements
+        let mut statements = Vec::with_capacity(8);
         self.skip_newlines();
 
         loop {
@@ -188,7 +199,7 @@ impl Parser {
         self.skip_newlines();
 
         let var = match self.peek().kind.clone() {
-            TokenKind::Word(s) => s,
+            TokenKind::Word(s) => s.into_owned(),
             _ => return Err(JshError::syntax("Expected variable name after 'for'")),
         };
         self.advance();
@@ -229,6 +240,7 @@ impl Parser {
             items,
             body,
             span,
+            loop_id: crate::jit::LoopId::new(),
         }))
     }
 
@@ -259,6 +271,7 @@ impl Parser {
             condition,
             body,
             span,
+            loop_id: crate::jit::LoopId::new(),
         }))
     }
 
@@ -289,6 +302,7 @@ impl Parser {
             condition,
             body,
             span,
+            loop_id: crate::jit::LoopId::new(),
         }))
     }
 
@@ -359,7 +373,7 @@ impl Parser {
         self.skip_newlines();
 
         let var = match self.peek().kind.clone() {
-            TokenKind::Word(s) => s,
+            TokenKind::Word(s) => s.into_owned(),
             _ => return Err(JshError::syntax("Expected variable name after 'select'")),
         };
         self.advance();
@@ -413,7 +427,7 @@ impl Parser {
         self.skip_newlines();
 
         let name = match self.peek().kind.clone() {
-            TokenKind::Word(s) => s,
+            TokenKind::Word(s) => s.into_owned(),
             _ => return Err(JshError::syntax("Expected function name")),
         };
         self.advance();
@@ -449,7 +463,7 @@ impl Parser {
     pub fn parse_function_shorthand(&mut self) -> Result<Statement> {
         let span = self.current_span();
         let name = match self.peek().kind.clone() {
-            TokenKind::Word(s) => s,
+            TokenKind::Word(s) => s.into_owned(),
             _ => return Err(JshError::syntax("Expected function name")),
         };
         self.advance();
@@ -489,7 +503,7 @@ impl Parser {
 
             // Parse parameter name
             let param = match self.peek().kind.clone() {
-                TokenKind::Word(s) => s,
+                TokenKind::Word(s) => s.into_owned(),
                 TokenKind::RParen => break,
                 _ => return Err(JshError::syntax("Expected parameter name or ')'")),
             };

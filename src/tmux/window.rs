@@ -160,7 +160,7 @@ impl Window {
         // Swap the panes in the HashMap
         let p1 = self.panes.remove(&pane1).unwrap();
         let p2 = self.panes.remove(&pane2).unwrap();
-        
+
         // Update their IDs
         {
             let mut p1_lock = p1.lock().unwrap();
@@ -170,7 +170,7 @@ impl Window {
 
         self.panes.insert(pane1, p2);
         self.panes.insert(pane2, p1);
-        
+
         true
     }
 
@@ -179,13 +179,13 @@ impl Window {
         if self.panes.len() <= 1 {
             return None;
         }
-        
+
         let pane = self.panes.remove(&id)?;
-        
+
         if self.active_pane == id {
             self.active_pane = *self.panes.keys().next().unwrap_or(&0);
         }
-        
+
         self.recalculate_layout();
         Some(pane)
     }
@@ -201,7 +201,7 @@ impl Window {
         // Get terminal size
         let (width, height) = terminal_size();
         let pane_count = self.panes.len();
-        
+
         if pane_count == 0 {
             return;
         }
@@ -252,7 +252,7 @@ impl Window {
                         p.width = width;
                         p.height = main_height;
                     }
-                    
+
                     let other_width = width / (pane_count - 1) as u16;
                     for (i, id) in ids[1..].iter().enumerate() {
                         if let Some(pane) = self.panes.get(id) {
@@ -283,7 +283,7 @@ impl Window {
                         p.width = main_width;
                         p.height = height;
                     }
-                    
+
                     let other_height = height / (pane_count - 1) as u16;
                     for (i, id) in ids[1..].iter().enumerate() {
                         if let Some(pane) = self.panes.get(id) {
@@ -347,7 +347,7 @@ impl Window {
 
         // Reassign IDs
         let panes: Vec<_> = ids.iter().map(|id| self.panes.remove(id).unwrap()).collect();
-        
+
         let new_ids: Vec<usize> = self.panes.keys().cloned().collect();
         for (i, pane) in panes.into_iter().enumerate() {
             let new_id = if i < new_ids.len() { new_ids[i] } else { i };
@@ -441,7 +441,7 @@ pub struct PaneInfo {
 impl std::fmt::Display for PaneInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let marker = if self.active { "*" } else { " " };
-        write!(f, "{}:{} [{}x{}] [{},{}]", 
+        write!(f, "{}:{} [{}x{}] [{},{}]",
             self.id, marker, self.width, self.height, self.x, self.y)
     }
 }
@@ -539,7 +539,7 @@ fn terminal_size() -> (u16, u16) {
     {
         use nix::libc;
         use std::mem::MaybeUninit;
-        
+
         unsafe {
             let mut size: MaybeUninit<libc::winsize> = MaybeUninit::uninit();
             if libc::ioctl(libc::STDOUT_FILENO, libc::TIOCGWINSZ, size.as_mut_ptr()) == 0 {
@@ -548,7 +548,7 @@ fn terminal_size() -> (u16, u16) {
             }
         }
     }
-    
+
     // Default fallback
     (80, 24)
 }

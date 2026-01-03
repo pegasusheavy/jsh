@@ -1,4 +1,4 @@
-//! Compound statement execution for jsh interpreter
+//! Compound statement execution for Franken Shell interpreter
 
 use crate::ast::{
     CaseStatement, ConstBinding, FishSwitchStatement, ForLoop, IfStatement,
@@ -46,7 +46,7 @@ impl Interpreter {
                 .collect()
         } else {
             // If no items specified, use positional parameters
-            self.positional_params.clone()
+            self.positional_params.to_vec()
         };
 
         for item in items {
@@ -147,7 +147,7 @@ impl Interpreter {
                 .collect()
         } else {
             // If no items specified, use positional parameters
-            self.positional_params.clone()
+            self.positional_params.to_vec()
         };
 
         loop {
@@ -214,7 +214,7 @@ impl Interpreter {
         Ok(ExitStatus::success())
     }
 
-    /// Execute jsh match expression
+    /// Execute franken match expression
     pub(crate) fn execute_match(&mut self, match_expr: &MatchExpr) -> Result<ExitStatus> {
         let value = self.expand_word(&match_expr.value)?;
 
@@ -276,7 +276,7 @@ impl Interpreter {
         }
     }
 
-    /// Execute jsh infinite loop
+    /// Execute franken infinite loop
     pub(crate) fn execute_loop(&mut self, loop_stmt: &LoopStatement) -> Result<ExitStatus> {
         self.loop_depth += 1;
         let mut status = ExitStatus::success();
@@ -297,21 +297,21 @@ impl Interpreter {
         Ok(status)
     }
 
-    /// Execute jsh let binding
+    /// Execute franken let binding
     pub(crate) fn execute_let(&mut self, let_binding: &LetBinding) -> Result<ExitStatus> {
         let value = self.expand_word(&let_binding.value)?;
         self.set_var(&let_binding.name, &value);
         Ok(ExitStatus::success())
     }
 
-    /// Execute jsh const binding
+    /// Execute franken const binding
     pub(crate) fn execute_const(&mut self, const_binding: &ConstBinding) -> Result<ExitStatus> {
         let value = self.expand_word(&const_binding.value)?;
         self.consts.insert(const_binding.name.clone(), value);
         Ok(ExitStatus::success())
     }
 
-    /// Execute jsh try-catch-finally
+    /// Execute franken try-catch-finally
     pub(crate) fn execute_try(&mut self, try_stmt: &TryStatement) -> Result<ExitStatus> {
         let result = self.execute_statements(&try_stmt.try_block);
 

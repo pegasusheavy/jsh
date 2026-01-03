@@ -143,7 +143,7 @@ pub fn builtin_tmux_plugins(args: &[String], interp: &mut Interpreter) -> Result
 }
 
 fn print_tmux_help() {
-    println!("jsh tmux - Terminal multiplexer (tmux-compatible)");
+    println!("franken tmux - Terminal multiplexer (tmux-compatible)");
     println!();
     println!("Usage: tmux [command] [options]");
     println!();

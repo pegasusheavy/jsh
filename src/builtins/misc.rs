@@ -125,7 +125,7 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
             match output {
                 Ok(output) if output.status.success() => {
                     let stdout = String::from_utf8_lossy(&output.stdout);
-                    
+
                     for line in stdout.lines() {
                         if line.starts_with("SSH_AUTH_SOCK=") {
                             if let Some(sock) = line
@@ -156,7 +156,7 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
                     Ok(ExitStatus::success())
                 }
                 _ => {
-                    eprintln!("jsh: ssh_agent: failed to start ssh-agent");
+                    eprintln!("franken: ssh_agent: failed to start ssh-agent");
                     Ok(ExitStatus::failure(1))
                 }
             }
@@ -167,7 +167,7 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
                 let _ = Command::new("kill")
                     .arg(&pid)
                     .status();
-                
+
                 // SAFETY: Clearing env vars
                 unsafe {
                     std::env::remove_var("SSH_AUTH_SOCK");
@@ -177,11 +177,11 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
                 interp.vars.remove("SSH_AGENT_PID");
                 interp.exports.remove("SSH_AUTH_SOCK");
                 interp.exports.remove("SSH_AGENT_PID");
-                
+
                 println!("ssh-agent stopped (pid {})", pid);
                 Ok(ExitStatus::success())
             } else {
-                eprintln!("jsh: ssh_agent: no ssh-agent running");
+                eprintln!("franken: ssh_agent: no ssh-agent running");
                 Ok(ExitStatus::failure(1))
             }
         }
@@ -222,7 +222,7 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
         "add" => {
             // Check if agent is running
             if interp.get_var("SSH_AUTH_SOCK").is_none() {
-                eprintln!("jsh: ssh_agent: ssh-agent is not running");
+                eprintln!("franken: ssh_agent: ssh-agent is not running");
                 return Ok(ExitStatus::failure(1));
             }
 
@@ -236,7 +236,7 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
                     Ok(ExitStatus::success())
                 }
                 _ => {
-                    eprintln!("jsh: ssh_agent: failed to add keys");
+                    eprintln!("franken: ssh_agent: failed to add keys");
                     Ok(ExitStatus::failure(1))
                 }
             }

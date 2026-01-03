@@ -247,42 +247,44 @@ pub fn builtin_string(args: &[String], _interp: &mut Interpreter) -> Result<Exit
 }
 
 /// Simple glob-style pattern matching for Fish string match
+/// Uses iterative approach to avoid stack overflow and infinite loops
 fn glob_match_pattern(pattern: &str, text: &str) -> bool {
-    let mut pattern_chars = pattern.chars().peekable();
-    let mut text_chars = text.chars().peekable();
+    glob_match_helper(pattern.as_bytes(), text.as_bytes())
+}
 
-    while let Some(p) = pattern_chars.next() {
-        match p {
-            '*' => {
-                // Match zero or more characters
-                if pattern_chars.peek().is_none() {
-                    return true;
-                }
-                let remaining_pattern: String = pattern_chars.collect();
-                let mut remaining_text = String::new();
-                while text_chars.peek().is_some() {
-                    if glob_match_pattern(&remaining_pattern, &remaining_text) {
-                        return true;
-                    }
-                    remaining_text.insert(0, text_chars.next().unwrap());
-                }
-                return glob_match_pattern(&remaining_pattern, &remaining_text);
-            }
-            '?' => {
-                // Match exactly one character
-                if text_chars.next().is_none() {
-                    return false;
-                }
-            }
-            c => {
-                if text_chars.next() != Some(c) {
-                    return false;
-                }
-            }
+fn glob_match_helper(pattern: &[u8], text: &[u8]) -> bool {
+    let mut pi = 0; // pattern index
+    let mut ti = 0; // text index
+    let mut star_pi = None; // position in pattern after last *
+    let mut star_ti = None; // position in text when we hit last *
+
+    while ti < text.len() {
+        if pi < pattern.len() && (pattern[pi] == b'?' || pattern[pi] == text[ti]) {
+            // Match single character or ?
+            pi += 1;
+            ti += 1;
+        } else if pi < pattern.len() && pattern[pi] == b'*' {
+            // Found *, save state and try to match with zero chars
+            star_pi = Some(pi);
+            star_ti = Some(ti);
+            pi += 1;
+        } else if let Some(spi) = star_pi {
+            // No match, but we have a * to backtrack to
+            pi = spi + 1;
+            star_ti = Some(star_ti.unwrap() + 1);
+            ti = star_ti.unwrap();
+        } else {
+            // No match possible
+            return false;
         }
     }
 
-    text_chars.peek().is_none()
+    // Check remaining pattern (should only be *s)
+    while pi < pattern.len() && pattern[pi] == b'*' {
+        pi += 1;
+    }
+
+    pi == pattern.len()
 }
 
 /// contains - Fish-compatible contains check
@@ -331,7 +333,7 @@ pub fn builtin_status(args: &[String], interp: &mut Interpreter) -> Result<ExitS
             Ok(ExitStatus::failure(1)) // Simplified
         }
         "filename" | "current-filename" | "--current-filename" => {
-            println!("{}", interp.get_var("0").unwrap_or("jsh"));
+            println!("{}", interp.get_var("0").unwrap_or("fsh"));
             Ok(ExitStatus::success())
         }
         "function" | "current-function" | "--current-function" => {
@@ -526,66 +528,127 @@ pub fn builtin_math(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
     }
 }
 
-/// Simple math expression evaluator
+/// Simple math expression evaluator with depth limit to prevent stack overflow
 fn evaluate_simple_math(expr: &str) -> std::result::Result<f64, String> {
-    let expr = expr.replace(' ', "");
+    evaluate_math_with_depth(expr, 0)
+}
 
-    // Handle basic binary operations
-    if let Some(pos) = expr.rfind('+') {
+const MAX_MATH_DEPTH: usize = 50;
+
+fn evaluate_math_with_depth(expr: &str, depth: usize) -> std::result::Result<f64, String> {
+    if depth > MAX_MATH_DEPTH {
+        return Err("expression too complex".to_string());
+    }
+
+    let expr = expr.trim().replace(' ', "");
+
+    if expr.is_empty() {
+        return Err("empty expression".to_string());
+    }
+
+    // Handle parentheses first (find matching pair)
+    if expr.starts_with('(') {
+        if let Some(end) = find_matching_paren(&expr) {
+            if end == expr.len() - 1 {
+                return evaluate_math_with_depth(&expr[1..end], depth + 1);
+            }
+        }
+    }
+
+    // Handle addition/subtraction (lowest precedence, process right-to-left)
+    // Skip operators inside parentheses
+    if let Some(pos) = find_top_level_op(&expr, &['+', '-']) {
         if pos > 0 {
-            let left = evaluate_simple_math(&expr[..pos])?;
-            let right = evaluate_simple_math(&expr[pos + 1..])?;
-            return Ok(left + right);
+            let left = evaluate_math_with_depth(&expr[..pos], depth + 1)?;
+            let op = expr.chars().nth(pos).unwrap();
+            let right = evaluate_math_with_depth(&expr[pos + 1..], depth + 1)?;
+            return match op {
+                '+' => Ok(left + right),
+                '-' => Ok(left - right),
+                _ => unreachable!(),
+            };
         }
     }
 
-    if let Some(pos) = expr.rfind('-') {
-        if pos > 0 && !matches!(expr.chars().nth(pos - 1), Some('*') | Some('/') | Some('^')) {
-            let left = evaluate_simple_math(&expr[..pos])?;
-            let right = evaluate_simple_math(&expr[pos + 1..])?;
-            return Ok(left - right);
-        }
+    // Handle multiplication/division/modulo
+    if let Some(pos) = find_top_level_op(&expr, &['*', '/', '%']) {
+        let left = evaluate_math_with_depth(&expr[..pos], depth + 1)?;
+        let op = expr.chars().nth(pos).unwrap();
+        let right = evaluate_math_with_depth(&expr[pos + 1..], depth + 1)?;
+        return match op {
+            '*' => Ok(left * right),
+            '/' => {
+                if right == 0.0 {
+                    Err("division by zero".to_string())
+                } else {
+                    Ok(left / right)
+                }
+            }
+            '%' => Ok(left % right),
+            _ => unreachable!(),
+        };
     }
 
-    if let Some(pos) = expr.rfind('*') {
-        let left = evaluate_simple_math(&expr[..pos])?;
-        let right = evaluate_simple_math(&expr[pos + 1..])?;
-        return Ok(left * right);
-    }
-
-    if let Some(pos) = expr.rfind('/') {
-        let left = evaluate_simple_math(&expr[..pos])?;
-        let right = evaluate_simple_math(&expr[pos + 1..])?;
-        if right == 0.0 {
-            return Err("division by zero".to_string());
-        }
-        return Ok(left / right);
-    }
-
-    if let Some(pos) = expr.rfind('%') {
-        let left = evaluate_simple_math(&expr[..pos])?;
-        let right = evaluate_simple_math(&expr[pos + 1..])?;
-        return Ok(left % right);
-    }
-
-    if let Some(pos) = expr.rfind('^') {
-        let left = evaluate_simple_math(&expr[..pos])?;
-        let right = evaluate_simple_math(&expr[pos + 1..])?;
+    // Handle exponentiation (right associative)
+    if let Some(pos) = find_top_level_op(&expr, &['^']) {
+        let left = evaluate_math_with_depth(&expr[..pos], depth + 1)?;
+        let right = evaluate_math_with_depth(&expr[pos + 1..], depth + 1)?;
         return Ok(left.powf(right));
     }
 
-    // Handle parentheses
-    if expr.starts_with('(') && expr.ends_with(')') {
-        return evaluate_simple_math(&expr[1..expr.len() - 1]);
+    // Handle unary minus
+    if expr.starts_with('-') && expr.len() > 1 {
+        return Ok(-evaluate_math_with_depth(&expr[1..], depth + 1)?);
     }
 
-    // Handle unary minus
-    if expr.starts_with('-') {
-        return Ok(-evaluate_simple_math(&expr[1..])?);
+    // Handle unary plus
+    if expr.starts_with('+') && expr.len() > 1 {
+        return evaluate_math_with_depth(&expr[1..], depth + 1);
     }
 
     // Try to parse as number
     expr.parse::<f64>()
         .map_err(|_| format!("invalid number: {}", expr))
+}
+
+/// Find matching closing parenthesis
+fn find_matching_paren(expr: &str) -> Option<usize> {
+    let mut depth = 0;
+    for (i, c) in expr.chars().enumerate() {
+        match c {
+            '(' => depth += 1,
+            ')' => {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(i);
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+/// Find top-level operator (not inside parentheses), searching right-to-left
+fn find_top_level_op(expr: &str, ops: &[char]) -> Option<usize> {
+    let mut depth = 0;
+    let chars: Vec<char> = expr.chars().collect();
+
+    // Search right-to-left for proper precedence
+    for i in (0..chars.len()).rev() {
+        match chars[i] {
+            '(' => depth += 1,
+            ')' => depth -= 1,
+            c if depth == 0 && ops.contains(&c) => {
+                // Skip if this is part of a number (e.g., -5)
+                if c == '-' && (i == 0 || matches!(chars.get(i - 1), Some(&'(') | Some(&'+') | Some(&'-') | Some(&'*') | Some(&'/') | Some(&'%') | Some(&'^'))) {
+                    continue;
+                }
+                return Some(i);
+            }
+            _ => {}
+        }
+    }
+    None
 }
 

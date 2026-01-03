@@ -7,7 +7,7 @@ use std::io::{self, Read};
 /// source - execute commands from file
 pub fn builtin_source(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
     if args.is_empty() {
-        eprintln!("jsh: source: filename argument required");
+        eprintln!("franken: source: filename argument required");
         return Ok(ExitStatus::failure(1));
     }
 
@@ -28,7 +28,7 @@ pub fn builtin_exec(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
 
     use std::os::unix::process::CommandExt;
     let err = std::process::Command::new(&args[0]).args(&args[1..]).exec();
-    eprintln!("jsh: exec: {}: {}", args[0], err);
+    eprintln!("franken: exec: {}: {}", args[0], err);
     Ok(ExitStatus::failure(126))
 }
 
@@ -46,10 +46,10 @@ pub fn builtin_shift(args: &[String], interp: &mut Interpreter) -> Result<ExitSt
         .unwrap_or(1);
 
     if n <= interp.positional_params.len() {
-        interp.positional_params = interp.positional_params[n..].to_vec();
+        interp.positional_params = interp.positional_params[n..].iter().cloned().collect();
         Ok(ExitStatus::success())
     } else {
-        eprintln!("jsh: shift: shift count out of range");
+        eprintln!("franken: shift: shift count out of range");
         Ok(ExitStatus::failure(1))
     }
 }

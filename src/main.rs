@@ -1,15 +1,15 @@
-//! jsh - A ZSH/Bash-compatible shell with enhanced scripting features
+//! fsh - Franken Shell: The vibe-coded shell that does everything stupidly
 
 use colored::Colorize;
-use jsh::Shell;
+use franken_shell::Shell;
 use std::env;
 use std::process::ExitCode;
 
 fn print_version() {
     println!(
-        "{} {} - A ZSH/Bash-compatible shell",
-        "jsh".cyan().bold(),
-        jsh::VERSION
+        "{} {} - Franken Shell: The vibe-coded shell",
+        "fsh".cyan().bold(),
+        franken_shell::VERSION
     );
     println!("Copyright (c) 2025 Pegasus Heavy Industries LLC");
     println!("Licensed under MIT OR Apache-2.0");
@@ -19,7 +19,7 @@ fn print_help() {
     print_version();
     println!();
     println!("{}", "USAGE:".yellow().bold());
-    println!("    jsh [OPTIONS] [SCRIPT] [ARGS...]");
+    println!("    fsh [OPTIONS] [SCRIPT] [ARGS...]");
     println!();
     println!("{}", "OPTIONS:".yellow().bold());
     println!("    -c <command>    Execute command string and exit");
@@ -36,13 +36,13 @@ fn print_help() {
     println!("    Path to script file to execute");
     println!();
     println!("{}", "EXAMPLES:".yellow().bold());
-    println!("    jsh                     Start interactive shell");
-    println!("    jsh script.sh           Run a script");
-    println!("    jsh -c 'echo hello'     Run a command");
-    println!("    jsh script.sh arg1 arg2 Run script with arguments");
+    println!("    fsh                     Start interactive shell");
+    println!("    fsh script.sh           Run a script");
+    println!("    fsh -c 'echo hello'     Run a command");
+    println!("    fsh script.sh arg1 arg2 Run script with arguments");
     println!();
-    println!("{}", "JSH FEATURES:".yellow().bold());
-    println!("    jsh extends Bash/ZSH with modern syntax:");
+    println!("{}", "FRANKEN FEATURES:".yellow().bold());
+    println!("    fsh extends Bash/ZSH with modern syntax:");
     println!();
     println!("    {} - Pattern matching like Rust", "match".magenta());
     println!("        match $val {{");
@@ -70,7 +70,7 @@ fn main() -> ExitCode {
 
     // Check if invoked as login shell (argv[0] starts with '-' or --login flag)
     let invoked_as_login = args.first()
-        .map(|s| s.starts_with('-') || s.ends_with("-jsh"))
+        .map(|s| s.starts_with('-') || s.ends_with("-fsh"))
         .unwrap_or(false);
 
     let mut command: Option<String> = None;

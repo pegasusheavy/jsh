@@ -55,7 +55,7 @@ impl KeyTable {
         table.bind("n", "next-window");
         table.bind("p", "previous-window");
         table.bind("l", "last-window");
-        
+
         // Window selection by number
         for i in 0..=9 {
             table.bind(&i.to_string(), &format!("select-window -t :{}", i));
@@ -158,7 +158,7 @@ impl KeyTable {
         table.bind("C-f", "send-keys -X cursor-right");
         table.bind("C-n", "send-keys -X cursor-down");
         table.bind("C-p", "send-keys -X cursor-up");
-        
+
         // Page navigation
         table.bind("PageUp", "send-keys -X page-up");
         table.bind("PageDown", "send-keys -X page-down");
@@ -207,7 +207,7 @@ impl KeyTable {
         table.bind("H", "send-keys -X top-line");
         table.bind("L", "send-keys -X bottom-line");
         table.bind("M", "send-keys -X middle-line");
-        
+
         // Page navigation
         table.bind("C-b", "send-keys -X page-up");
         table.bind("C-f", "send-keys -X page-down");
@@ -277,12 +277,12 @@ impl Default for KeyTable {
 /// Parse key string to key code
 pub fn parse_key(key: &str) -> Option<KeyCode> {
     let key = key.trim();
-    
+
     // Check for modifiers
     let mut ctrl = false;
     let mut alt = false;
     let mut shift = false;
-    
+
     let parts: Vec<&str> = key.split('-').collect();
     let base_key = if parts.len() > 1 {
         for part in &parts[..parts.len()-1] {
@@ -375,7 +375,7 @@ impl std::fmt::Display for KeyCode {
         if self.ctrl { parts.push("C"); }
         if self.alt { parts.push("M"); }
         if self.shift { parts.push("S"); }
-        
+
         let base = match &self.base {
             BaseKey::Char(c) => c.to_string(),
             BaseKey::F(n) => format!("F{}", n),
@@ -395,7 +395,7 @@ impl std::fmt::Display for KeyCode {
             BaseKey::Left => "Left".to_string(),
             BaseKey::Right => "Right".to_string(),
         };
-        
+
         parts.push(&base);
         write!(f, "{}", parts.join("-"))
     }

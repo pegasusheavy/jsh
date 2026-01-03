@@ -54,9 +54,9 @@ impl Session {
 
         let window_name = name.unwrap_or(&format!("{}", id)).to_string();
         let window = Arc::new(Mutex::new(Window::new(id, &window_name)));
-        
+
         self.windows.insert(id, window.clone());
-        
+
         if self.windows.len() == 1 {
             self.current_window = id;
         }
@@ -94,7 +94,7 @@ impl Session {
     pub fn next_window(&mut self) -> bool {
         let mut indices: Vec<usize> = self.windows.keys().cloned().collect();
         indices.sort();
-        
+
         if let Some(pos) = indices.iter().position(|&i| i == self.current_window) {
             let next = if pos + 1 < indices.len() {
                 indices[pos + 1]
@@ -111,7 +111,7 @@ impl Session {
     pub fn previous_window(&mut self) -> bool {
         let mut indices: Vec<usize> = self.windows.keys().cloned().collect();
         indices.sort();
-        
+
         if let Some(pos) = indices.iter().position(|&i| i == self.current_window) {
             let prev = if pos > 0 {
                 indices[pos - 1]
@@ -159,7 +159,7 @@ impl Session {
     pub fn list_windows(&self) -> Vec<WindowInfo> {
         let mut windows: Vec<_> = self.windows.iter().collect();
         windows.sort_by_key(|(id, _)| *id);
-        
+
         windows.into_iter().map(|(id, window)| {
             let w = window.lock().unwrap();
             WindowInfo {
@@ -205,7 +205,7 @@ impl Session {
 
         for (i, (old_id, window)) in windows.into_iter().enumerate() {
             let new_id = base_index + i;
-            
+
             if old_id == self.current_window {
                 new_current = new_id;
             }
@@ -217,7 +217,7 @@ impl Session {
                 let mut w = window.lock().unwrap();
                 w.index = new_id;
             }
-            
+
             new_windows.insert(new_id, window);
         }
 

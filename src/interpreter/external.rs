@@ -1,6 +1,8 @@
-//! External command execution for jsh interpreter
+//! External command execution for Franken Shell interpreter
 
-use crate::ast::{Command as AstCommand, CommandKind, Redirect, RedirectKind, RedirectTarget};
+use crate::ast::{
+    Command as AstCommand, CommandKind, FlatCommand, Redirect, RedirectKind, RedirectTarget,
+};
 use crate::error::{JshError, Result};
 use crate::interpreter::{ExitStatus, Interpreter};
 use std::fs::{File, OpenOptions};
@@ -8,6 +10,53 @@ use std::os::unix::io::{AsRawFd, FromRawFd};
 use std::process::{Child, Command as ProcessCommand, Stdio};
 
 impl Interpreter {
+    /// Execute an external command (flat version - no expansion needed)
+    ///
+    /// This is an optimized path for commands with no variable expansions
+    /// or glob patterns, which is the common case for most commands.
+    #[inline]
+    pub fn execute_external_flat(
+        &mut self,
+        flat: &FlatCommand,
+        redirects: &[Redirect],
+    ) -> Result<ExitStatus> {
+        let name = flat.name();
+        let args = flat.args();
+
+        let mut cmd = ProcessCommand::new(name);
+        cmd.args(args);
+        cmd.current_dir(&self.cwd);
+
+        // Set up environment
+        for (key, value) in &self.env {
+            cmd.env(key, value);
+        }
+
+        // Set up redirections
+        self.setup_redirects(&mut cmd, redirects)?;
+
+        // Execute
+        match cmd.status() {
+            Ok(status) => {
+                let code = status.code().unwrap_or(128);
+                self.last_arg = args.last().cloned().unwrap_or_default();
+                Ok(ExitStatus::failure(code))
+            }
+            Err(e) => {
+                if e.kind() == std::io::ErrorKind::NotFound {
+                    eprintln!("fsh: {}: command not found", name);
+                    Ok(ExitStatus::failure(127))
+                } else if e.kind() == std::io::ErrorKind::PermissionDenied {
+                    eprintln!("fsh: {}: permission denied", name);
+                    Ok(ExitStatus::failure(126))
+                } else {
+                    eprintln!("fsh: {}: {}", name, e);
+                    Ok(ExitStatus::failure(1))
+                }
+            }
+        }
+    }
+
     /// Execute an external command
     pub fn execute_external(
         &mut self,
@@ -35,10 +84,10 @@ impl Interpreter {
             }
             Err(e) => {
                 if e.kind() == std::io::ErrorKind::NotFound {
-                    eprintln!("jsh: {}: command not found", name);
+                    eprintln!("franken: {}: command not found", name);
                     Err(JshError::CommandNotFound(name.to_string()))
                 } else {
-                    eprintln!("jsh: {}: {}", name, e);
+                    eprintln!("franken: {}: {}", name, e);
                     Err(JshError::Io(e))
                 }
             }
@@ -92,9 +141,52 @@ impl Interpreter {
                     Ok(child) => Ok(Some(child)),
                     Err(e) => {
                         if e.kind() == std::io::ErrorKind::NotFound {
-                            eprintln!("jsh: {}: command not found", name);
+                            eprintln!("franken: {}: command not found", name);
                         } else {
-                            eprintln!("jsh: {}: {}", name, e);
+                            eprintln!("franken: {}: {}", name, e);
+                        }
+                        Ok(None)
+                    }
+                }
+            }
+            CommandKind::Flat(flat) => {
+                // Fast path for flat commands (no expansions needed)
+                if flat.is_empty() {
+                    return Ok(None);
+                }
+
+                let name = flat.name();
+                let args = flat.args();
+
+                // Check for functions
+                if self.functions.contains_key(name) {
+                    let word_args: Vec<crate::ast::Word> = args
+                        .iter()
+                        .map(|a| crate::ast::Word::literal(a.clone(), crate::token::Span::default()))
+                        .collect();
+                    self.call_function(name, &word_args)?;
+                    return Ok(None);
+                }
+
+                let mut process_cmd = ProcessCommand::new(name);
+                process_cmd.args(args);
+                process_cmd.current_dir(&self.cwd);
+                process_cmd.stdin(stdin);
+                process_cmd.stdout(stdout);
+
+                for (key, value) in &self.env {
+                    process_cmd.env(key, value);
+                }
+
+                self.setup_redirects(&mut process_cmd, &cmd.redirects)?;
+
+                match process_cmd.spawn() {
+                    Ok(child) => Ok(Some(child)),
+                    Err(e) => {
+                        if e.kind() == std::io::ErrorKind::NotFound {
+                            eprintln!("fsh: {}: command not found", name);
+                        } else {
+                            eprintln!("fsh: {}: {}", name, e);
                         }
                         Ok(None)
                     }

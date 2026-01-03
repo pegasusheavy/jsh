@@ -1,9 +1,10 @@
-//! Lexer benchmarks for jsh
+//! Lexer benchmarks for Franken Shell
 //!
 //! Benchmarks tokenization performance across various input types.
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use jsh::lexer::Lexer;
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use std::hint::black_box;
+use franken_shell::lexer::Lexer;
 
 /// Simple command tokenization
 fn bench_simple_command(c: &mut Criterion) {
@@ -148,7 +149,7 @@ fn bench_control_flow(c: &mut Criterion) {
     group.finish();
 }
 
-/// jsh-specific syntax tokenization
+/// franken-specific syntax tokenization
 fn bench_jsh_syntax(c: &mut Criterion) {
     let inputs = [
         ("match_simple", "match $x { 1 => echo one; * => echo other }"),
@@ -180,13 +181,13 @@ fn bench_jsh_syntax(c: &mut Criterion) {
 /// Realistic script tokenization
 fn bench_realistic_scripts(c: &mut Criterion) {
     let small_script = r#"
-#!/usr/bin/env jsh
+#!/usr/bin/env franken
 name="World"
 echo "Hello, $name!"
 "#;
 
     let medium_script = r#"
-#!/usr/bin/env jsh
+#!/usr/bin/env franken
 # A medium-sized script
 
 name="${1:-World}"
@@ -208,7 +209,7 @@ fi
 "#;
 
     let large_script = r#"
-#!/usr/bin/env jsh
+#!/usr/bin/env franken
 # A larger, more complex script
 
 set -e

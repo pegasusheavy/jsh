@@ -11,13 +11,13 @@ pub fn builtin_jobs(_args: &[String], _interp: &mut Interpreter) -> Result<ExitS
 
 /// fg - bring job to foreground
 pub fn builtin_fg(_args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
-    eprintln!("jsh: fg: job control not implemented");
+    eprintln!("franken: fg: job control not implemented");
     Ok(ExitStatus::failure(1))
 }
 
 /// bg - send job to background
 pub fn builtin_bg(_args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
-    eprintln!("jsh: bg: job control not implemented");
+    eprintln!("franken: bg: job control not implemented");
     Ok(ExitStatus::failure(1))
 }
 

@@ -1,4 +1,4 @@
-//! Plugin Manager for jsh
+//! Plugin Manager for Franken Shell
 //!
 //! A zplug-inspired plugin manager supporting:
 //! - Oh-My-Zsh plugins and themes
@@ -6,10 +6,10 @@
 //! - Bash plugins
 //! - Generic Git-based plugins
 //!
-//! Plugins are stored in $XDG_DATA_HOME/jsh/plugins/
+//! Plugins are stored in $XDG_DATA_HOME/fsh/plugins/
 
 use crate::error::{JshError, Result};
-use crate::shell::{jsh_data_dir, jsh_cache_dir};
+use crate::shell::{fsh_data_dir, fsh_cache_dir};
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
@@ -167,17 +167,17 @@ impl Plugin {
 
 /// Get the plugins directory
 pub fn plugins_dir() -> PathBuf {
-    jsh_data_dir().join("plugins")
+    fsh_data_dir().join("plugins")
 }
 
 /// Get the oh-my-zsh installation directory
 pub fn omz_dir() -> PathBuf {
-    jsh_data_dir().join("oh-my-zsh")
+    fsh_data_dir().join("oh-my-zsh")
 }
 
 /// Get the plugin cache directory
 pub fn plugin_cache_dir() -> PathBuf {
-    jsh_cache_dir().join("plugins")
+    fsh_cache_dir().join("plugins")
 }
 
 /// Plugin Manager

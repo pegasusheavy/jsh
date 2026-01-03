@@ -1,13 +1,14 @@
-//! Parser benchmarks for jsh
+//! Parser benchmarks for Franken Shell
 //!
 //! Benchmarks parsing performance for various shell constructs.
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use jsh::lexer::Lexer;
-use jsh::parser::Parser;
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use std::hint::black_box;
+use franken_shell::lexer::Lexer;
+use franken_shell::parser::Parser;
 
 /// Helper to parse input
-fn parse_input(input: &str) -> jsh::ast::Program {
+fn parse_input(input: &str) -> franken_shell::ast::Program {
     let mut lexer = Lexer::new(input);
     let tokens = lexer.tokenize().unwrap();
     let mut parser = Parser::new(tokens);
@@ -127,7 +128,7 @@ fn bench_functions(c: &mut Criterion) {
     group.finish();
 }
 
-/// jsh-specific syntax parsing
+/// franken-specific syntax parsing
 fn bench_jsh_syntax(c: &mut Criterion) {
     let inputs = [
         ("match_simple", "match $x { 1 => echo one; * => echo other }"),
@@ -172,7 +173,7 @@ done
 "#;
 
     let medium_script = r#"
-#!/usr/bin/env jsh
+#!/usr/bin/env franken
 set -e
 
 name="${1:-World}"
@@ -199,7 +200,7 @@ main "$@"
 "#;
 
     let large_script = r#"
-#!/usr/bin/env jsh
+#!/usr/bin/env franken
 set -e
 
 readonly VERSION="1.0.0"

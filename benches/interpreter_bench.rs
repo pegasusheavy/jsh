@@ -1,14 +1,15 @@
-//! Interpreter benchmarks for jsh
+//! Interpreter benchmarks for Franken Shell
 //!
 //! Benchmarks execution performance for various shell constructs.
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
-use jsh::interpreter::Interpreter;
-use jsh::lexer::Lexer;
-use jsh::parser::Parser;
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use std::hint::black_box;
+use franken_shell::interpreter::Interpreter;
+use franken_shell::lexer::Lexer;
+use franken_shell::parser::Parser;
 
 /// Helper to execute input
-fn execute_input(input: &str) -> jsh::interpreter::ExitStatus {
+fn execute_input(input: &str) -> franken_shell::interpreter::ExitStatus {
     let mut lexer = Lexer::new(input);
     let tokens = lexer.tokenize().unwrap();
     let mut parser = Parser::new(tokens);
@@ -170,7 +171,7 @@ fn bench_arithmetic(c: &mut Criterion) {
     group.finish();
 }
 
-/// jsh-specific features benchmark
+/// franken-specific features benchmark
 fn bench_jsh_features(c: &mut Criterion) {
     let inputs = [
         (

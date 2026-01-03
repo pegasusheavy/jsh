@@ -1,5 +1,11 @@
-//! Token definitions for jsh lexer
+//! Token definitions for Franken Shell lexer
+//!
+//! Uses `Cow<'static, str>` with string interning for efficient string storage.
+//! Common strings (keywords, variable names) are interned and shared.
+//! Keyword lookup uses perfect hashing (PHF) for O(1) lookup.
 
+use phf::phf_map;
+use std::borrow::Cow;
 use std::fmt;
 
 /// Position in source code
@@ -12,6 +18,7 @@ pub struct Span {
 }
 
 impl Span {
+    #[inline]
     pub fn new(start: usize, end: usize, line: usize, column: usize) -> Self {
         Self {
             start,
@@ -22,19 +29,49 @@ impl Span {
     }
 }
 
+/// A string that may be borrowed (interned) or owned.
+/// Using Cow<'static, str> allows us to:
+/// - Borrow from static strings (keywords, common variable names)
+/// - Own strings that need to be allocated (escaped strings, unique identifiers)
+pub type TokenStr = Cow<'static, str>;
+
+/// Create a borrowed token string from a static str
+#[inline]
+pub fn borrowed_str(s: &'static str) -> TokenStr {
+    Cow::Borrowed(s)
+}
+
+/// Create an owned token string
+#[inline]
+pub fn owned_str(s: String) -> TokenStr {
+    Cow::Owned(s)
+}
+
+/// Convert a TokenStr to an owned String
+#[inline]
+pub fn into_string(s: TokenStr) -> String {
+    s.into_owned()
+}
+
+/// Get a &str reference from TokenStr
+#[inline]
+pub fn as_str(s: &TokenStr) -> &str {
+    s.as_ref()
+}
+
 /// Token types for shell syntax
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenKind {
     // Literals
-    Word(String),           // Regular word/identifier
-    String(String),         // "double quoted" or 'single quoted'
-    RawString(String),      // $'...' ANSI-C style
+    Word(TokenStr),         // Regular word/identifier
+    String(TokenStr),       // "double quoted" or 'single quoted'
+    RawString(TokenStr),    // $'...' ANSI-C style
     Number(i64),            // Integer literal
     Float(f64),             // Float literal
 
     // Variables
-    Variable(String),       // $var
-    VariableBrace(String),  // ${var}
+    Variable(TokenStr),     // $var
+    VariableBrace(TokenStr),// ${var}
     SpecialVar(char),       // $?, $!, $$, $#, $@, $*, $0-$9
 
     // Operators
@@ -118,7 +155,7 @@ pub enum TokenKind {
     Coproc,
     // Note: local, export, readonly, declare, typeset, unset, shift are builtins, not keywords
 
-    // jsh-specific keywords (enhanced syntax)
+    // franken-specific keywords (enhanced syntax)
     Match_,                 // match keyword (different from =~ operator)
     When,                   // when (for match arms)
     Loop,                   // loop (infinite loop)
@@ -141,8 +178,8 @@ pub enum TokenKind {
     Contains,               // contains (Fish-style list contains)
 
     // Special
-    Glob(String),           // *, ?, [...]
-    Comment(String),        // # comment
+    Glob(TokenStr),         // *, ?, [...]
+    Comment(TokenStr),      // # comment
     Eof,
 }
 
@@ -299,65 +336,120 @@ impl Token {
     }
 }
 
-/// Check if a word is a keyword
+/// Keyword ID for perfect hash lookup
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+enum KeywordId {
+    If, Then, Else, Elif, Fi,
+    Case, Esac,
+    For, In, Do, Done,
+    While, Until, Select,
+    Function, Return, Break, Continue,
+    Time, Coproc,
+    // Franken-specific
+    Match, When, Loop, Fn,
+    Let, Const,
+    Try, Catch, Finally, Throw,
+    // Fish-compatible
+    End, Begin, Switch,
+    And, Or, Not,
+    Contains,
+}
+
+/// Perfect hash map for keyword lookup (O(1) lookup, generated at compile time)
+static KEYWORDS: phf::Map<&'static str, KeywordId> = phf_map! {
+    // Shell keywords
+    "if" => KeywordId::If,
+    "then" => KeywordId::Then,
+    "else" => KeywordId::Else,
+    "elif" => KeywordId::Elif,
+    "fi" => KeywordId::Fi,
+    "case" => KeywordId::Case,
+    "esac" => KeywordId::Esac,
+    "for" => KeywordId::For,
+    "in" => KeywordId::In,
+    "do" => KeywordId::Do,
+    "done" => KeywordId::Done,
+    "while" => KeywordId::While,
+    "until" => KeywordId::Until,
+    "select" => KeywordId::Select,
+    "function" => KeywordId::Function,
+    "return" => KeywordId::Return,
+    "break" => KeywordId::Break,
+    "continue" => KeywordId::Continue,
+    "time" => KeywordId::Time,
+    "coproc" => KeywordId::Coproc,
+    // Franken-specific keywords
+    "match" => KeywordId::Match,
+    "when" => KeywordId::When,
+    "loop" => KeywordId::Loop,
+    "fn" => KeywordId::Fn,
+    "let" => KeywordId::Let,
+    "const" => KeywordId::Const,
+    "try" => KeywordId::Try,
+    "catch" => KeywordId::Catch,
+    "finally" => KeywordId::Finally,
+    "throw" => KeywordId::Throw,
+    // Fish-compatible keywords
+    "end" => KeywordId::End,
+    "begin" => KeywordId::Begin,
+    "switch" => KeywordId::Switch,
+    "and" => KeywordId::And,
+    "or" => KeywordId::Or,
+    "not" => KeywordId::Not,
+    // Note: "contains" is NOT a keyword - it's a Fish builtin command
+    // If it were a keyword, it would break "contains foo bar" as a command
+};
+
+/// Check if a word is a keyword using perfect hash lookup
+///
+/// Uses compile-time generated perfect hash function for O(1) lookup.
+#[inline]
 pub fn keyword_from_str(s: &str) -> Option<TokenKind> {
-    match s {
-        "if" => Some(TokenKind::If),
-        "then" => Some(TokenKind::Then),
-        "else" => Some(TokenKind::Else),
-        "elif" => Some(TokenKind::Elif),
-        "fi" => Some(TokenKind::Fi),
-        "case" => Some(TokenKind::Case),
-        "esac" => Some(TokenKind::Esac),
-        "for" => Some(TokenKind::For),
-        "in" => Some(TokenKind::In),
-        "do" => Some(TokenKind::Do),
-        "done" => Some(TokenKind::Done),
-        "while" => Some(TokenKind::While),
-        "until" => Some(TokenKind::Until),
-        "select" => Some(TokenKind::Select),
-        "function" => Some(TokenKind::Function),
-        "return" => Some(TokenKind::Return),
-        "break" => Some(TokenKind::Break),
-        "continue" => Some(TokenKind::Continue),
-        // "local" is handled as builtin, not keyword
-        // "local" => Some(TokenKind::Local),
-        // "export" is handled as builtin, not keyword
-        // "export" => Some(TokenKind::Export),
-        // "readonly" is handled as builtin, not keyword
-        // "readonly" => Some(TokenKind::Readonly),
-        // "declare" is handled as builtin, not keyword
-        // "declare" => Some(TokenKind::Declare),
-        // "typeset" is handled as builtin, not keyword
-        // "typeset" => Some(TokenKind::Typeset),
-        // "unset" is handled as builtin, not keyword
-        // "unset" => Some(TokenKind::Unset),
-        // "shift" is handled as builtin, not keyword
-        // "shift" => Some(TokenKind::Shift),
-        "time" => Some(TokenKind::Time),
-        "coproc" => Some(TokenKind::Coproc),
-        // jsh-specific
-        "match" => Some(TokenKind::Match_),
-        "when" => Some(TokenKind::When),
-        "loop" => Some(TokenKind::Loop),
-        "fn" => Some(TokenKind::Fn),
-        "let" => Some(TokenKind::Let),
-        "const" => Some(TokenKind::Const),
-        "try" => Some(TokenKind::Try),
-        "catch" => Some(TokenKind::Catch),
-        "finally" => Some(TokenKind::Finally),
-        "throw" => Some(TokenKind::Throw),
-        // Fish-compatible keywords
-        "end" => Some(TokenKind::End),
-        "begin" => Some(TokenKind::Begin),
-        "switch" => Some(TokenKind::Switch),
-        "and" => Some(TokenKind::And_),
-        "or" => Some(TokenKind::Or_),
-        "not" => Some(TokenKind::Not_),
-        // "set" is handled as builtin, not keyword
-        // "set" => Some(TokenKind::Set),
-        "contains" => Some(TokenKind::Contains),
-        _ => None,
-    }
+    KEYWORDS.get(s).map(|id| match id {
+        KeywordId::If => TokenKind::If,
+        KeywordId::Then => TokenKind::Then,
+        KeywordId::Else => TokenKind::Else,
+        KeywordId::Elif => TokenKind::Elif,
+        KeywordId::Fi => TokenKind::Fi,
+        KeywordId::Case => TokenKind::Case,
+        KeywordId::Esac => TokenKind::Esac,
+        KeywordId::For => TokenKind::For,
+        KeywordId::In => TokenKind::In,
+        KeywordId::Do => TokenKind::Do,
+        KeywordId::Done => TokenKind::Done,
+        KeywordId::While => TokenKind::While,
+        KeywordId::Until => TokenKind::Until,
+        KeywordId::Select => TokenKind::Select,
+        KeywordId::Function => TokenKind::Function,
+        KeywordId::Return => TokenKind::Return,
+        KeywordId::Break => TokenKind::Break,
+        KeywordId::Continue => TokenKind::Continue,
+        KeywordId::Time => TokenKind::Time,
+        KeywordId::Coproc => TokenKind::Coproc,
+        KeywordId::Match => TokenKind::Match_,
+        KeywordId::When => TokenKind::When,
+        KeywordId::Loop => TokenKind::Loop,
+        KeywordId::Fn => TokenKind::Fn,
+        KeywordId::Let => TokenKind::Let,
+        KeywordId::Const => TokenKind::Const,
+        KeywordId::Try => TokenKind::Try,
+        KeywordId::Catch => TokenKind::Catch,
+        KeywordId::Finally => TokenKind::Finally,
+        KeywordId::Throw => TokenKind::Throw,
+        KeywordId::End => TokenKind::End,
+        KeywordId::Begin => TokenKind::Begin,
+        KeywordId::Switch => TokenKind::Switch,
+        KeywordId::And => TokenKind::And_,
+        KeywordId::Or => TokenKind::Or_,
+        KeywordId::Not => TokenKind::Not_,
+        KeywordId::Contains => TokenKind::Contains,
+    })
+}
+
+/// Check if a string is a keyword (without allocating TokenKind)
+#[inline]
+pub fn is_keyword(s: &str) -> bool {
+    KEYWORDS.contains_key(s)
 }
 

@@ -16,7 +16,7 @@ pub fn builtin_type(args: &[String], interp: &mut Interpreter) -> Result<ExitSta
         } else if let Ok(path) = which::which(name) {
             println!("{} is {}", name, path.display());
         } else {
-            eprintln!("jsh: type: {}: not found", name);
+            eprintln!("franken: type: {}: not found", name);
         }
     }
 
@@ -75,7 +75,7 @@ pub fn builtin_builtin(args: &[String], interp: &mut Interpreter) -> Result<Exit
     if let Some(status) = builtins.execute(&args[0], &args[1..], interp)? {
         Ok(status)
     } else {
-        eprintln!("jsh: builtin: {}: not a shell builtin", args[0]);
+        eprintln!("franken: builtin: {}: not a shell builtin", args[0]);
         Ok(ExitStatus::failure(1))
     }
 }
@@ -83,7 +83,7 @@ pub fn builtin_builtin(args: &[String], interp: &mut Interpreter) -> Result<Exit
 /// help - display help
 pub fn builtin_help(args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
     if args.is_empty() {
-        println!("jsh - Joseph's Shell - A ZSH/Bash-compatible shell with enhanced scripting");
+        println!("franken - Franken Shell - The vibe-coded shell that does everything stupidly");
         println!();
         println!("Built-in commands:");
         let builtins = Builtins::new();
@@ -93,7 +93,7 @@ pub fn builtin_help(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
             println!("  {}", chunk.join("  "));
         }
         println!();
-        println!("jsh-specific features:");
+        println!("franken-specific features:");
         println!("  match    - Pattern matching expression");
         println!("  loop     - Infinite loop");
         println!("  let      - Variable binding");
@@ -107,8 +107,8 @@ pub fn builtin_help(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
         println!("  theme preview        - Preview all themes");
         println!();
         println!("Theme variables:");
-        println!("  JSH_THEME   - Set theme by name (in .jshrc)");
-        println!("  PROMPT      - Custom prompt string (ZSH format)");
+        println!("  FSH_THEME - Set theme by name (in .fshrc)");
+        println!("  PROMPT        - Custom prompt string (ZSH format)");
         println!("  RPROMPT     - Right prompt string");
         println!();
         println!("Prompt escape sequences (ZSH-style):");
@@ -160,11 +160,11 @@ pub fn builtin_help(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
                     println!("  theme preview        - Preview all themes");
                     println!("  theme preview <name> - Preview specific theme");
                     println!();
-                    println!("Available themes: robbyrussell, agnoster, minimal, jsh,");
+                    println!("Available themes: robbyrussell, agnoster, minimal, franken,");
                     println!("                  powerlevel, simple, pure");
                     println!();
                     println!("You can also set themes via environment variables:");
-                    println!("  export JSH_THEME=<name>");
+                    println!("  export FSH_THEME=<name>");
                     println!("  export PROMPT='<prompt string>'");
                 }
                 "prompt" | "PROMPT" => {

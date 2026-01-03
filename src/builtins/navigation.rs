@@ -45,7 +45,7 @@ pub fn builtin_cd(args: &[String], interp: &mut Interpreter) -> Result<ExitStatu
             Ok(ExitStatus::success())
         }
         Err(e) => {
-            eprintln!("jsh: cd: {}: {}", path, e);
+            eprintln!("franken: cd: {}: {}", path, e);
             Ok(ExitStatus::failure(1))
         }
     }
@@ -69,7 +69,7 @@ pub fn builtin_pushd(args: &[String], interp: &mut Interpreter) -> Result<ExitSt
                 stack.push(current);
                 builtin_cd(&[top.to_string_lossy().to_string()], interp)
             } else {
-                eprintln!("jsh: pushd: no other directory");
+                eprintln!("franken: pushd: no other directory");
                 Ok(ExitStatus::failure(1))
             }
         })
@@ -88,7 +88,7 @@ pub fn builtin_popd(_args: &[String], interp: &mut Interpreter) -> Result<ExitSt
         if let Some(dir) = stack.pop() {
             builtin_cd(&[dir.to_string_lossy().to_string()], interp)
         } else {
-            eprintln!("jsh: popd: directory stack empty");
+            eprintln!("franken: popd: directory stack empty");
             Ok(ExitStatus::failure(1))
         }
     })

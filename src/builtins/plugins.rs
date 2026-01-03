@@ -246,7 +246,7 @@ pub fn builtin_plug_source(args: &[String], interp: &mut Interpreter) -> Result<
 pub fn builtin_plug_info(args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
     if args.is_empty() {
         // Show general info
-        println!("jsh Plugin Manager");
+        println!("Franken Plugin Manager");
         println!();
         println!("Directories:");
         println!("  Plugins: {}", plugins_dir().display());

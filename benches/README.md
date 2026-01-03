@@ -1,6 +1,6 @@
-# jsh Benchmarks
+# Franken Shell Benchmarks
 
-Comprehensive benchmarking suite for jsh shell performance.
+Comprehensive benchmarking suite for Franken Shell performance.
 
 ## Running Benchmarks
 
@@ -33,7 +33,7 @@ Tests tokenization speed for:
 - **lexer_strings**: Single/double quoted strings with escapes
 - **lexer_pipelines**: Pipes, redirections, heredocs
 - **lexer_control_flow**: if/for/while/case statements
-- **lexer_jsh_syntax**: jsh-specific match/loop/let/try/fn
+- **lexer_franken_syntax**: franken-specific match/loop/let/try/fn
 - **lexer_scripts**: Realistic small/medium/large scripts
 
 ### `parser_bench` - Parser Performance
@@ -43,7 +43,7 @@ Tests parsing speed for:
 - **parser_pipelines**: Multi-stage pipelines with redirects
 - **parser_control_flow**: Control flow constructs
 - **parser_functions**: Function definitions
-- **parser_jsh_syntax**: jsh-specific syntax
+- **parser_franken_syntax**: franken-specific syntax
 - **parser_scripts**: Realistic scripts
 - **parser_nesting**: Deeply nested structures
 
@@ -56,7 +56,7 @@ Tests execution speed for:
 - **interp_functions**: Function calls and recursion
 - **interp_logical**: && and || operators
 - **interp_arithmetic**: Arithmetic expressions
-- **interp_jsh**: jsh match/let/loop features
+- **interp_franken**: franken match/let/loop features
 - **interp_fish**: Fish builtins (string, math, contains)
 - **interp_options**: Shell option handling
 
@@ -66,7 +66,7 @@ Tests full lex→parse→execute pipeline:
 - **pipeline_breakdown**: Compare lex vs parse vs execute times
 - **pipeline_sizes**: Tiny to large script scaling
 - **pipeline_complexity**: Linear/branching/looping/nested
-- **pipeline_styles**: POSIX vs Bash vs Fish vs jsh syntax
+- **pipeline_styles**: POSIX vs Bash vs Fish vs franken syntax
 - **interpreter_reuse**: New vs reused interpreter
 - **loop_scaling**: Performance with varying loop counts
 
@@ -108,4 +108,3 @@ fn bench_new_feature(c: &mut Criterion) {
 
 criterion_group!(benches, ..., bench_new_feature);
 ```
-

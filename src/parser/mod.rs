@@ -1,11 +1,16 @@
-//! Parser for jsh shell syntax
+//! Parser for Franken Shell syntax
 //!
-//! This module parses shell commands, control flow, and jsh-specific extensions.
+//! This module parses shell commands, control flow, and franken-specific extensions.
 //!
 //! ## Submodules
 //! - `word` - Word and brace expansion parsing
 //! - `compound` - Control flow statements (if, for, while, case, etc.)
-//! - `extensions` - jsh-specific and Fish-compatible syntax
+//! - `extensions` - franken-specific and Fish-compatible syntax
+//!
+//! ## Optimizations
+//! - Uses references for token access to avoid cloning
+//! - Look-ahead buffer for repeated peeks
+//! - Pre-allocated vectors with capacity hints
 
 mod compound;
 mod extensions;
@@ -15,6 +20,17 @@ use crate::ast::*;
 use crate::error::{JshError, Result};
 use crate::lexer::Lexer;
 use crate::token::{Span, Token, TokenKind};
+
+/// Static EOF token to avoid repeated allocation
+static EOF_TOKEN: Token = Token {
+    kind: TokenKind::Eof,
+    span: Span {
+        start: 0,
+        end: 0,
+        line: 0,
+        column: 0,
+    },
+};
 
 /// Parser for shell syntax
 pub struct Parser {
@@ -34,56 +50,99 @@ impl Parser {
     }
 
     // ========================================================================
-    // Core token manipulation methods
+    // Core token manipulation methods (optimized)
     // ========================================================================
 
+    /// Get a reference to the current token (no cloning)
+    #[inline]
+    pub(crate) fn peek_ref(&self) -> &Token {
+        self.tokens.get(self.pos).unwrap_or(&EOF_TOKEN)
+    }
+
+    /// Get a reference to the token at offset n (no cloning)
+    #[inline]
+    pub(crate) fn peek_nth_ref(&self, n: usize) -> &Token {
+        self.tokens.get(self.pos + n).unwrap_or(&EOF_TOKEN)
+    }
+
+    /// Get a reference to the current token kind (most common operation)
+    #[inline]
+    pub(crate) fn peek_kind(&self) -> &TokenKind {
+        &self.peek_ref().kind
+    }
+
+    /// Legacy peek that clones - use peek_ref() for performance when possible
     pub(crate) fn peek(&self) -> Token {
-        self.tokens.get(self.pos).cloned().unwrap_or_else(Token::eof)
+        self.peek_ref().clone()
     }
 
+    /// Legacy peek_nth that clones - use peek_nth_ref() for performance
     pub(crate) fn peek_nth(&self, n: usize) -> Token {
-        self.tokens
-            .get(self.pos + n)
-            .cloned()
-            .unwrap_or_else(Token::eof)
+        self.peek_nth_ref(n).clone()
     }
 
+    /// Advance and return the consumed token
     pub(crate) fn advance(&mut self) -> Token {
-        let token = self.peek();
-        if !token.is_eof() {
+        if self.pos < self.tokens.len() {
+            let token = std::mem::replace(
+                &mut self.tokens[self.pos],
+                EOF_TOKEN.clone(),
+            );
+            self.pos += 1;
+            token
+        } else {
+            EOF_TOKEN.clone()
+        }
+    }
+
+    /// Advance without returning the token (faster when token not needed)
+    #[inline]
+    pub(crate) fn advance_skip(&mut self) {
+        if self.pos < self.tokens.len() {
             self.pos += 1;
         }
-        token
     }
 
+    #[inline]
     pub(crate) fn is_at_end(&self) -> bool {
-        self.peek().is_eof()
+        matches!(self.peek_kind(), TokenKind::Eof)
     }
 
     pub(crate) fn expect(&mut self, kind: &TokenKind) -> Result<Token> {
-        if std::mem::discriminant(&self.peek().kind) == std::mem::discriminant(kind) {
+        if std::mem::discriminant(self.peek_kind()) == std::mem::discriminant(kind) {
             Ok(self.advance())
         } else {
             Err(JshError::UnexpectedToken {
                 expected: format!("{:?}", kind),
-                found: format!("{:?}", self.peek().kind),
+                found: format!("{:?}", self.peek_kind()),
             })
         }
     }
 
+    /// Check if current token matches kind without cloning
+    #[inline]
     #[allow(dead_code)]
     pub(crate) fn check(&self, kind: &TokenKind) -> bool {
-        std::mem::discriminant(&self.peek().kind) == std::mem::discriminant(kind)
+        std::mem::discriminant(self.peek_kind()) == std::mem::discriminant(kind)
+    }
+
+    /// Check if current token is one of the given kinds
+    #[inline]
+    #[allow(dead_code)]
+    pub(crate) fn check_any(&self, kinds: &[TokenKind]) -> bool {
+        let current = self.peek_kind();
+        kinds.iter().any(|k| std::mem::discriminant(current) == std::mem::discriminant(k))
     }
 
     pub(crate) fn skip_newlines(&mut self) {
-        while matches!(self.peek().kind, TokenKind::Newline) {
-            self.advance();
+        while matches!(self.peek_kind(), TokenKind::Newline) {
+            self.advance_skip();
         }
     }
 
+    #[inline]
     pub(crate) fn current_span(&self) -> Span {
-        self.peek().span
+        self.peek_ref().span
     }
 
     // ========================================================================
@@ -92,7 +151,8 @@ impl Parser {
 
     /// Parse a complete program
     pub fn parse_program(&mut self) -> Result<Program> {
-        let mut statements = Vec::new();
+        // Most scripts have ~10 top-level statements
+        let mut statements = Vec::with_capacity(10);
         self.skip_newlines();
 
         while !self.is_at_end() {
@@ -115,8 +175,9 @@ impl Parser {
     fn parse_list(&mut self) -> Result<Statement> {
         let first = self.parse_pipeline()?;
 
-        let mut rest = Vec::new();
-        while matches!(self.peek().kind, TokenKind::And | TokenKind::Or) {
+        // Most lists have 1-2 additional pipelines (command && command)
+        let mut rest = Vec::with_capacity(2);
+        while matches!(self.peek_kind(), TokenKind::And | TokenKind::Or) {
             let op = match self.advance().kind {
                 TokenKind::And => ListOp::And,
                 TokenKind::Or => ListOp::Or,
@@ -149,14 +210,15 @@ impl Parser {
 
     /// Parse a pipeline (cmd | cmd | cmd)
     fn parse_pipeline(&mut self) -> Result<Pipeline> {
-        let negated = if matches!(self.peek().kind, TokenKind::Not) {
-            self.advance();
+        let negated = if matches!(self.peek_kind(), TokenKind::Not) {
+            self.advance_skip();
             true
         } else {
             false
         };
 
-        let mut commands = Vec::new();
+        // Most pipelines have 1-3 commands
+        let mut commands = Vec::with_capacity(3);
 
         // Check for compound commands first
         if let Some(stmt) = self.try_parse_compound()? {
@@ -173,8 +235,8 @@ impl Parser {
         }
 
         // Parse rest of pipeline
-        while matches!(self.peek().kind, TokenKind::Pipe | TokenKind::PipeErr) {
-            self.advance();
+        while matches!(self.peek_kind(), TokenKind::Pipe | TokenKind::PipeErr) {
+            self.advance_skip();
             self.skip_newlines();
 
             if let Some(stmt) = self.try_parse_compound()? {
@@ -188,8 +250,8 @@ impl Parser {
             }
         }
 
-        let background = if matches!(self.peek().kind, TokenKind::Amp) {
-            self.advance();
+        let background = if matches!(self.peek_kind(), TokenKind::Amp) {
+            self.advance_skip();
             true
         } else {
             false
@@ -219,7 +281,7 @@ impl Parser {
             TokenKind::Function => Ok(Some(self.parse_function()?)),
             TokenKind::LBrace => Ok(Some(self.parse_brace_group()?)),
             TokenKind::LParen => Ok(Some(self.parse_subshell()?)),
-            // jsh-specific
+            // franken-specific
             TokenKind::Match_ => Ok(Some(self.parse_match()?)),
             TokenKind::Loop => Ok(Some(self.parse_loop()?)),
             TokenKind::Let => Ok(Some(self.parse_let()?)),
@@ -273,8 +335,9 @@ impl Parser {
 
     /// Parse a simple command
     fn parse_command(&mut self) -> Result<Option<Command>> {
-        let mut assignments = Vec::new();
-        let mut redirects = Vec::new();
+        // Most commands have 0-2 assignments and 0-2 redirects
+        let mut assignments = Vec::with_capacity(2);
+        let mut redirects = Vec::with_capacity(2);
 
         // Parse leading assignments and redirects
         loop {
@@ -315,7 +378,8 @@ impl Parser {
         }
 
         let name = self.parse_word()?;
-        let mut args = Vec::new();
+        // Most commands have 2-6 arguments
+        let mut args = Vec::with_capacity(6);
 
         // Parse arguments
         loop {
@@ -427,7 +491,7 @@ impl Parser {
     fn parse_assignment(&mut self) -> Result<Assignment> {
         let span = self.current_span();
         let name = match self.peek().kind.clone() {
-            TokenKind::Word(s) => s,
+            TokenKind::Word(s) => s.into_owned(),
             _ => return Err(JshError::syntax("Expected variable name")),
         };
         self.advance();
@@ -480,10 +544,25 @@ impl Parser {
             TokenKind::HereString => (RedirectKind::HereString, Some(0)),
             TokenKind::RedirectFd(n, m) => {
                 self.advance();
+                // Determine direction based on source fd convention:
+                // n>&m is output duplication (fd n points to where fd m points)
+                // n<&m is input duplication
+                // For simplicity, we use DupOutput for all fd duplications
+                // since the actual direction is determined by n
+                let kind = if m == -1 {
+                    // Close fd
+                    RedirectKind::DupOutput
+                } else {
+                    RedirectKind::DupOutput
+                };
                 return Ok(Redirect {
-                    kind: RedirectKind::DupOutput,
+                    kind,
                     fd: Some(n),
-                    target: RedirectTarget::Fd(m),
+                    target: if m == -1 {
+                        RedirectTarget::Close
+                    } else {
+                        RedirectTarget::Fd(m)
+                    },
                     span,
                 });
             }

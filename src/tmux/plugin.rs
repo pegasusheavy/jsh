@@ -1,7 +1,7 @@
 //! Tmux Plugin Manager (TPM) compatible plugin system
 
 use crate::error::{JshError, Result};
-use crate::shell::jsh_data_dir;
+use crate::shell::fsh_data_dir;
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
@@ -39,7 +39,7 @@ impl TmuxPluginManager {
     /// Install all registered plugins
     pub fn install_all(&self) -> Result<Vec<String>> {
         let mut installed = vec![];
-        
+
         // Ensure plugins directory exists
         fs::create_dir_all(&self.plugins_dir)
             .map_err(|e| JshError::runtime(format!("Failed to create plugins dir: {}", e)))?;
@@ -181,7 +181,7 @@ impl TmuxPluginManager {
         if let Ok(entries) = fs::read_dir(&self.plugins_dir) {
             for entry in entries.filter_map(|e| e.ok()) {
                 let name = entry.file_name().to_string_lossy().to_string();
-                
+
                 // Skip tpm itself
                 if name == "tpm" {
                     continue;
@@ -221,7 +221,7 @@ impl TmuxPluginManager {
     /// Source a plugin's configuration
     pub fn source_plugin(&self, name: &str) -> Option<String> {
         let plugin_dir = self.plugins_dir.join(name);
-        
+
         if !plugin_dir.exists() {
             return None;
         }
@@ -260,13 +260,13 @@ impl TmuxPluginManager {
     /// Initialize TPM (install TPM itself)
     pub fn init_tpm(&self) -> Result<()> {
         let tpm_dir = self.plugins_dir.join("tpm");
-        
+
         if tpm_dir.exists() {
             return Ok(());
         }
 
         println!("Installing TPM (Tmux Plugin Manager)...");
-        
+
         let status = Command::new("git")
             .args([
                 "clone",
@@ -300,7 +300,7 @@ impl TmuxPlugin {
     /// Parse plugin specification
     pub fn from_spec(spec: &str) -> Result<Self> {
         let spec = spec.trim().trim_matches(|c| c == '"' || c == '\'');
-        
+
         // Handle git@ URLs
         if spec.starts_with("git@") {
             let name = spec
@@ -309,7 +309,7 @@ impl TmuxPlugin {
                 .map(|s| s.trim_end_matches(".git"))
                 .unwrap_or("plugin")
                 .to_string();
-            
+
             return Ok(Self {
                 name,
                 git_url: spec.to_string(),
@@ -326,7 +326,7 @@ impl TmuxPlugin {
                 .map(|s| s.trim_end_matches(".git"))
                 .unwrap_or("plugin")
                 .to_string();
-            
+
             return Ok(Self {
                 name,
                 git_url: spec.to_string(),
@@ -340,15 +340,15 @@ impl TmuxPlugin {
             let parts: Vec<&str> = spec.split('#').collect();
             let repo = parts[0];
             let branch = parts.get(1).map(|s| s.to_string());
-            
+
             let name = repo
                 .split('/')
                 .last()
                 .unwrap_or("plugin")
                 .to_string();
-            
+
             let git_url = format!("https://github.com/{}.git", repo);
-            
+
             return Ok(Self {
                 name,
                 git_url,
@@ -376,13 +376,13 @@ pub fn tpm_plugins_dir() -> PathBuf {
     // Default to ~/.tmux/plugins for tmux compatibility
     let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
     let tmux_plugins = PathBuf::from(&home).join(".tmux/plugins");
-    
+
     if tmux_plugins.exists() {
         return tmux_plugins;
     }
 
     // Fallback to XDG location
-    jsh_data_dir().join("tmux/plugins")
+    fsh_data_dir().join("tmux/plugins")
 }
 
 /// Popular tmux plugins

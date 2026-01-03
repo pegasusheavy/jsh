@@ -1,10 +1,18 @@
 //! Output built-in commands: echo, printf
+//!
+//! Optimized with pre-allocated output buffers.
 
 use crate::error::Result;
 use crate::interpreter::{ExitStatus, Interpreter};
-use std::io::{self, Write};
+use std::io::{self, BufWriter, Write};
 
-/// echo - print arguments
+/// Estimate output size for echo: sum of argument lengths + spaces
+#[inline]
+fn estimate_echo_size(args: &[String]) -> usize {
+    args.iter().map(|s| s.len()).sum::<usize>() + args.len()
+}
+
+/// echo - print arguments (optimized with pre-allocated buffer)
 pub fn builtin_echo(args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
     let mut newline = true;
     let mut interpret_escapes = false;
@@ -37,19 +45,44 @@ pub fn builtin_echo(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
         }
     }
 
-    let output = args[start..].join(" ");
+    let remaining = &args[start..];
 
+    // Fast path: no arguments
+    if remaining.is_empty() {
+        if newline {
+            println!();
+        }
+        return Ok(ExitStatus::success());
+    }
+
+    // Pre-allocate output buffer
+    let estimated_size = estimate_echo_size(remaining);
+    let mut output = String::with_capacity(estimated_size);
+
+    // Build output string
+    for (i, arg) in remaining.iter().enumerate() {
+        if i > 0 {
+            output.push(' ');
+        }
+        output.push_str(arg);
+    }
+
+    // Apply escape interpretation if needed
     let output = if interpret_escapes {
         interpret_escape_sequences(&output)
     } else {
         output
     };
 
-    print!("{}", output);
+    // Write with buffered output for efficiency
+    let stdout = io::stdout();
+    let mut writer = BufWriter::new(stdout.lock());
+    writer.write_all(output.as_bytes())?;
     if newline {
-        println!();
+        writer.write_all(b"\n")?;
     }
-    io::stdout().flush()?;
+    writer.flush()?;
+
     Ok(ExitStatus::success())
 }
 
@@ -119,17 +152,20 @@ pub fn interpret_escape_sequences(s: &str) -> String {
     result
 }
 
-/// printf - formatted output
+/// printf - formatted output (optimized with pre-allocated buffer)
 pub fn builtin_printf(args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
     if args.is_empty() {
-        eprintln!("jsh: printf: usage: printf format [arguments]");
+        eprintln!("fsh: printf: usage: printf format [arguments]");
         return Ok(ExitStatus::failure(1));
     }
 
     let format = &args[0];
     let mut arg_idx = 1;
     let mut chars = format.chars().peekable();
-    let mut output = String::new();
+
+    // Pre-allocate output buffer: format length + estimated expansion
+    let estimated_size = format.len() + args[1..].iter().map(|s| s.len()).sum::<usize>();
+    let mut output = String::with_capacity(estimated_size);
 
     while let Some(c) = chars.next() {
         if c == '%' {
@@ -235,8 +271,12 @@ pub fn builtin_printf(args: &[String], _interp: &mut Interpreter) -> Result<Exit
         }
     }
 
-    print!("{}", output);
-    io::stdout().flush()?;
+    // Write with buffered output for efficiency
+    let stdout = io::stdout();
+    let mut writer = BufWriter::new(stdout.lock());
+    writer.write_all(output.as_bytes())?;
+    writer.flush()?;
+
     Ok(ExitStatus::success())
 }
 

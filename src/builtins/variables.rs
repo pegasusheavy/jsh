@@ -146,7 +146,7 @@ pub fn builtin_set(args: &[String], interp: &mut Interpreter) -> Result<ExitStat
 
         // Special case: -- sets positional params
         if arg == "--" {
-            interp.positional_params = args[idx + 1..].to_vec();
+            interp.positional_params = args[idx + 1..].iter().cloned().collect();
             return Ok(ExitStatus::success());
         }
 
@@ -225,14 +225,24 @@ pub fn builtin_set(args: &[String], interp: &mut Interpreter) -> Result<ExitStat
 }
 
 /// local - declare local variables
+///
+/// Supports variable expansion in values:
+/// - `local var="$1"` expands `$1` to the first positional parameter
+/// - `local var=${other:-default}` expands parameter substitutions
 pub fn builtin_local(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
     for arg in args {
         if let Some(eq_pos) = arg.find('=') {
             let name = &arg[..eq_pos];
             let value = &arg[eq_pos + 1..];
-            interp.set_var(name, value);
+
+            // Expand any variables in the value
+            let expanded_value = interp.expand_string_variables(value);
+
+            // Use set_local_var to properly scope the variable
+            interp.set_local_var(name, &expanded_value);
         } else {
-            interp.set_var(arg, "");
+            // Declare variable with empty value in local scope
+            interp.set_local_var(arg, "");
         }
     }
     Ok(ExitStatus::success())
@@ -321,7 +331,7 @@ pub fn set_option_by_name(name: &str, enable: bool, interp: &mut Interpreter) {
         }
         "ignoreeof" => interp.options.ignoreeof = enable,
         "posix" => interp.options.posix = enable,
-        _ => eprintln!("jsh: set: {}: invalid option name", name),
+        _ => eprintln!("franken: set: {}: invalid option name", name),
     }
 }
 

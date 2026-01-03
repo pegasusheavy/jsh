@@ -1,9 +1,19 @@
-//! Lexer for jsh shell syntax
+//! Lexer for Franken Shell syntax
+//!
+//! Uses Cow<'static, str> for token strings to reduce allocations.
+//! Uses PHF for O(1) keyword lookup.
 
 use crate::error::{JshError, Result};
-use crate::token::{keyword_from_str, Span, Token, TokenKind};
+use crate::token::{keyword_from_str, owned_str, Span, Token, TokenKind};
 use std::iter::Peekable;
 use std::str::Chars;
+
+/// Estimate initial token capacity based on input length
+/// Heuristic: ~1 token per 5 characters on average
+#[inline]
+fn estimate_token_count(input_len: usize) -> usize {
+    (input_len / 5).max(16)
+}
 
 /// Lexer for tokenizing shell input
 pub struct Lexer<'a> {
@@ -83,7 +93,7 @@ impl<'a> Lexer<'a> {
         }
 
         Token::new(
-            TokenKind::Comment(comment),
+            TokenKind::Comment(owned_str(comment)),
             self.span_from(start, start_line, start_col),
         )
     }
@@ -199,7 +209,7 @@ impl<'a> Lexer<'a> {
         }
 
         Ok(Token::new(
-            TokenKind::String(string),
+            TokenKind::String(owned_str(string)),
             self.span_from(start, start_line, start_col),
         ))
     }
@@ -293,7 +303,7 @@ impl<'a> Lexer<'a> {
         }
 
         Ok(Token::new(
-            TokenKind::RawString(string),
+            TokenKind::RawString(owned_str(string)),
             self.span_from(start, start_line, start_col),
         ))
     }
@@ -329,7 +339,7 @@ impl<'a> Lexer<'a> {
                 }
 
                 Token::new(
-                    TokenKind::VariableBrace(name),
+                    TokenKind::VariableBrace(owned_str(name)),
                     self.span_from(start, start_line, start_col),
                 )
             }
@@ -354,7 +364,7 @@ impl<'a> Lexer<'a> {
                 }
 
                 Token::new(
-                    TokenKind::VariableBrace(format!("$({})", content)),
+                    TokenKind::VariableBrace(owned_str(format!("$({})", content))),
                     self.span_from(start, start_line, start_col),
                 )
             }
@@ -383,12 +393,12 @@ impl<'a> Lexer<'a> {
                     }
                 }
                 Token::new(
-                    TokenKind::Variable(name),
+                    TokenKind::Variable(owned_str(name)),
                     self.span_from(start, start_line, start_col),
                 )
             }
             _ => Token::new(
-                TokenKind::Word("$".to_string()),
+                TokenKind::Word(owned_str("$".to_string())),
                 self.span_from(start, start_line, start_col),
             ),
         }
@@ -398,34 +408,160 @@ impl<'a> Lexer<'a> {
         let start = self.pos;
         let start_line = self.line;
         let start_col = self.column;
-        let mut word = String::new();
 
-        while let Some(c) = self.peek() {
-            match c {
-                // Word terminators
-                ' ' | '\t' | '\n' | '\r' | ';' | '|' | '&' | '<' | '>' | '(' | ')' | '{' | '}'
-                | '[' | ']' | '#' | '"' | '\'' | '`' | '$' | ',' => break,
-                '\\' => {
-                    self.advance();
-                    if let Some(escaped) = self.peek() {
-                        word.push(escaped);
+        // Fast path: use memchr to find word boundary quickly
+        let word_end = self.find_word_end_fast();
+        let remaining = &self.input[self.pos..];
+
+        // Check if we can use the fast path (no escapes or special chars in this segment)
+        let fast_segment = &remaining[..word_end];
+        let has_escape = fast_segment.contains('\\');
+        let has_equals = fast_segment.contains('=');
+        let has_dollar = fast_segment.contains('$');
+
+        let word = if !has_escape && !has_equals && !has_dollar {
+            // Fast path: just slice the string
+            let word = fast_segment.to_string();
+            // Advance position
+            for _ in fast_segment.chars() {
+                self.advance();
+            }
+            word
+        } else {
+            // Slow path: handle escapes and special chars
+            let mut word = String::with_capacity(word_end);
+            let mut after_equals = false;
+
+            while let Some(c) = self.peek() {
+                match c {
+                    // Word terminators (but $ and quotes are conditional after =)
+                    ' ' | '\t' | '\n' | '\r' | ';' | '|' | '&' | '<' | '>' | '(' | ')' | '{' | '}'
+                    | '[' | ']' | '#' | '`' | ',' => break,
+                    // Quotes are word terminators unless after = (to support local x="value")
+                    '"' | '\'' if !after_equals => break,
+                    '"' => {
+                        // Include quoted string content in the word (for assignment RHS)
+                        self.advance(); // consume opening quote (don't add to word)
+                        // Read until closing quote
+                        while let Some(c) = self.peek() {
+                            if c == '"' {
+                                self.advance(); // consume closing quote (don't add to word)
+                                break;
+                            } else if c == '\\' {
+                                self.advance();
+                                // Handle escape in double quote
+                                if let Some(escaped) = self.peek() {
+                                    word.push(escaped);
+                                    self.advance();
+                                }
+                            } else {
+                                word.push(c);
+                                self.advance();
+                            }
+                        }
+                    }
+                    '\'' => {
+                        // Include single-quoted string content in the word
+                        self.advance(); // consume opening quote (don't add to word)
+                        // Read until closing quote (no escapes in single quotes)
+                        while let Some(c) = self.peek() {
+                            if c == '\'' {
+                                self.advance(); // consume closing quote (don't add to word)
+                                break;
+                            } else {
+                                word.push(c);
+                                self.advance();
+                            }
+                        }
+                    }
+                    // $ is only a word terminator if NOT after = (to support var=$value syntax)
+                    '$' if !after_equals => break,
+                    '$' => {
+                        // Include $var in the word (for assignment RHS)
+                        word.push(c);
+                        self.advance();
+                        // Continue reading the variable name/special char
+                        if let Some(next) = self.peek() {
+                            if next.is_alphanumeric() || next == '_' ||
+                               matches!(next, '?' | '!' | '$' | '#' | '@' | '*' | '-') {
+                                word.push(next);
+                                self.advance();
+                                // Read rest of variable name
+                                while let Some(c) = self.peek() {
+                                    if c.is_alphanumeric() || c == '_' {
+                                        word.push(c);
+                                        self.advance();
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            } else if next == '{' {
+                                // ${var} syntax - read until }
+                                word.push(next);
+                                self.advance();
+                                let mut brace_depth = 1;
+                                while let Some(c) = self.peek() {
+                                    word.push(c);
+                                    self.advance();
+                                    if c == '{' {
+                                        brace_depth += 1;
+                                    } else if c == '}' {
+                                        brace_depth -= 1;
+                                        if brace_depth == 0 {
+                                            break;
+                                        }
+                                    }
+                                }
+                            } else if next == '(' {
+                                // $(cmd) or $(( )) - read until matching )
+                                word.push(next);
+                                self.advance();
+                                let mut paren_depth = 1;
+                                while let Some(c) = self.peek() {
+                                    word.push(c);
+                                    self.advance();
+                                    if c == '(' {
+                                        paren_depth += 1;
+                                    } else if c == ')' {
+                                        paren_depth -= 1;
+                                        if paren_depth == 0 {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    '\\' => {
+                        self.advance();
+                        if let Some(escaped) = self.peek() {
+                            word.push(escaped);
+                            self.advance();
+                        }
+                    }
+                    '=' if word.is_empty() || self.at_command_start => {
+                        // Could be assignment operator - stop here
+                        break;
+                    }
+                    '=' => {
+                        // Part of assignment value (e.g., x=y=z)
+                        word.push(c);
+                        self.advance();
+                        after_equals = true;
+                    }
+                    _ => {
+                        word.push(c);
                         self.advance();
                     }
                 }
-                '=' if word.is_empty() || self.at_command_start => {
-                    // Could be assignment
-                    break;
-                }
-                _ => {
-                    word.push(c);
-                    self.advance();
-                }
             }
-        }
+            word
+        };
 
         let span = self.span_from(start, start_line, start_col);
 
         // Check if it's a keyword (only at command position)
+        // PHF lookup is O(1)
         if self.at_command_start {
             if let Some(kw) = keyword_from_str(&word) {
                 return Token::new(kw, span);
@@ -440,7 +576,7 @@ impl<'a> Lexer<'a> {
             return Token::new(TokenKind::Float(n), span);
         }
 
-        Token::new(TokenKind::Word(word), span)
+        Token::new(TokenKind::Word(owned_str(word)), span)
     }
 
     fn read_operator(&mut self) -> Token {
@@ -496,6 +632,27 @@ impl<'a> Lexer<'a> {
                 self.advance();
                 TokenKind::Le
             }
+            ('<', Some('&')) => {
+                // <&0 or <&- syntax
+                self.advance(); // consume '&'
+                if let Some(c) = self.peek() {
+                    if c == '-' {
+                        // <&- closes stdin
+                        self.advance();
+                        TokenKind::RedirectFd(0, -1)
+                    } else if c.is_ascii_digit() {
+                        // <&3 duplicates fd 3 to stdin
+                        let fd = (c as u8 - b'0') as i32;
+                        self.advance();
+                        TokenKind::RedirectFd(0, fd)
+                    } else {
+                        // Just <& followed by something else (treat as redirect in)
+                        TokenKind::RedirectIn
+                    }
+                } else {
+                    TokenKind::RedirectIn
+                }
+            }
             ('<', _) => TokenKind::RedirectIn,
 
             ('>', Some('>')) => {
@@ -505,6 +662,27 @@ impl<'a> Lexer<'a> {
             ('>', Some('=')) => {
                 self.advance();
                 TokenKind::Ge
+            }
+            ('>', Some('&')) => {
+                // >&2 or >&- syntax
+                self.advance(); // consume '&'
+                if let Some(c) = self.peek() {
+                    if c == '-' {
+                        // >&- closes stdout
+                        self.advance();
+                        TokenKind::RedirectFd(1, -1)
+                    } else if c.is_ascii_digit() {
+                        // >&2 duplicates fd 2 to stdout
+                        let fd = (c as u8 - b'0') as i32;
+                        self.advance();
+                        TokenKind::RedirectFd(1, fd)
+                    } else {
+                        // Just >& followed by something else
+                        TokenKind::RedirectBoth
+                    }
+                } else {
+                    TokenKind::RedirectBoth
+                }
             }
             ('>', _) => TokenKind::RedirectOut,
 
@@ -575,7 +753,7 @@ impl<'a> Lexer<'a> {
 
             (',', _) => TokenKind::Comma,
 
-            _ => TokenKind::Word(c.to_string()),
+            _ => TokenKind::Word(owned_str(c.to_string())),
         };
 
         Token::new(kind, self.span_from(start, start_line, start_col))
@@ -615,15 +793,33 @@ impl<'a> Lexer<'a> {
                 let start = self.pos;
                 let start_line = self.line;
                 let start_col = self.column;
-                self.advance();
-                self.advance();
-                let kind = if self.peek() == Some('>') {
+                self.advance(); // consume '2'
+                self.advance(); // consume '>'
+
+                if self.peek() == Some('&') {
+                    // 2>&1 or 2>&- syntax
+                    self.advance(); // consume '&'
+                    if let Some(c) = self.peek() {
+                        if c == '-' {
+                            self.advance();
+                            Token::new(TokenKind::RedirectFd(2, -1), self.span_from(start, start_line, start_col))
+                        } else if c.is_ascii_digit() {
+                            let fd = (c as u8 - b'0') as i32;
+                            self.advance();
+                            Token::new(TokenKind::RedirectFd(2, fd), self.span_from(start, start_line, start_col))
+                        } else {
+                            // 2>& followed by something else
+                            Token::new(TokenKind::RedirectErr, self.span_from(start, start_line, start_col))
+                        }
+                    } else {
+                        Token::new(TokenKind::RedirectErr, self.span_from(start, start_line, start_col))
+                    }
+                } else if self.peek() == Some('>') {
                     self.advance();
-                    TokenKind::RedirectErrAppend
+                    Token::new(TokenKind::RedirectErrAppend, self.span_from(start, start_line, start_col))
                 } else {
-                    TokenKind::RedirectErr
-                };
-                Token::new(kind, self.span_from(start, start_line, start_col))
+                    Token::new(TokenKind::RedirectErr, self.span_from(start, start_line, start_col))
+                }
             }
             _ => self.read_word(),
         };
@@ -659,9 +855,10 @@ impl<'a> Lexer<'a> {
         Ok(token)
     }
 
-    /// Tokenize all input
+    /// Tokenize all input with pre-allocated capacity
     pub fn tokenize(&mut self) -> Result<Vec<Token>> {
-        let mut tokens = Vec::new();
+        // Pre-allocate based on input size estimate
+        let mut tokens = Vec::with_capacity(estimate_token_count(self.input.len()));
 
         loop {
             let token = self.next_token()?;
@@ -679,6 +876,28 @@ impl<'a> Lexer<'a> {
 
         Ok(tokens)
     }
+
+    /// Fast scan to find the end of a word
+    /// Returns the number of bytes until a word terminator
+    #[inline]
+    fn find_word_end_fast(&self) -> usize {
+        let remaining = &self.input[self.pos..];
+        let bytes = remaining.as_bytes();
+
+        // Scan for any word terminator (except =, which is handled specially)
+        for (i, &b) in bytes.iter().enumerate() {
+            if matches!(b,
+                b' ' | b'\t' | b'\n' | b'\r' | b';' | b'|' | b'&' |
+                b'<' | b'>' | b'(' | b')' | b'{' | b'}' |
+                b'[' | b']' | b'#' | b'"' | b'\'' | b'`' | b'$' | b','
+            ) {
+                return i;
+            }
+        }
+
+        bytes.len()
+    }
+
 }
 
 #[cfg(test)]

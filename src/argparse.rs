@@ -1,12 +1,12 @@
-//! Command line argument parsing library for jsh builtins and scripts
+//! Command line argument parsing library for Franken Shell builtins and scripts
 //!
 //! This module provides a lightweight, ergonomic argument parser designed
-//! specifically for shell builtins and jsh scripts.
+//! specifically for shell builtins and franken scripts.
 //!
 //! # Example
 //!
 //! ```rust
-//! use jsh::argparse::{ArgParser, ArgType};
+//! use franken_shell::argparse::{ArgParser, ArgType};
 //!
 //! let mut parser = ArgParser::new("mycommand")
 //!     .description("A sample command")

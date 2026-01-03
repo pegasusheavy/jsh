@@ -1,4 +1,4 @@
-//! Oh-my-zsh compatible theme system for jsh
+//! Oh-my-zsh compatible theme system for Franken Shell
 
 use crate::error::Result;
 use std::collections::HashMap;
@@ -581,7 +581,7 @@ pub fn get_builtin_theme(name: &str) -> Option<Theme> {
             prompt2: "❯ ".to_string(),
             colors: HashMap::new(),
         }),
-        "jsh" | "default" => Some(Theme {
+        "fsh" | "default" => Some(Theme {
             prompt: concat!(
                 "%F{cyan}%n%f %F{8}@%f %F{blue}%m%f",
                 "$(git_prompt_info)\n",
@@ -635,6 +635,895 @@ pub fn get_builtin_theme(name: &str) -> Option<Theme> {
             prompt2: "%F{208}⧗%f ".to_string(),          // Orange hourglass continuation
             colors: HashMap::new(),
         }),
+
+        // =====================================================================
+        // Oh-My-ZSH Themes
+        // =====================================================================
+
+        "af-magic" => Some(Theme {
+            prompt: concat!(
+                "%F{blue}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{cyan}$%f "
+            ).to_string(),
+            rprompt: Some("%F{white}%T%f".to_string()),
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "afowler" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{yellow}%m%f:%F{cyan}%~%f$(git_prompt_info)\n%F{white}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "alanpeabody" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f$(git_prompt_info)\n%(?.%F{green}.%F{red})→%f ".to_string(),
+            rprompt: None,
+            prompt2: "→ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "amuse" => Some(Theme {
+            prompt: concat!(
+                "%F{magenta}%n%f ",
+                "%F{blue}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{green}$%f "
+            ).to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "apple" => Some(Theme {
+            prompt: "%F{green}%n@%m%f:%F{blue}%~%f$(git_prompt_info)$ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "arrow" => Some(Theme {
+            prompt: "%F{yellow}➜%f %F{cyan}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: None,
+            prompt2: "➜ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "aussiegeek" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%F{red}$%f ".to_string(),
+            rprompt: Some("%F{cyan}%T%f".to_string()),
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "avit" => Some(Theme {
+            prompt: concat!(
+                "%F{yellow}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{white}❯%f "
+            ).to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "awesomepanda" => Some(Theme {
+            prompt: "%F{cyan}🐼 %~%f$(git_prompt_info) %F{green}➜%f ".to_string(),
+            rprompt: None,
+            prompt2: "➜ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "bira" => Some(Theme {
+            prompt: concat!(
+                "%F{cyan}╭─%f%F{green}%n%f@%F{yellow}%m%f %F{blue}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{cyan}╰─%f%(?.%F{green}.%F{red})$%f "
+            ).to_string(),
+            rprompt: None,
+            prompt2: "│ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "blinks" => Some(Theme {
+            prompt: "%F{blue}%n%f@%F{cyan}%m%f:%F{green}%~%f$(git_prompt_info)%F{white}$%f ".to_string(),
+            rprompt: Some("%F{yellow}%T%f".to_string()),
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "bureau" => Some(Theme {
+            prompt: concat!(
+                "%F{white}┌─[%f%F{cyan}%n%f%F{white}][%f%F{blue}%~%f%F{white}]%f",
+                "$(git_prompt_info)\n",
+                "%F{white}└─%f%(?.%F{green}.%F{red})▶%f "
+            ).to_string(),
+            rprompt: Some("%F{yellow}%T%f".to_string()),
+            prompt2: "│ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "candy" => Some(Theme {
+            prompt: "%F{magenta}%n%f@%F{yellow}%m%f:%F{cyan}%~%f$(git_prompt_info)\n%F{green}➤%f ".to_string(),
+            rprompt: None,
+            prompt2: "➤ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "clean" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f:%F{blue}%~%f$(git_prompt_info)\n%% ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "cloud" => Some(Theme {
+            prompt: "%F{cyan}☁%f  %F{blue}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: None,
+            prompt2: "☁ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "crunch" => Some(Theme {
+            prompt: concat!(
+                "%F{red}➭%f %F{green}%n%f@%F{yellow}%m%f:",
+                "%F{cyan}%~%f",
+                "$(git_prompt_info) "
+            ).to_string(),
+            rprompt: Some("%F{blue}%T%f".to_string()),
+            prompt2: "➭ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "cypher" => Some(Theme {
+            prompt: "%F{green}%n%f %F{blue}%~%f$(git_prompt_info)\n%(?.%F{green}.%F{red})→%f ".to_string(),
+            rprompt: None,
+            prompt2: "→ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "dallas" => Some(Theme {
+            prompt: "%F{yellow}[%T]%f %F{green}%n%f@%F{blue}%m%f:%F{cyan}%~%f$(git_prompt_info)\n$ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "darkblood" => Some(Theme {
+            prompt: "%F{red}┌─[%f%F{green}%n%f%F{red}@%f%F{green}%m%f%F{red}]─[%f%F{yellow}%~%f%F{red}]%f$(git_prompt_info)\n%F{red}└─▶%f ".to_string(),
+            rprompt: None,
+            prompt2: "│ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "dieter" => Some(Theme {
+            prompt: "%F{blue}%n%f at %F{green}%m%f in %F{yellow}%~%f$(git_prompt_info)\n→ ".to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "→ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "dpoggi" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%F{white}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "dst" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f %F{blue}%~%f$(git_prompt_info) %F{white}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "dstufft" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%% ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "eastwood" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{yellow}%m%f %F{cyan}%~%f$(git_prompt_info)\n%F{green}➜%f ".to_string(),
+            rprompt: None,
+            prompt2: "➜ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "emotty" => Some(Theme {
+            prompt: "%(?.😊.😢) %F{cyan}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: None,
+            prompt2: "… ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "essembeh" => Some(Theme {
+            prompt: "%F{blue}%n%f@%F{green}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%(?.%F{green}✓.%F{red}✗)%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "evan" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info) $ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "fino" => Some(Theme {
+            prompt: concat!(
+                "%F{cyan}╭─%f%F{blue}%n%f@%F{green}%m%f %F{yellow}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{cyan}╰─%f%F{green}➤%f "
+            ).to_string(),
+            rprompt: None,
+            prompt2: "│ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "fino-time" => Some(Theme {
+            prompt: concat!(
+                "%F{cyan}╭─%f%F{yellow}[%T]%f %F{blue}%n%f@%F{green}%m%f %F{yellow}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{cyan}╰─%f%F{green}➤%f "
+            ).to_string(),
+            rprompt: None,
+            prompt2: "│ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "fishy" => Some(Theme {
+            prompt: "%F{cyan}%~%f$(git_prompt_info) %F{green}>%F{cyan}>%F{blue}>%f ".to_string(),
+            rprompt: None,
+            prompt2: ">>> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "flazz" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%F{blue}»%f ".to_string(),
+            rprompt: None,
+            prompt2: "» ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "fletcherm" => Some(Theme {
+            prompt: "%F{cyan}%n%f %F{green}%~%f$(git_prompt_info)\n%F{yellow}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "fox" => Some(Theme {
+            prompt: "%F{208}🦊%f %F{yellow}%~%f$(git_prompt_info) %F{green}➜%f ".to_string(),
+            rprompt: None,
+            prompt2: "➜ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "frisk" => Some(Theme {
+            prompt: "%F{blue}%n%f@%F{green}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%F{magenta}→%f ".to_string(),
+            rprompt: None,
+            prompt2: "→ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "frontcube" => Some(Theme {
+            prompt: "%F{yellow}▸%f %F{green}%n%f@%F{blue}%m%f %F{cyan}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: None,
+            prompt2: "▸ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "funky" => Some(Theme {
+            prompt: "%F{magenta}☆%f %F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{cyan}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "☆ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "fwalch" => Some(Theme {
+            prompt: "%F{cyan}%n%f %F{yellow}%~%f$(git_prompt_info)\n%F{green}%(!.#.$)%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "gallois" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f:%F{blue}%~%f$(git_prompt_info)\n%(?.%F{green}.%F{red})%(!.#.$)%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "gentoo" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{cyan}%~%f$(git_prompt_info) %F{green}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "geoffgarside" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{magenta}%m%f:%F{cyan}%~%f$(git_prompt_info) $ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "gianu" => Some(Theme {
+            prompt: "%F{green}➜%f %F{cyan}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: Some("%F{yellow}%T%f".to_string()),
+            prompt2: "➜ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "gnzh" => Some(Theme {
+            prompt: concat!(
+                "%F{green}╭─%f%F{cyan}%n%f@%F{blue}%m%f %F{yellow}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{green}╰─%f%(?.%F{green}➤.%F{red}➤)%f "
+            ).to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "│ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "gozilla" => Some(Theme {
+            prompt: "%F{green}🦖 %n%f@%F{blue}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%F{green}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "half-life" => Some(Theme {
+            prompt: "%F{208}λ%f %F{cyan}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: None,
+            prompt2: "λ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "humza" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f %F{blue}%~%f$(git_prompt_info)\n%F{yellow}❯%f ".to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "imajes" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info) %F{green}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "intheloop" => Some(Theme {
+            prompt: "%F{yellow}⟳%f %F{cyan}%~%f$(git_prompt_info) %F{green}»%f ".to_string(),
+            rprompt: None,
+            prompt2: "» ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "itchy" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f$(git_prompt_info)\n%(?.😀.😞) ".to_string(),
+            rprompt: None,
+            prompt2: "… ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "jaischeema" => Some(Theme {
+            prompt: "%F{cyan}%n%f %F{yellow}%~%f$(git_prompt_info)\n%F{green}➜%f ".to_string(),
+            rprompt: None,
+            prompt2: "➜ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "jbergantine" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info) $ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "jispwoso" => Some(Theme {
+            prompt: "%F{blue}[%f%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f%F{blue}]%f$(git_prompt_info)$ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "jnrowe" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%F{blue}%%%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "jonathan" => Some(Theme {
+            prompt: concat!(
+                "%F{white}┌─[%f%F{green}%n%f@%F{blue}%m%f%F{white}]%f-",
+                "%F{white}[%f%F{yellow}%~%f%F{white}]%f",
+                "$(git_prompt_info)\n",
+                "%F{white}└─%f%(?.%F{green}.%F{red})▶%f "
+            ).to_string(),
+            rprompt: Some("%F{cyan}%T%f".to_string()),
+            prompt2: "│ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "josh" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{cyan}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "jreese" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f:%F{yellow}%~%f$(git_prompt_info) %F{white}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "jtriley" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%F{white}$%f ".to_string(),
+            rprompt: Some("%F{cyan}%T%f".to_string()),
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "juanghurtado" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f$(git_prompt_info)\n→ ".to_string(),
+            rprompt: None,
+            prompt2: "→ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "junkfood" => Some(Theme {
+            prompt: "%F{yellow}🍔%f %F{green}%n%f@%F{blue}%m%f %F{cyan}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: None,
+            prompt2: "🍟 ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "kafeitu" => Some(Theme {
+            prompt: "%F{yellow}☕%f %F{green}%n%f@%F{blue}%m%f:%F{cyan}%~%f$(git_prompt_info)\n%F{white}$%f ".to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "kardan" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f %F{blue}%~%f$(git_prompt_info) %(?.%F{green}.%F{red})$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "kennethreitz" => Some(Theme {
+            prompt: "%F{magenta}%n%f at %F{yellow}%m%f in %F{green}%~%f$(git_prompt_info)\n%F{blue}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "$ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "kiwi" => Some(Theme {
+            prompt: "%F{green}🥝 %n%f@%F{cyan}%m%f:%F{yellow}%~%f$(git_prompt_info) $ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "kolo" => Some(Theme {
+            prompt: "%F{cyan}%~%f$(git_prompt_info)\n%F{green}%n%f@%F{blue}%m%f $ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "kphoen" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f %F{blue}%~%f$(git_prompt_info)\n%F{yellow}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "lambda" => Some(Theme {
+            prompt: "%F{green}λ%f %F{cyan}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: None,
+            prompt2: "λ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "linuxonly" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f:%F{yellow}%~%f$(git_prompt_info)\n$ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "lukerandall" => Some(Theme {
+            prompt: "%F{cyan}%~%f$(git_prompt_info) %(?.%F{green}.%F{red})$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "macovsky" => Some(Theme {
+            prompt: "%F{green}➜%f %F{cyan}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: Some("%F{yellow}%T%f".to_string()),
+            prompt2: "➜ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "maran" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{blue}λ%f ".to_string(),
+            rprompt: None,
+            prompt2: "λ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "mgutz" => Some(Theme {
+            prompt: "%F{yellow}%~%f$(git_prompt_info) %F{green}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "mh" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info)\n%# ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "michelebologna" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f:%F{blue}%~%f$(git_prompt_info)\n%(?.%F{green}.%F{red})$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "mikeh" => Some(Theme {
+            prompt: "%F{cyan}%n%f %F{yellow}%~%f$(git_prompt_info)\n%F{green}$%f ".to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "miloshadzic" => Some(Theme {
+            prompt: "%F{cyan}%~%f$(git_prompt_info)\n%F{green}❯%f ".to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "mira" => Some(Theme {
+            prompt: "%F{magenta}✦%f %F{cyan}%~%f$(git_prompt_info) %F{green}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "✦ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "mortalscumbag" => Some(Theme {
+            prompt: "%F{red}☠%f %F{green}%n%f@%F{blue}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%F{red}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "☠ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "mrtazz" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f:%F{yellow}%~%f$(git_prompt_info) $ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "murilasso" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f %F{yellow}%~%f$(git_prompt_info)\n%(?.%F{green}✔.%F{red}✘)%f ".to_string(),
+            rprompt: None,
+            prompt2: "… ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "muse" => Some(Theme {
+            prompt: "%F{magenta}♪%f %F{cyan}%~%f$(git_prompt_info) %F{green}»%f ".to_string(),
+            rprompt: None,
+            prompt2: "♪ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "nanotech" => Some(Theme {
+            prompt: "%F{green}▸%f %F{cyan}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: Some("%F{blue}%T%f".to_string()),
+            prompt2: "▸ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "nebirhos" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{cyan}»%f ".to_string(),
+            rprompt: None,
+            prompt2: "» ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "nicoulaj" => Some(Theme {
+            prompt: "%F{cyan}%~%f$(git_prompt_info) %(?.%F{green}.%F{red})%(!.#.❯)%f ".to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "norm" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f$(git_prompt_info) $ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "obraun" => Some(Theme {
+            prompt: "%F{blue}[%f%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f%F{blue}]%f$(git_prompt_info)\n%F{blue}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "peepcode" => Some(Theme {
+            prompt: "%F{green}%n%f %F{cyan}%~%f$(git_prompt_info)\n%F{white}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "philips" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%F{blue}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "pmcgee" => Some(Theme {
+            prompt: "%F{green}%n%f at %F{blue}%m%f in %F{yellow}%~%f$(git_prompt_info)\n→ ".to_string(),
+            rprompt: None,
+            prompt2: "→ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "pygmalion" => Some(Theme {
+            prompt: concat!(
+                "%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f ",
+                "$(git_prompt_info)\n",
+                "%(?.%F{green}.%F{red})❯%f "
+            ).to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "re5et" => Some(Theme {
+            prompt: "%F{cyan}[%f%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f%F{cyan}]%f$(git_prompt_info)\n%F{white}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "refined" => Some(Theme {
+            prompt: "%F{cyan}%~%f$(git_prompt_info)\n%F{magenta}❯%f ".to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "rgm" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info) $ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "risto" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{blue}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "rixius" => Some(Theme {
+            prompt: "%F{green}➜%f %F{blue}%n%f@%F{cyan}%m%f:%F{yellow}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: None,
+            prompt2: "➜ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "rkj" => Some(Theme {
+            prompt: concat!(
+                "%F{cyan}┌─[%f%F{green}%n%f@%F{blue}%m%f%F{cyan}]%f",
+                "%F{cyan}─[%f%F{yellow}%~%f%F{cyan}]%f",
+                "$(git_prompt_info)\n",
+                "%F{cyan}└─▶%f "
+            ).to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "│ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "sammy" => Some(Theme {
+            prompt: "%F{magenta}%n%f@%F{cyan}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{green}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "simonoff" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f:%F{yellow}%~%f$(git_prompt_info) $ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "skaro" => Some(Theme {
+            // Doctor Who Skaro theme (Dalek homeworld)
+            prompt: "%F{yellow}⬡%f %F{blue}%n%f@%F{cyan}%m%f %F{red}%~%f$(git_prompt_info)\n%(?.%F{yellow}EXTERMINATE!.%F{red}MALFUNCTION!)%f ".to_string(),
+            rprompt: None,
+            prompt2: "⬡ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "smt" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{cyan}%~%f$(git_prompt_info)\n%F{yellow}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "sonicradish" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f:%F{yellow}%~%f$(git_prompt_info)\n%(?.%F{green}.%F{red})$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "sorin" => Some(Theme {
+            prompt: "%F{cyan}%~%f$(git_prompt_info) %F{magenta}❯%f ".to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "sporty_256" => Some(Theme {
+            prompt: "%F{214}%n%f@%F{118}%m%f:%F{33}%~%f$(git_prompt_info)\n%F{196}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "steeef" => Some(Theme {
+            prompt: concat!(
+                "%F{magenta}%n%f at %F{yellow}%m%f in ",
+                "%F{green}%~%f",
+                "$(git_prompt_info)\n",
+                "%F{cyan}$%f "
+            ).to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "strug" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info) %(?.%F{green}✓.%F{red}✗)%f ".to_string(),
+            rprompt: None,
+            prompt2: "… ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "sunaku" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{blue}%#%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "sunrise" => Some(Theme {
+            prompt: "%F{yellow}☀%f %F{green}%n%f@%F{blue}%m%f %F{cyan}%~%f$(git_prompt_info)\n%F{yellow}$%f ".to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "☀ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "superjarin" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{magenta}%m%f %F{cyan}%~%f$(git_prompt_info)\n%F{yellow}❯%f ".to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "suvash" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f:%F{yellow}%~%f$(git_prompt_info) $ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "takashiyoshida" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f$(git_prompt_info)\n%(?.%F{green}.%F{red})$%f ".to_string(),
+            rprompt: Some("%F{blue}%T%f".to_string()),
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "terminalparty" => Some(Theme {
+            prompt: "%F{magenta}🎉%f %F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{cyan}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "🎉 ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "theunraveler" => Some(Theme {
+            prompt: "%F{blue}%~%f$(git_prompt_info) %(?.%F{green}.%F{red})➜%f ".to_string(),
+            rprompt: None,
+            prompt2: "➜ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "tjkirch" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{blue}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "tonotdo" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info)\n$ ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "trapd00r" => Some(Theme {
+            prompt: "%F{cyan}%n%f %F{green}%~%f$(git_prompt_info)\n%F{magenta}»%f ".to_string(),
+            rprompt: None,
+            prompt2: "» ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "wedisagree" => Some(Theme {
+            prompt: "%F{red}✗%f %F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: None,
+            prompt2: "✗ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "wezm" => Some(Theme {
+            prompt: "%F{cyan}%n%f@%F{green}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{blue}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "wuffers" => Some(Theme {
+            prompt: "%F{yellow}🐕%f %F{green}%n%f@%F{blue}%m%f %F{cyan}%~%f$(git_prompt_info) ".to_string(),
+            rprompt: None,
+            prompt2: "🐕 ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "xiong-chiamiov" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{blue}%m%f %F{yellow}%~%f$(git_prompt_info)\n%F{cyan}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "ys" => Some(Theme {
+            prompt: concat!(
+                "%F{blue}#%f %F{cyan}%n%f @ %F{green}%m%f in ",
+                "%F{yellow}%~%f",
+                "$(git_prompt_info)\n",
+                "%F{red}$%f "
+            ).to_string(),
+            rprompt: Some("%F{white}[%T]%f".to_string()),
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "zhann" => Some(Theme {
+            prompt: "%F{green}%n%f@%F{cyan}%m%f %F{yellow}%~%f$(git_prompt_info) %F{blue}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+
+        // Additional popular themes
+        "spaceship" => Some(Theme {
+            prompt: concat!(
+                "%F{cyan}%~%f ",
+                "$(git_prompt_info)\n",
+                "%(?.%F{green}.%F{red})❯%f "
+            ).to_string(),
+            rprompt: Some("%F{yellow}%T%f".to_string()),
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "bullet-train" => Some(Theme {
+            prompt: concat!(
+                "%K{blue}%F{white} %n %f%k",
+                "%K{green}%F{blue}%f%F{black} %m %f%k",
+                "%K{yellow}%F{green}%f%F{black} %~ %f%k",
+                "$(git_prompt_info)",
+                "%F{yellow}%f "
+            ).to_string(),
+            rprompt: None,
+            prompt2: "▶ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "dracula" => Some(Theme {
+            prompt: concat!(
+                "%F{cyan}%n%f@%F{magenta}%m%f ",
+                "%F{green}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{magenta}➜%f "
+            ).to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "➜ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "gruvbox" => Some(Theme {
+            prompt: concat!(
+                "%F{208}%n%f@%F{142}%m%f ",
+                "%F{109}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{214}❯%f "
+            ).to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "nord" => Some(Theme {
+            prompt: concat!(
+                "%F{cyan}%n%f@%F{blue}%m%f ",
+                "%F{white}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{cyan}❯%f "
+            ).to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "catppuccin" => Some(Theme {
+            prompt: concat!(
+                "%F{183}%n%f@%F{139}%m%f ",
+                "%F{116}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{183}❯%f "
+            ).to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "tokyo-night" => Some(Theme {
+            prompt: concat!(
+                "%F{111}%n%f@%F{73}%m%f ",
+                "%F{186}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{140}❯%f "
+            ).to_string(),
+            rprompt: Some("%F{8}%T%f".to_string()),
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "onedark" => Some(Theme {
+            prompt: concat!(
+                "%F{114}%n%f@%F{180}%m%f ",
+                "%F{39}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{170}❯%f "
+            ).to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "solarized" => Some(Theme {
+            prompt: "%F{136}%n%f@%F{166}%m%f %F{33}%~%f$(git_prompt_info)\n%F{64}$%f ".to_string(),
+            rprompt: None,
+            prompt2: "> ".to_string(),
+            colors: HashMap::new(),
+        }),
+        "monokai" => Some(Theme {
+            prompt: concat!(
+                "%F{208}%n%f@%F{141}%m%f ",
+                "%F{148}%~%f ",
+                "$(git_prompt_info)\n",
+                "%F{81}❯%f "
+            ).to_string(),
+            rprompt: None,
+            prompt2: "❯ ".to_string(),
+            colors: HashMap::new(),
+        }),
+
         _ => None,
     }
 }
@@ -642,14 +1531,147 @@ pub fn get_builtin_theme(name: &str) -> Option<Theme> {
 /// List available built-in themes
 pub fn list_builtin_themes() -> Vec<&'static str> {
     vec![
+        // FSH built-in themes
+        "fsh",
+        "default",
         "robbyrussell",
         "agnoster",
         "minimal",
-        "jsh",
         "powerlevel",
         "simple",
         "pure",
         "gallifrey",
+        // Oh-My-ZSH themes
+        "af-magic",
+        "afowler",
+        "alanpeabody",
+        "amuse",
+        "apple",
+        "arrow",
+        "aussiegeek",
+        "avit",
+        "awesomepanda",
+        "bira",
+        "blinks",
+        "bureau",
+        "candy",
+        "clean",
+        "cloud",
+        "crunch",
+        "cypher",
+        "dallas",
+        "darkblood",
+        "dieter",
+        "dpoggi",
+        "dst",
+        "dstufft",
+        "eastwood",
+        "emotty",
+        "essembeh",
+        "evan",
+        "fino",
+        "fino-time",
+        "fishy",
+        "flazz",
+        "fletcherm",
+        "fox",
+        "frisk",
+        "frontcube",
+        "funky",
+        "fwalch",
+        "gallois",
+        "gentoo",
+        "geoffgarside",
+        "gianu",
+        "gnzh",
+        "gozilla",
+        "half-life",
+        "humza",
+        "imajes",
+        "intheloop",
+        "itchy",
+        "jaischeema",
+        "jbergantine",
+        "jispwoso",
+        "jnrowe",
+        "jonathan",
+        "josh",
+        "jreese",
+        "jtriley",
+        "juanghurtado",
+        "junkfood",
+        "kafeitu",
+        "kardan",
+        "kennethreitz",
+        "kiwi",
+        "kolo",
+        "kphoen",
+        "lambda",
+        "linuxonly",
+        "lukerandall",
+        "macovsky",
+        "maran",
+        "mgutz",
+        "mh",
+        "michelebologna",
+        "mikeh",
+        "miloshadzic",
+        "mira",
+        "mortalscumbag",
+        "mrtazz",
+        "murilasso",
+        "muse",
+        "nanotech",
+        "nebirhos",
+        "nicoulaj",
+        "norm",
+        "obraun",
+        "peepcode",
+        "philips",
+        "pmcgee",
+        "pygmalion",
+        "re5et",
+        "refined",
+        "rgm",
+        "risto",
+        "rixius",
+        "rkj",
+        "sammy",
+        "simonoff",
+        "skaro",
+        "smt",
+        "sonicradish",
+        "sorin",
+        "sporty_256",
+        "steeef",
+        "strug",
+        "sunaku",
+        "sunrise",
+        "superjarin",
+        "suvash",
+        "takashiyoshida",
+        "terminalparty",
+        "theunraveler",
+        "tjkirch",
+        "tonotdo",
+        "trapd00r",
+        "wedisagree",
+        "wezm",
+        "wuffers",
+        "xiong-chiamiov",
+        "ys",
+        "zhann",
+        // Popular modern themes
+        "spaceship",
+        "bullet-train",
+        "dracula",
+        "gruvbox",
+        "nord",
+        "catppuccin",
+        "tokyo-night",
+        "onedark",
+        "solarized",
+        "monokai",
     ]
 }
 
@@ -668,7 +1690,7 @@ impl Default for ThemeManager {
 impl ThemeManager {
     pub fn new() -> Self {
         Self {
-            current_theme: get_builtin_theme("jsh").unwrap(),
+            current_theme: get_builtin_theme("fsh").unwrap(),
             git_format: " %F{yellow}git:(%F{red}%b%F{yellow})%f%F{red}%d%f".to_string(),
         }
     }

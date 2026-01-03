@@ -1,4 +1,4 @@
-//! jsh-specific and Fish-compatible syntax extensions
+//! Franken-specific and Fish-compatible syntax extensions
 
 use crate::ast::*;
 use crate::error::{JshError, Result};
@@ -8,10 +8,10 @@ use super::Parser;
 
 impl Parser {
     // ========================================================================
-    // jsh-specific enhanced syntax
+    // Franken-specific enhanced syntax
     // ========================================================================
 
-    /// Parse jsh match expression
+    /// Parse franken match expression
     pub fn parse_match(&mut self) -> Result<Statement> {
         let span = self.current_span();
         self.expect(&TokenKind::Match_)?;
@@ -159,7 +159,7 @@ impl Parser {
         Ok(MatchPattern::Literal(word))
     }
 
-    /// Parse jsh infinite loop
+    /// Parse franken infinite loop
     pub fn parse_loop(&mut self) -> Result<Statement> {
         let span = self.current_span();
         self.expect(&TokenKind::Loop)?;
@@ -181,17 +181,17 @@ impl Parser {
             stmts
         };
 
-        Ok(Statement::Loop(LoopStatement { body, span }))
+        Ok(Statement::Loop(LoopStatement { body, span, loop_id: crate::jit::LoopId::new() }))
     }
 
-    /// Parse jsh let binding
+    /// Parse franken let binding
     pub fn parse_let(&mut self) -> Result<Statement> {
         let span = self.current_span();
         self.expect(&TokenKind::Let)?;
         self.skip_newlines();
 
         let name = match self.peek().kind.clone() {
-            TokenKind::Word(s) => s,
+            TokenKind::Word(s) => s.into_owned(),
             _ => return Err(JshError::syntax("Expected variable name after 'let'")),
         };
         self.advance();
@@ -202,14 +202,14 @@ impl Parser {
         Ok(Statement::Let(LetBinding { name, value, span }))
     }
 
-    /// Parse jsh const binding
+    /// Parse franken const binding
     pub fn parse_const(&mut self) -> Result<Statement> {
         let span = self.current_span();
         self.expect(&TokenKind::Const)?;
         self.skip_newlines();
 
         let name = match self.peek().kind.clone() {
-            TokenKind::Word(s) => s,
+            TokenKind::Word(s) => s.into_owned(),
             _ => return Err(JshError::syntax("Expected variable name after 'const'")),
         };
         self.advance();
@@ -220,7 +220,7 @@ impl Parser {
         Ok(Statement::Const(ConstBinding { name, value, span }))
     }
 
-    /// Parse jsh try-catch-finally
+    /// Parse franken try-catch-finally
     pub fn parse_try(&mut self) -> Result<Statement> {
         let span = self.current_span();
         self.expect(&TokenKind::Try)?;
@@ -245,7 +245,7 @@ impl Parser {
             self.skip_newlines();
 
             let var = if let TokenKind::Word(s) = &self.peek().kind {
-                let v = s.clone();
+                let v = s.clone().into_owned();
                 self.advance();
                 self.skip_newlines();
                 Some(v)
@@ -300,14 +300,14 @@ impl Parser {
         }))
     }
 
-    /// Parse jsh fn (function shorthand)
+    /// Parse franken fn (function shorthand)
     pub fn parse_fn(&mut self) -> Result<Statement> {
         let span = self.current_span();
         self.expect(&TokenKind::Fn)?;
         self.skip_newlines();
 
         let name = match self.peek().kind.clone() {
-            TokenKind::Word(s) => s,
+            TokenKind::Word(s) => s.into_owned(),
             _ => return Err(JshError::syntax("Expected function name after 'fn'")),
         };
         self.advance();

@@ -1,4 +1,4 @@
-//! Tmux-compatible terminal multiplexer module for jsh
+//! Tmux-compatible terminal multiplexer module for Franken Shell
 //!
 //! Provides full tmux compatibility including:
 //! - Session, window, and pane management
@@ -18,7 +18,7 @@ pub mod plugin;
 pub mod commands;
 
 use crate::error::{JshError, Result};
-use crate::shell::jsh_config_dir;
+use crate::shell::fsh_config_dir;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -82,7 +82,7 @@ impl TmuxServer {
 
         let session = Arc::new(Mutex::new(Session::new(name)));
         self.sessions.insert(name.to_string(), session.clone());
-        
+
         if self.current_session.is_none() {
             self.current_session = Some(name.to_string());
         }
@@ -112,7 +112,7 @@ impl TmuxServer {
         }
 
         self.sessions.remove(name);
-        
+
         if self.current_session.as_ref() == Some(&name.to_string()) {
             self.current_session = self.sessions.keys().next().cloned();
         }
@@ -137,7 +137,7 @@ impl TmuxServer {
                 s.name = new_name.to_string();
             }
             self.sessions.insert(new_name.to_string(), session);
-            
+
             if self.current_session.as_ref() == Some(&old_name.to_string()) {
                 self.current_session = Some(new_name.to_string());
             }
@@ -163,16 +163,16 @@ pub fn default_socket_path() -> PathBuf {
     let runtime_dir = std::env::var("XDG_RUNTIME_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("/tmp"));
-    runtime_dir.join(format!("jsh-tmux-{}", std::process::id()))
+    runtime_dir.join(format!("fsh-tmux-{}", std::process::id()))
 }
 
 /// Get default config path
 pub fn default_config_path() -> PathBuf {
     // Check multiple locations in order
     let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-    
+
     // XDG config first
-    let xdg_config = jsh_config_dir().join("tmux.conf");
+    let xdg_config = fsh_config_dir().join("tmux.conf");
     if xdg_config.exists() {
         return xdg_config;
     }
@@ -307,7 +307,7 @@ pub struct TmuxStyle {
 impl TmuxStyle {
     pub fn parse(s: &str) -> Self {
         let mut style = TmuxStyle::default();
-        
+
         for part in s.split(',') {
             let part = part.trim();
             if let Some(color) = part.strip_prefix("fg=") {

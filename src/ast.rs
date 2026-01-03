@@ -1,6 +1,9 @@
-//! Abstract Syntax Tree for jsh shell
+//! Abstract Syntax Tree for Franken Shell
+//!
+//! Includes optimized representations for common command patterns.
 
 use crate::token::Span;
+use smallvec::SmallVec;
 
 /// A complete shell program
 #[derive(Debug, Clone)]
@@ -31,15 +34,15 @@ pub enum Statement {
     Select(SelectStatement),
     /// Function definition
     Function(FunctionDef),
-    /// jsh match expression
+    /// franken match expression
     Match(MatchExpr),
-    /// jsh loop (infinite)
+    /// franken loop (infinite)
     Loop(LoopStatement),
-    /// jsh let binding
+    /// franken let binding
     Let(LetBinding),
-    /// jsh const binding
+    /// franken const binding
     Const(ConstBinding),
-    /// jsh try-catch-finally
+    /// franken try-catch-finally
     Try(TryStatement),
     /// Fish-style begin...end block
     BeginBlock(Vec<Statement>),
@@ -93,6 +96,9 @@ pub struct Command {
 pub enum CommandKind {
     /// Simple command (program with arguments)
     Simple(SimpleCommand),
+    /// Flat command - optimized for simple commands with no expansions
+    /// This is an optimization to avoid Word/WordPart overhead
+    Flat(FlatCommand),
     /// Compound command (if, for, while, etc.)
     Compound(Box<Statement>),
     /// Function call
@@ -115,6 +121,161 @@ pub struct SimpleCommand {
     pub assignments: Vec<Assignment>,
 }
 
+impl SimpleCommand {
+    /// Check if this command can be represented as a flat command
+    /// (all arguments are simple literals with no expansions)
+    #[inline]
+    pub fn is_flat(&self) -> bool {
+        self.assignments.is_empty()
+            && self.name.is_literal()
+            && self.args.iter().all(|w| w.is_literal())
+    }
+
+    /// Convert to a flat command if possible
+    /// Returns None if the command contains expansions
+    pub fn to_flat(&self) -> Option<FlatCommand> {
+        if !self.is_flat() {
+            return None;
+        }
+
+        let mut argv = SmallVec::with_capacity(1 + self.args.len());
+
+        // Add command name
+        if let Some(name) = self.name.as_literal() {
+            argv.push(name.to_string());
+        } else {
+            return None;
+        }
+
+        // Add arguments
+        for arg in &self.args {
+            if let Some(lit) = arg.as_literal() {
+                argv.push(lit.to_string());
+            } else {
+                return None;
+            }
+        }
+
+        Some(FlatCommand { argv })
+    }
+}
+
+/// A flat representation of a simple command with no variable expansions.
+///
+/// This is an optimized representation for commands like:
+/// - `echo hello world`
+/// - `ls -la /tmp`
+/// - `grep -r pattern .`
+///
+/// Most shell commands fall into this category, so having an efficient
+/// representation avoids the overhead of the full AST structure.
+#[derive(Debug, Clone)]
+pub struct FlatCommand {
+    /// Command name (index 0) and arguments (indices 1..)
+    /// SmallVec avoids heap allocation for commands with ≤8 arguments
+    pub argv: SmallVec<[String; 8]>,
+}
+
+impl FlatCommand {
+    /// Create a new flat command from a command name
+    #[inline]
+    pub fn new(name: impl Into<String>) -> Self {
+        let mut argv = SmallVec::new();
+        argv.push(name.into());
+        Self { argv }
+    }
+
+    /// Create a flat command with pre-allocated capacity
+    #[inline]
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            argv: SmallVec::with_capacity(capacity),
+        }
+    }
+
+    /// Get the command name
+    #[inline]
+    pub fn name(&self) -> &str {
+        self.argv.first().map(|s| s.as_str()).unwrap_or("")
+    }
+
+    /// Get the arguments (excluding command name)
+    #[inline]
+    pub fn args(&self) -> &[String] {
+        if self.argv.len() > 1 {
+            &self.argv[1..]
+        } else {
+            &[]
+        }
+    }
+
+    /// Get all argv (command name + arguments)
+    #[inline]
+    pub fn argv(&self) -> &[String] {
+        &self.argv
+    }
+
+    /// Add an argument
+    #[inline]
+    pub fn push_arg(&mut self, arg: impl Into<String>) {
+        self.argv.push(arg.into());
+    }
+
+    /// Number of arguments (excluding command name)
+    #[inline]
+    pub fn argc(&self) -> usize {
+        self.argv.len().saturating_sub(1)
+    }
+
+    /// Total length including command name
+    #[inline]
+    pub fn len(&self) -> usize {
+        self.argv.len()
+    }
+
+    /// Check if empty (no command name)
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.argv.is_empty()
+    }
+
+    /// Convert back to a SimpleCommand for cases where full AST is needed
+    pub fn to_simple_command(&self, span: Span) -> SimpleCommand {
+        let name = if let Some(n) = self.argv.first() {
+            Word::literal(n.clone(), span)
+        } else {
+            Word::literal("", span)
+        };
+
+        let args = self.args()
+            .iter()
+            .map(|a| Word::literal(a.clone(), span))
+            .collect();
+
+        SimpleCommand {
+            name,
+            args,
+            assignments: vec![],
+        }
+    }
+}
+
+impl From<Vec<String>> for FlatCommand {
+    fn from(argv: Vec<String>) -> Self {
+        Self {
+            argv: SmallVec::from_vec(argv),
+        }
+    }
+}
+
+impl From<&[&str]> for FlatCommand {
+    fn from(argv: &[&str]) -> Self {
+        Self {
+            argv: argv.iter().map(|s| s.to_string()).collect(),
+        }
+    }
+}
+
 /// A word that may contain expansions
 #[derive(Debug, Clone)]
 pub struct Word {
@@ -130,10 +291,14 @@ impl Word {
         }
     }
 
+    /// Check if this word is a single literal (no expansion needed)
+    #[inline]
     pub fn is_literal(&self) -> bool {
         self.parts.len() == 1 && matches!(&self.parts[0], WordPart::Literal(_))
     }
 
+    /// Get the literal value if this is a simple literal word
+    #[inline]
     pub fn as_literal(&self) -> Option<&str> {
         if self.parts.len() == 1 {
             if let WordPart::Literal(s) = &self.parts[0] {
@@ -141,6 +306,45 @@ impl Word {
             }
         }
         None
+    }
+
+    /// Check if this word needs expansion (contains variables, command subs, etc.)
+    ///
+    /// Returns false if the word is a constant that doesn't depend on runtime state.
+    /// Used for caching and lazy expansion optimization.
+    #[inline]
+    pub fn needs_expansion(&self) -> bool {
+        for part in &self.parts {
+            match part {
+                WordPart::Literal(s) => {
+                    // Check for embedded variables in literals (from double-quoted strings)
+                    if s.contains('$') || s.starts_with("$__ARITH__") {
+                        return true;
+                    }
+                }
+                WordPart::Variable(_) => return true,
+                WordPart::SpecialVar(_) => return true,
+                WordPart::BraceExpansion(_) => return true,
+                WordPart::CommandSub(_) => return true,
+                WordPart::BacktickSub(_) => return true,
+                WordPart::ArithmeticSub(_) => return true,
+                WordPart::ProcessSub { .. } => return true,
+                WordPart::Glob(_) => {
+                    // Globs don't need variable expansion, but might need glob expansion
+                    // We don't consider globs as "needing expansion" for caching purposes
+                    // since they're constant patterns
+                }
+            }
+        }
+        false
+    }
+
+    /// Check if this word is a constant (can be cached)
+    ///
+    /// A constant word has no runtime-dependent parts.
+    #[inline]
+    pub fn is_constant(&self) -> bool {
+        !self.needs_expansion()
     }
 }
 
@@ -415,6 +619,8 @@ pub struct ForLoop {
     pub items: Option<Vec<Word>>,
     pub body: Vec<Statement>,
     pub span: Span,
+    /// Unique ID for JIT hotspot tracking
+    pub loop_id: crate::jit::LoopId,
 }
 
 /// C-style for loop
@@ -433,6 +639,8 @@ pub struct WhileLoop {
     pub condition: Vec<Statement>,
     pub body: Vec<Statement>,
     pub span: Span,
+    /// Unique ID for JIT hotspot tracking
+    pub loop_id: crate::jit::LoopId,
 }
 
 /// Until loop
@@ -441,6 +649,8 @@ pub struct UntilLoop {
     pub condition: Vec<Statement>,
     pub body: Vec<Statement>,
     pub span: Span,
+    /// Unique ID for JIT hotspot tracking
+    pub loop_id: crate::jit::LoopId,
 }
 
 /// Case statement
@@ -480,7 +690,7 @@ pub struct SelectStatement {
 #[derive(Debug, Clone)]
 pub struct FunctionDef {
     pub name: String,
-    /// Named parameters (jsh extension): fn greet(name, greeting) { ... }
+    /// Named parameters (franken extension): fn greet(name, greeting) { ... }
     pub params: Vec<String>,
     pub body: Vec<Statement>,
     pub local_vars: Vec<String>,
@@ -488,10 +698,10 @@ pub struct FunctionDef {
 }
 
 // ============================================================================
-// jsh-specific enhanced syntax
+// franken-specific enhanced syntax
 // ============================================================================
 
-/// jsh match expression (similar to Rust match)
+/// franken match expression (similar to Rust match)
 #[derive(Debug, Clone)]
 pub struct MatchExpr {
     pub value: Word,
@@ -533,14 +743,16 @@ pub enum MatchPattern {
     Wildcard,
 }
 
-/// jsh infinite loop
+/// franken infinite loop
 #[derive(Debug, Clone)]
 pub struct LoopStatement {
     pub body: Vec<Statement>,
     pub span: Span,
+    /// Unique ID for JIT hotspot tracking
+    pub loop_id: crate::jit::LoopId,
 }
 
-/// jsh let binding
+/// franken let binding
 #[derive(Debug, Clone)]
 pub struct LetBinding {
     pub name: String,
@@ -548,7 +760,7 @@ pub struct LetBinding {
     pub span: Span,
 }
 
-/// jsh const binding
+/// franken const binding
 #[derive(Debug, Clone)]
 pub struct ConstBinding {
     pub name: String,
@@ -556,7 +768,7 @@ pub struct ConstBinding {
     pub span: Span,
 }
 
-/// jsh try-catch-finally
+/// franken try-catch-finally
 #[derive(Debug, Clone)]
 pub struct TryStatement {
     pub try_block: Vec<Statement>,

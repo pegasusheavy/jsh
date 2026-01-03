@@ -10,21 +10,22 @@ impl Parser {
     /// Parse a word (may contain multiple parts when adjacent without whitespace)
     pub fn parse_word(&mut self) -> Result<Word> {
         let span = self.current_span();
-        let mut parts = Vec::new();
+        // Most words have 1-2 parts (literal or variable expansion)
+        let mut parts = Vec::with_capacity(2);
 
         // First, get the initial part based on the current token
         let first_part = match self.peek().kind.clone() {
             TokenKind::Word(s) => {
                 self.advance();
-                WordPart::Literal(s)
+                WordPart::Literal(s.into_owned())
             }
             TokenKind::String(s) => {
                 self.advance();
-                WordPart::Literal(s)
+                WordPart::Literal(s.into_owned())
             }
             TokenKind::RawString(s) => {
                 self.advance();
-                WordPart::Literal(s)
+                WordPart::Literal(s.into_owned())
             }
             TokenKind::Number(n) => {
                 self.advance();
@@ -36,7 +37,7 @@ impl Parser {
             }
             TokenKind::Variable(name) => {
                 self.advance();
-                WordPart::Variable(name)
+                WordPart::Variable(name.into_owned())
             }
             TokenKind::LBracket => {
                 // [ as word (for test builtin)
@@ -78,7 +79,7 @@ impl Parser {
             }
             TokenKind::Glob(pattern) => {
                 self.advance();
-                WordPart::Glob(pattern)
+                WordPart::Glob(pattern.into_owned())
             }
             _ => {
                 return Err(JshError::syntax("Expected word"));

@@ -1,12 +1,13 @@
-//! Statement execution for jsh interpreter
+//! Statement execution for Franken Shell interpreter
 
 use crate::ast::{
-    Assignment, AssignmentOp, Command as AstCommand, CommandKind, List, ListOp,
+    Assignment, AssignmentOp, Command as AstCommand, CommandKind, FlatCommand, List, ListOp,
     Pipeline, Program, Redirect, SimpleCommand, Statement, Word,
 };
 use crate::builtins::Builtins;
 use crate::error::{JshError, Result};
 use crate::interpreter::{ExitStatus, Interpreter};
+use crate::token::Span;
 use std::os::unix::io::{AsRawFd, FromRawFd};
 use std::process::{Child, Stdio};
 
@@ -127,7 +128,7 @@ impl Interpreter {
                     final_status = ExitStatus::failure(status.code().unwrap_or(1));
                 }
                 Err(e) => {
-                    eprintln!("jsh: error waiting for process: {}", e);
+                    eprintln!("franken: error waiting for process: {}", e);
                     final_status = ExitStatus::failure(1);
                 }
             }
@@ -146,10 +147,52 @@ impl Interpreter {
     pub(crate) fn execute_ast_command(&mut self, cmd: &AstCommand) -> Result<ExitStatus> {
         match &cmd.kind {
             CommandKind::Simple(simple) => self.execute_simple_command(simple, &cmd.redirects),
+            CommandKind::Flat(flat) => self.execute_flat_command(flat, &cmd.redirects),
             CommandKind::Compound(stmt) => self.execute_statement(stmt),
             CommandKind::FunctionCall { name, args } => self.call_function(name, args),
             CommandKind::Coproc { name: _, command } => self.execute_ast_command(command),
         }
+    }
+
+    /// Execute a flat command (optimized path for simple commands)
+    ///
+    /// Flat commands have no variable expansions or glob patterns,
+    /// so we can skip the expansion phase entirely.
+    #[inline]
+    pub(crate) fn execute_flat_command(
+        &mut self,
+        cmd: &FlatCommand,
+        redirects: &[Redirect],
+    ) -> Result<ExitStatus> {
+        if cmd.is_empty() {
+            return Ok(ExitStatus::success());
+        }
+
+        let name = cmd.name();
+        let args = cmd.args();
+
+        // Check for functions first
+        if self.functions.contains_key(name) {
+            // Convert to Word args for function call
+            let word_args: Vec<Word> = args
+                .iter()
+                .map(|a| Word::literal(a.clone(), Span::default()))
+                .collect();
+            return self.call_function(name, &word_args);
+        }
+
+        // Check for builtins (fast path - most commands are builtins or external)
+        let builtins = Builtins::new();
+        let args_vec: Vec<String> = args.iter().cloned().collect();
+        if let Some(status) = builtins.execute(name, &args_vec, self)? {
+            self.last_status = status;
+            return Ok(status);
+        }
+
+        // External command
+        let status = self.execute_external_flat(cmd, redirects)?;
+        self.last_status = status;
+        Ok(status)
     }
 
     /// Execute a simple command
@@ -245,7 +288,7 @@ impl Interpreter {
             let old_params = std::mem::take(&mut self.positional_params);
 
             // Expand all arguments
-            let mut expanded_args = Vec::new();
+            let mut expanded_args = smallvec::SmallVec::<[String; 16]>::new();
             for arg in args {
                 expanded_args.push(self.expand_word(arg)?);
             }

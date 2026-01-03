@@ -1,13 +1,14 @@
-//! Error types for jsh shell
+//! Error types for Franken Shell 🧟
 
 use thiserror::Error;
 
-/// Result type for jsh operations
-pub type Result<T> = std::result::Result<T, JshError>;
+/// Result type for Franken Shell operations
+pub type Result<T> = std::result::Result<T, FrankenError>;
 
-/// Main error type for jsh
+/// Main error type for Franken Shell
+/// (Because even monsters need proper error handling)
 #[derive(Error, Debug)]
-pub enum JshError {
+pub enum FrankenError {
     #[error("Readline error: {0}")]
     Readline(#[from] rustyline::error::ReadlineError),
 
@@ -67,13 +68,13 @@ pub enum JshError {
     Return(Option<String>),
 }
 
-impl JshError {
+impl FrankenError {
     pub fn syntax(msg: impl Into<String>) -> Self {
-        JshError::Syntax(msg.into())
+        FrankenError::Syntax(msg.into())
     }
 
     pub fn parse(msg: impl Into<String>, line: usize, column: usize) -> Self {
-        JshError::Parse {
+        FrankenError::Parse {
             message: msg.into(),
             line,
             column,
@@ -81,11 +82,13 @@ impl JshError {
     }
 
     pub fn runtime(msg: impl Into<String>) -> Self {
-        JshError::Runtime(msg.into())
+        FrankenError::Runtime(msg.into())
     }
 
     pub fn type_error(msg: impl Into<String>) -> Self {
-        JshError::Type(msg.into())
+        FrankenError::Type(msg.into())
     }
 }
 
+// Alias for backward compatibility
+pub type JshError = FrankenError;

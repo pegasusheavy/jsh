@@ -1,4 +1,4 @@
-//! FZF (fuzzy finder) integration for jsh
+//! FZF (fuzzy finder) integration for Franken Shell
 //!
 //! Provides shell functions and utilities for fzf integration:
 //! - fzf_history: Fuzzy search command history
@@ -45,7 +45,7 @@ fn run_fzf(input: &str, opts: &[&str]) -> Option<String> {
 /// Usage: fzf_history [--multi]
 pub fn builtin_fzf_history(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
     if !fzf_available() {
-        eprintln!("jsh: fzf_history: fzf not found in PATH");
+        eprintln!("franken: fzf_history: fzf not found in PATH");
         eprintln!("Install fzf: https://github.com/junegunn/fzf#installation");
         return Ok(ExitStatus::failure(1));
     }
@@ -82,7 +82,7 @@ pub fn builtin_fzf_history(args: &[String], interp: &mut Interpreter) -> Result<
 /// Usage: fzf_file [directory] [--multi] [--preview]
 pub fn builtin_fzf_file(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
     if !fzf_available() {
-        eprintln!("jsh: fzf_file: fzf not found in PATH");
+        eprintln!("franken: fzf_file: fzf not found in PATH");
         return Ok(ExitStatus::failure(1));
     }
 
@@ -133,7 +133,7 @@ pub fn builtin_fzf_file(args: &[String], interp: &mut Interpreter) -> Result<Exi
 /// Usage: fzf_dir [base_directory] [--preview]
 pub fn builtin_fzf_dir(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
     if !fzf_available() {
-        eprintln!("jsh: fzf_dir: fzf not found in PATH");
+        eprintln!("franken: fzf_dir: fzf not found in PATH");
         return Ok(ExitStatus::failure(1));
     }
 
@@ -180,7 +180,7 @@ pub fn builtin_fzf_dir(args: &[String], interp: &mut Interpreter) -> Result<Exit
 /// Usage: fzf_git_branch [--all]
 pub fn builtin_fzf_git_branch(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
     if !fzf_available() {
-        eprintln!("jsh: fzf_git_branch: fzf not found in PATH");
+        eprintln!("franken: fzf_git_branch: fzf not found in PATH");
         return Ok(ExitStatus::failure(1));
     }
 
@@ -199,7 +199,7 @@ pub fn builtin_fzf_git_branch(args: &[String], interp: &mut Interpreter) -> Resu
     let input = match branches {
         Some(b) if !b.is_empty() => b,
         _ => {
-            eprintln!("jsh: fzf_git_branch: not a git repository or no branches found");
+            eprintln!("franken: fzf_git_branch: not a git repository or no branches found");
             return Ok(ExitStatus::failure(1));
         }
     };
@@ -225,7 +225,7 @@ pub fn builtin_fzf_git_branch(args: &[String], interp: &mut Interpreter) -> Resu
 /// Usage: fzf_git_log [--all]
 pub fn builtin_fzf_git_log(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
     if !fzf_available() {
-        eprintln!("jsh: fzf_git_log: fzf not found in PATH");
+        eprintln!("franken: fzf_git_log: fzf not found in PATH");
         return Ok(ExitStatus::failure(1));
     }
 
@@ -251,7 +251,7 @@ pub fn builtin_fzf_git_log(args: &[String], interp: &mut Interpreter) -> Result<
     let input = match logs {
         Some(l) if !l.is_empty() => l,
         _ => {
-            eprintln!("jsh: fzf_git_log: not a git repository or no commits found");
+            eprintln!("franken: fzf_git_log: not a git repository or no commits found");
             return Ok(ExitStatus::failure(1));
         }
     };
@@ -283,7 +283,7 @@ pub fn builtin_fzf_git_log(args: &[String], interp: &mut Interpreter) -> Result<
 /// Usage: fzf_process [--multi]
 pub fn builtin_fzf_process(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
     if !fzf_available() {
-        eprintln!("jsh: fzf_process: fzf not found in PATH");
+        eprintln!("franken: fzf_process: fzf not found in PATH");
         return Ok(ExitStatus::failure(1));
     }
 
@@ -324,7 +324,7 @@ pub fn builtin_fzf_process(args: &[String], interp: &mut Interpreter) -> Result<
 /// Or: fzf [options...] (reads from stdin)
 pub fn builtin_fzf(args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
     if !fzf_available() {
-        eprintln!("jsh: fzf: fzf not found in PATH");
+        eprintln!("franken: fzf: fzf not found in PATH");
         eprintln!("Install fzf: https://github.com/junegunn/fzf#installation");
         return Ok(ExitStatus::failure(1));
     }
@@ -347,7 +347,7 @@ pub fn builtin_fzf(args: &[String], _interp: &mut Interpreter) -> Result<ExitSta
             }
         }
         Err(e) => {
-            eprintln!("jsh: fzf: {}", e);
+            eprintln!("franken: fzf: {}", e);
             Ok(ExitStatus::failure(1))
         }
     }
@@ -357,7 +357,7 @@ pub fn builtin_fzf(args: &[String], _interp: &mut Interpreter) -> Result<ExitSta
 /// Usage: fzf_cd [base_directory]
 pub fn builtin_fzf_cd(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
     if !fzf_available() {
-        eprintln!("jsh: fzf_cd: fzf not found in PATH");
+        eprintln!("franken: fzf_cd: fzf not found in PATH");
         return Ok(ExitStatus::failure(1));
     }
 
@@ -398,7 +398,7 @@ pub fn builtin_fzf_cd(args: &[String], interp: &mut Interpreter) -> Result<ExitS
             interp.set_var("FZF_RESULT", &selected);
             Ok(ExitStatus::success())
         } else {
-            eprintln!("jsh: fzf_cd: cannot cd to '{}'", selected);
+            eprintln!("franken: fzf_cd: cannot cd to '{}'", selected);
             Ok(ExitStatus::failure(1))
         }
     } else {
@@ -410,7 +410,7 @@ pub fn builtin_fzf_cd(args: &[String], interp: &mut Interpreter) -> Result<ExitS
 /// Usage: fzf_kill [signal]
 pub fn builtin_fzf_kill(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
     if !fzf_available() {
-        eprintln!("jsh: fzf_kill: fzf not found in PATH");
+        eprintln!("franken: fzf_kill: fzf not found in PATH");
         return Ok(ExitStatus::failure(1));
     }
 

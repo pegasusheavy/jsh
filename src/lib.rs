@@ -1,22 +1,23 @@
-//! jsh - A ZSH/Bash-compatible shell with enhanced scripting features
+//! 🧟 Franken Shell - The vibe-coded shell that does everything stupidly™
 //!
-//! jsh is a shell that combines compatibility with existing shell scripts
-//! with modern, easy-to-understand syntax extensions for flow control.
+//! A monstrous creation stitched together from the best parts of Bash, ZSH,
+//! Fish, and POSIX shells — held together with duct tape, good intentions,
+//! and an alarming amount of caffeine.
 //!
 //! # Features
 //!
-//! ## Bash/ZSH Compatible
+//! ## Bash/ZSH Compatible (Ish)
 //! - Full support for common shell constructs
 //! - If-then-else, for loops, while loops, case statements
 //! - Variable expansion, command substitution
 //! - Pipes, redirections, background jobs
 //!
-//! ## Enhanced Flow Control
+//! ## Enhanced Flow Control (The Fun Stuff)
 //! - `match` expressions with pattern matching
 //! - `loop` for infinite loops
 //! - `let` and `const` bindings
 //! - `try`/`catch`/`finally` error handling
-//! - `fn` shorthand for functions
+//! - `fn` shorthand for functions with named parameters
 //!
 //! # Example: Traditional Bash Style
 //!
@@ -43,7 +44,7 @@
 //! esac
 //! ```
 //!
-//! # Example: jsh Enhanced Syntax
+//! # Example: Franken Shell's Weird Syntax
 //!
 //! ```bash
 //! # Match expression (Rust-like pattern matching)
@@ -77,17 +78,21 @@
 //!     cleanup
 //! }
 //!
-//! # Function shorthand
-//! fn greet {
-//!     echo "Hello, $1!"
+//! # Function shorthand with named parameters
+//! fn greet(name, greeting="Hello") {
+//!     echo "$greeting, $name!"
 //! }
 //! ```
 
+pub mod arena;
 pub mod argparse;
 pub mod ast;
 pub mod builtins;
+pub mod bytecode;
 pub mod error;
+pub mod intern;
 pub mod interpreter;
+pub mod jit;
 pub mod lexer;
 pub mod parser;
 pub mod plugins;
@@ -97,10 +102,15 @@ pub mod tmux;
 pub mod token;
 
 pub use argparse::{ArgParser, ParsedArgs, ParseError};
-pub use error::{JshError, Result};
+pub use error::{FrankenError, Result};
 pub use interpreter::{ExitStatus, Interpreter};
 pub use shell::Shell;
 
 /// Library version
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+/// Shell name
+pub const SHELL_NAME: &str = "fsh";
+
+/// Shell tagline
+pub const TAGLINE: &str = "The vibe-coded shell that does everything stupidly™";

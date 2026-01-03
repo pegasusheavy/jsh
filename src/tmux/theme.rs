@@ -7,14 +7,14 @@ use std::collections::HashMap;
 #[derive(Debug, Clone)]
 pub struct StatusBarTheme {
     pub name: String,
-    
+
     // Status bar
     pub status_style: TmuxStyle,
     pub status_left: String,
     pub status_right: String,
     pub status_left_length: usize,
     pub status_right_length: usize,
-    
+
     // Window status
     pub window_status_format: String,
     pub window_status_current_format: String,
@@ -22,21 +22,21 @@ pub struct StatusBarTheme {
     pub window_status_current_style: TmuxStyle,
     pub window_status_activity_style: TmuxStyle,
     pub window_status_separator: String,
-    
+
     // Pane borders
     pub pane_border_style: TmuxStyle,
     pub pane_active_border_style: TmuxStyle,
-    
+
     // Message/command line
     pub message_style: TmuxStyle,
     pub message_command_style: TmuxStyle,
-    
+
     // Mode indicator
     pub mode_style: TmuxStyle,
-    
+
     // Clock
     pub clock_mode_colour: TmuxColor,
-    
+
     // Custom variables
     pub variables: HashMap<String, String>,
 }
@@ -303,7 +303,7 @@ impl StatusBarTheme {
 /// Format a status string with variable expansion
 pub fn format_status(format: &str, vars: &HashMap<String, String>) -> String {
     let mut result = format.to_string();
-    
+
     // Replace simple variables like #S, #I, #W, #H, etc.
     result = result.replace("#S", vars.get("session_name").map(|s| s.as_str()).unwrap_or(""));
     result = result.replace("#I", vars.get("window_index").map(|s| s.as_str()).unwrap_or(""));
@@ -338,11 +338,11 @@ pub fn format_status(format: &str, vars: &HashMap<String, String>) -> String {
                 let condition = parts[0];
                 let true_val = parts[1];
                 let false_val = parts[2];
-                
+
                 let cond_result = vars.get(condition)
                     .map(|v| !v.is_empty() && v != "0" && v != "false")
                     .unwrap_or(false);
-                
+
                 let replacement = if cond_result { true_val } else { false_val };
                 result = format!("{}{}{}", &result[..start], replacement, &result[start + end + 1..]);
             } else {

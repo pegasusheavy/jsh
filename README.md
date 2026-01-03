@@ -1,12 +1,42 @@
-# jsh - Joseph's Shell
+# 🧟 Franken Shell
 
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE-MIT)
 
-**jsh** (Joseph's Shell) is a modern ZSH/Bash-compatible shell that combines full compatibility with existing scripts while introducing cleaner, more intuitive syntax for flow control and scripting.
+```
+    ███████╗██████╗  █████╗ ███╗   ██╗██╗  ██╗███████╗███╗   ██╗
+    ██╔════╝██╔══██╗██╔══██╗████╗  ██║██║ ██╔╝██╔════╝████╗  ██║
+    █████╗  ██████╔╝███████║██╔██╗ ██║█████╔╝ █████╗  ██╔██╗ ██║
+    ██╔══╝  ██╔══██╗██╔══██║██║╚██╗██║██╔═██╗ ██╔══╝  ██║╚██╗██║
+    ██║     ██║  ██║██║  ██║██║ ╚████║██║  ██╗███████╗██║ ╚████║
+    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
+                        ███████╗██╗  ██╗███████╗██╗     ██╗
+                        ██╔════╝██║  ██║██╔════╝██║     ██║
+                        ███████╗███████║█████╗  ██║     ██║
+                        ╚════██║██╔══██║██╔══╝  ██║     ██║
+                        ███████║██║  ██║███████╗███████╗███████╗
+                        ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
+```
+
+**The vibe-coded shell that does everything stupidly™** 🔩⚡
+
+A monstrous creation stitched together from the best parts of Bash, ZSH, Fish, and POSIX shells — held together with duct tape, good intentions, and an alarming amount of caffeine.
+
+> *"It's alive! IT'S ALIVE!"* — You, after installing this shell
+
+## Why Franken Shell?
+
+Because sometimes you want a shell that:
+- ✅ Works like Bash (when it feels like it)
+- ✅ Steals features from Fish (with permission, mostly)
+- ✅ Has POSIX compliance (we tried our best, okay?)
+- ✅ Adds syntax that makes sense to exactly one person
+- ✅ Includes a built-in tmux clone (why not?)
+- ✅ Has more themes than your IDE
+- ✅ Supports plugins you didn't know you needed
 
 ## Features
 
-### Bash/ZSH Compatible
+### 🧪 Bash/ZSH Compatible (Ish)
 - ✅ If-then-else-elif-fi statements
 - ✅ For loops (`for x in ...; do ...; done`)
 - ✅ While and until loops
@@ -19,7 +49,7 @@
 - ✅ Logical operators (`&&`, `||`)
 - ✅ Glob expansion (`*.txt`, `file?.log`)
 
-### Fish Compatible
+### 🐟 Fish Compatible (We Borrowed Some Things)
 - ✅ `set` command with Fish-style flags (`-x`, `-e`, `-q`, `-g`)
 - ✅ `string` builtin (length, upper, lower, split, join, replace, match, etc.)
 - ✅ `math` builtin for arithmetic
@@ -31,14 +61,14 @@
 - ✅ `switch...case...end` statements
 - ✅ `and`, `or`, `not` keywords
 
-### Git Integration
+### 🔧 Git Integration (Because We're Not Savages)
 - ✅ `git_branch` - Get current git branch name
 - ✅ `git_status` - Git status in shell-friendly format
 - ✅ `git_info` - Detailed git repository information
 - ✅ `git_prompt` - Git info formatted for shell prompts
 - ✅ `in_git_repo` - Check if in a git repository
 
-### Ash/POSIX Compatible
+### 📜 Ash/POSIX Compatible (We Read the Manual)
 - ✅ POSIX `set` options (`-e`, `-u`, `-x`, `-n`, `-a`, `-C`, `-b`, `-f`)
 - ✅ `set -o optname` / `set +o optname` for named options
 - ✅ `set --` for positional parameters
@@ -51,7 +81,9 @@
 - ✅ Arithmetic expansion `$((...))`
 - ✅ POSIX test command `[` and `test`
 
-### jsh Enhanced Syntax
+### ⚡ Franken Shell's Weird Syntax
+
+Because we couldn't resist adding our own ideas:
 
 #### Pattern Matching with `match`
 ```bash
@@ -78,7 +110,7 @@ loop {
 #### Variable Bindings with `let` and `const`
 ```bash
 let name = "world"
-const PI = "3.14159"
+const PI = "3.14159"  # immutable, like my stubbornness
 echo "Hello, $name!"
 ```
 
@@ -88,6 +120,7 @@ try {
     risky_command
 } catch err {
     echo "Error occurred: $err"
+    # at least we tried
 } finally {
     cleanup_resources
 }
@@ -95,1215 +128,283 @@ try {
 
 #### Function Shorthand with `fn`
 ```bash
-# Simple fn (uses $1, $2 for args)
+# Simple fn (uses $1, $2 for args, like a normal person)
 fn greet {
     echo "Hello, $1!"
 }
-greet "World"
 
-# fn with named parameters
-fn greet(name, greeting) {
+# Named parameters (because we're fancy)
+fn greet(name, greeting="Hello") {
     echo "$greeting, $name!"
 }
-greet "World" "Hello"  # Output: Hello, World!
 
-fn add(a, b) {
-    echo $((a + b))
-}
-add 10 20  # Output: 30
+greet "World"                    # Hello, World!
+greet "World" "Sup"              # Sup, World!
+greet name="Universe"            # Hello, Universe!
 ```
 
-#### Named Function Parameters
+### 🎨 Themes (So Many Themes)
+
+Built-in themes that range from practical to questionable:
+
+**137 built-in themes** including all Oh-My-ZSH themes!
+
+| Category | Themes |
+|----------|--------|
+| **FSH Native** | `fsh`, `gallifrey`, `skaro` |
+| **Classic OMZ** | `robbyrussell`, `agnoster`, `avit`, `bira`, `bureau`, `fino`, `pure` |
+| **Minimal** | `minimal`, `simple`, `clean`, `refined`, `sorin`, `nicoulaj` |
+| **Powerline** | `powerlevel`, `bullet-train`, `spaceship`, `agnoster` |
+| **Color Schemes** | `dracula`, `nord`, `gruvbox`, `catppuccin`, `tokyo-night`, `onedark`, `solarized`, `monokai` |
+| **Fun** | `emotty`, `cloud`, `fox`, `awesomepanda`, `junkfood`, `terminalparty`, `half-life`, `lambda` |
+| **Box Drawing** | `bira`, `fino`, `fino-time`, `bureau`, `jonathan`, `rkj`, `gnzh`, `darkblood` |
+| **Classic Unix** | `gentoo`, `linuxonly`, `dst`, `dpoggi`, `norm` |
+
+<details>
+<summary>📋 All 137 Themes (Click to expand)</summary>
+
+**Core**: `fsh`, `default`, `robbyrussell`, `agnoster`, `minimal`, `powerlevel`, `simple`, `pure`, `gallifrey`
+
+**Oh-My-ZSH Themes**: `af-magic`, `afowler`, `alanpeabody`, `amuse`, `apple`, `arrow`, `aussiegeek`, `avit`, `awesomepanda`, `bira`, `blinks`, `bureau`, `candy`, `clean`, `cloud`, `crunch`, `cypher`, `dallas`, `darkblood`, `dieter`, `dpoggi`, `dst`, `dstufft`, `eastwood`, `emotty`, `essembeh`, `evan`, `fino`, `fino-time`, `fishy`, `flazz`, `fletcherm`, `fox`, `frisk`, `frontcube`, `funky`, `fwalch`, `gallois`, `gentoo`, `geoffgarside`, `gianu`, `gnzh`, `gozilla`, `half-life`, `humza`, `imajes`, `intheloop`, `itchy`, `jaischeema`, `jbergantine`, `jispwoso`, `jnrowe`, `jonathan`, `josh`, `jreese`, `jtriley`, `juanghurtado`, `junkfood`, `kafeitu`, `kardan`, `kennethreitz`, `kiwi`, `kolo`, `kphoen`, `lambda`, `linuxonly`, `lukerandall`, `macovsky`, `maran`, `mgutz`, `mh`, `michelebologna`, `mikeh`, `miloshadzic`, `mira`, `mortalscumbag`, `mrtazz`, `murilasso`, `muse`, `nanotech`, `nebirhos`, `nicoulaj`, `norm`, `obraun`, `peepcode`, `philips`, `pmcgee`, `pygmalion`, `re5et`, `refined`, `rgm`, `risto`, `rixius`, `rkj`, `sammy`, `simonoff`, `skaro`, `smt`, `sonicradish`, `sorin`, `sporty_256`, `steeef`, `strug`, `sunaku`, `sunrise`, `superjarin`, `suvash`, `takashiyoshida`, `terminalparty`, `theunraveler`, `tjkirch`, `tonotdo`, `trapd00r`, `wedisagree`, `wezm`, `wuffers`, `xiong-chiamiov`, `ys`, `zhann`
+
+**Modern Color Schemes**: `spaceship`, `bullet-train`, `dracula`, `gruvbox`, `nord`, `catppuccin`, `tokyo-night`, `onedark`, `solarized`, `monokai`
+</details>
+
 ```bash
-# Traditional shell uses $1, $2 for positional arguments
-# jsh allows named parameters for clearer code
+# Set a theme
+theme set dracula
 
-greet(name, greeting) {
-    echo "$greeting, $name!"
-}
-greet "World" "Hello"  # Output: Hello, World!
+# List all available themes
+theme list
 
-# Works with all function syntax styles
-fn add(a, b) {
-    echo $((a + b))
-}
-add 10 20  # Output: 30
+# Try some favorites
+theme set robbyrussell    # The OMZ classic
+theme set agnoster        # Powerline-style
+theme set bira            # Box drawing
+theme set catppuccin      # Modern color scheme
+theme set half-life       # λ for the scientists
+theme set gallifrey       # Time Lord approved ⧖
 
-function multiply(x, y) {
-    echo $((x * y))
-}
-multiply 6 7  # Output: 42
-
-# Named parameters are also accessible as $1, $2, etc.
-show(first, second) {
-    echo "Named: first=$first second=$second"
-    echo "Positional: \$1=$1 \$2=$2"
-}
+# Create your own monster
+theme set-prompt "%F{green}⚡%f %~ %F{yellow}→%f "
 ```
 
-#### Git Integration in Scripts
+### 🔌 Plugin Manager
+
+A `zplug`-inspired plugin manager, because dependency management is fun:
+
 ```bash
-# Check if in a git repository
-if in_git_repo; then
-    echo "Current branch: $(git_branch)"
-fi
+# Register plugins
+plug "zsh-users/zsh-syntax-highlighting"
+plug "zsh-users/zsh-autosuggestions"
+plug "oh-my-zsh" lib:git.zsh
+plug "oh-my-zsh" plugins:git
 
-# Conditional logic based on branch
-if [ "$(git_branch)" = "main" ]; then
-    echo "On main branch - be careful!"
-fi
+# Install all the things
+plug-install
 
-# Check for uncommitted changes before deploying
-if git_status --dirty; then
-    echo "Error: Uncommitted changes detected"
-    exit 1
-fi
+# Update everything
+plug-update
 
-# Get detailed git info
-git_info --query branch    # Just the branch name
-git_info --query hash      # Full commit hash
-git_info --query remote    # Remote name
+# See what chaos you've created
+plug-list
+```
 
-# Custom formatted output
-git_info --format '%b (%h)'  # "main (abc123)"
+### 🖥️ Built-in Tmux (Because Why Not?)
 
-# Use git_prompt in your PS1
-PS1="\u@\h:\w$(git_prompt -f ' [%b%d]')$ "
-# Output: user@host:~/project [main✗]$
+A full tmux-compatible multiplexer built right in:
+
+```bash
+# Sessions
+tmux new-session -s dev
+tmux list-sessions
+tmux attach -t dev
+tmux kill-session -t dev
+
+# Windows
+tmux new-window -n editor
+tmux select-window -t 2
+tmux rename-window -t 0 main
+
+# Panes
+tmux split-window -h
+tmux split-window -v
+tmux select-pane -L
+
+# Theming
+tmux theme set dracula
+tmux theme list
+```
+
+### 🔍 FZF Integration
+
+Fuzzy finding for everything:
+
+```bash
+fzf-history    # Search command history
+fzf-file       # Find files
+fzf-dir        # Find directories
+fzf-cd         # cd with fuzzy finding
+fzf-kill       # Kill processes fuzzy-style
+fzf-git        # Git branch/file selection
+fzf-env        # Browse environment variables
 ```
 
 ## Installation
 
-### Pre-built Packages
-
-#### Debian/Ubuntu (.deb)
+### From Source (The Fun Way)
 
 ```bash
-# Download the latest release
-wget https://github.com/pegasusheavy/jsh/releases/latest/download/jsh_0.1.0_amd64.deb
+# Clone this monster
+git clone https://github.com/pegasusheavy/franken-shell
+cd franken-shell
 
-# Install
-sudo apt install ./jsh_0.1.0_amd64.deb
-
-# Or with dpkg
-sudo dpkg -i jsh_0.1.0_amd64.deb
-```
-
-#### Fedora/RHEL/CentOS (.rpm)
-
-```bash
-# Download the latest release
-wget https://github.com/pegasusheavy/jsh/releases/latest/download/jsh-0.1.0-1.x86_64.rpm
-
-# Install (Fedora/RHEL 8+)
-sudo dnf install jsh-0.1.0-1.x86_64.rpm
-
-# Or with rpm
-sudo rpm -i jsh-0.1.0-1.x86_64.rpm
-```
-
-#### Arch Linux (AUR)
-
-```bash
-# Using an AUR helper (e.g., yay, paru)
-yay -S jsh
-
-# Or manually with PKGBUILD
-git clone https://github.com/pegasusheavy/jsh.git
-cd jsh/packaging
-makepkg -si
-```
-
-### From Source
-
-```bash
-# Clone the repository
-git clone https://github.com/pegasusheavy/jsh.git
-cd jsh
-
-# Build with Cargo
+# Build it
 cargo build --release
 
-# Install to ~/.cargo/bin
-cargo install --path .
+# Install it (at your own risk)
+sudo cp target/release/fsh /usr/local/bin/
+
+# Add to shells (optional but recommended)
+echo "/usr/local/bin/fsh" | sudo tee -a /etc/shells
+
+# Make it your default (no turning back now)
+chsh -s /usr/local/bin/fsh
 ```
 
-### Building Packages
-
-To build distribution packages yourself:
+### From Cargo
 
 ```bash
-# Build Debian package
-cargo install cargo-deb
-./packaging/build-deb.sh
-
-# Build RPM package
-cargo install cargo-generate-rpm
-./packaging/build-rpm.sh
-
-# Build both
-./packaging/build-all.sh
+cargo install franken-shell
 ```
 
-See [packaging/README.md](packaging/README.md) for detailed instructions.
+### From Package Manager
 
-### Requirements
-
-- Rust 1.85+ (Edition 2024)
-- Unix-like operating system (Linux, macOS, BSD)
-
-## Usage
-
-### Interactive Shell
 ```bash
-jsh
+# Debian/Ubuntu (coming soon™)
+sudo apt install franken-shell
+
+# Arch (btw) (coming soon™)
+yay -S franken-shell
+
+# Homebrew (coming soon™)
+brew install franken-shell
 ```
 
-### Run a Script
-```bash
-jsh script.sh
-jsh script.sh arg1 arg2
-```
+## Configuration
 
-### Run a Command
-```bash
-jsh -c 'echo "Hello, World!"'
-```
-
-### Command Line Options
-```
-OPTIONS:
-    -c <command>    Execute command string and exit
-    -s              Read commands from stdin
-    -i              Force interactive mode
-    -l, --login     Start as login shell
-    -h, --help      Print help message
-    -V, --version   Print version information
-```
-
-## Shell Initialization
-
-jsh follows POSIX conventions for shell initialization, automatically picking up environment variables and sourcing profile files.
-
-### Environment Variables
-
-jsh automatically inherits all environment variables from the parent process and sets these shell-specific variables:
-
-| Variable | Description |
-|----------|-------------|
-| `SHELL` | Path to jsh executable |
-| `SHLVL` | Shell nesting level (incremented for each subshell) |
-| `PWD` | Current working directory |
-| `OLDPWD` | Previous working directory |
-| `HOME` | User's home directory |
-| `USER` | Current username |
-| `HOSTNAME` | System hostname |
-| `TERM` | Terminal type (defaults to xterm-256color) |
-| `PATH` | Command search path |
-| `IFS` | Internal field separator |
-| `HISTFILE` | History file location |
-| `HISTSIZE` | Maximum history entries |
-
-### Environment File (Always Sourced)
-
-`~/.jshenv` is sourced for ALL shell invocations (login, interactive, non-interactive scripts):
-
-1. `/etc/jshenv` - System-wide environment
-2. `~/.jshenv` - User environment
-3. `~/.config/jsh/env` - XDG location
-
-Use `.jshenv` for:
-- Environment variables
-- PATH modifications
-- Settings that should apply to all shells and scripts
-
-### Login Shell Initialization
-
-When started as a login shell (`jsh -l`, `jsh --login`, or with `-jsh` as argv[0]):
-
-1. `~/.jshenv` (always first)
-2. `/etc/environment` - Parses KEY=VALUE pairs
-3. `/etc/profile` - System-wide login profile
-4. `/etc/profile.d/*.sh` - Additional system scripts
-5. `/etc/jsh_profile` - System-wide jsh login profile
-6. First of (in order):
-   - `~/.jsh_profile`
-   - `~/.bash_profile`
-   - `~/.bash_login`
-   - `~/.profile`
-
-### Interactive Shell Initialization
-
-For interactive shells (not running a script):
-
-1. `~/.jshenv` (always first)
-2. `/etc/jsh.jshrc`, `/etc/jshrc`, or `/etc/bash.bashrc` - System-wide config
-3. First of (in order):
-   - `~/.jshrc`
-   - `~/.config/jsh/jshrc` (XDG config)
-   - `~/.bashrc` (fallback for compatibility)
-   - `~/.zshrc` (fallback for compatibility)
-
-### System-Wide Configuration Files
+Franken Shell looks for configuration in these places:
 
 | File | When Sourced | Purpose |
 |------|--------------|---------|
-| `/etc/jshenv` | Always (all shells) | System environment variables |
-| `/etc/jsh_profile` | Login shells | System login initialization |
-| `/etc/jshrc` | Interactive shells | System interactive config |
+| `/etc/fshenv` | Always | System-wide environment |
+| `~/.fshenv` | Always | User environment |
+| `$XDG_CONFIG_HOME/fsh/env` | Always | XDG environment |
+| `/etc/fsh_profile` | Login shell | System-wide profile |
+| `~/.fsh_profile` | Login shell | User profile |
+| `$XDG_CONFIG_HOME/fsh/profile` | Login shell | XDG profile |
+| `/etc/fshrc` | Interactive | System-wide rc |
+| `~/.fshrc` | Interactive | User rc |
+| `$XDG_CONFIG_HOME/fsh/fshrc` | Interactive | XDG rc |
 
-### Configuration Files
-
-**`~/.jshenv`** - Environment settings (sourced for ALL shells):
-
-```bash
-# ~/.jshenv - Always sourced, even for non-interactive scripts
-
-# Path modifications
-export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
-
-# Editor and pager
-export EDITOR="vim"
-export PAGER="less"
-
-# Language settings
-export LANG="en_US.UTF-8"
-
-# Application-specific
-export CARGO_HOME="$HOME/.cargo"
-export RUSTUP_HOME="$HOME/.rustup"
-```
-
-**`~/.jshrc`** - Interactive shell configuration:
+### Example `.fshrc`
 
 ```bash
-# ~/.jshrc - Interactive shell settings
-export JSH_THEME="robbyrussell"
+# ~/.fshrc - Franken Shell configuration
+# The vibe-coded shell that does everything stupidly™
 
-# Aliases
-alias ll="ls -la"
-alias gs="git status"
-alias gp="git push"
+# Set your theme (pick your poison)
+theme set powerline
+
+# Enable ssh-agent auto-start (optional)
+export FSH_SSH_AGENT_AUTO_START=1
+
+# Aliases (because typing is hard)
+alias ll='ls -la'
+alias gs='git status'
+alias gc='git commit'
+alias yolo='git push --force'  # please don't
 
 # Functions
-fn mkcd {
-    mkdir -p "$1" && cd "$1"
+fn mkcd(dir) {
+    mkdir -p "$dir" && cd "$dir"
 }
 
-# Prompt customization
-export PROMPT='%F{cyan}%n%f@%F{blue}%m%f:%F{yellow}%~%f$ '
-```
+# Plugins
+plug "zsh-users/zsh-syntax-highlighting"
+plug "zsh-users/zsh-autosuggestions"
+plug-load
 
-**`~/.jsh_profile`** - Login shell configuration:
-
-```bash
-# ~/.jsh_profile - Login shell settings (sourced once at login)
-
-# Enable automatic ssh-agent startup (jsh built-in feature)
-export JSH_SSH_AGENT_AUTO_START=true
-
-# Or use a custom socket path
-# export JSH_SSH_AGENT_SOCKET="/run/user/$UID/ssh-agent.socket"
-
-# Load any secrets
-if [ -f ~/.secrets ]; then
-    source ~/.secrets
-fi
+# Custom prompt (optional)
+# theme set-prompt "%F{red}🧟%f %~ → "
 
 # Welcome message
-echo "Welcome back, $USER!"
+echo "🧟 Welcome to Franken Shell - It's alive!"
 ```
 
-**`~/.config/jsh/jshrc`** - XDG-compliant configuration:
+## XDG Base Directory Support
 
-```bash
-# XDG config location for jsh (~/.config/jsh/jshrc)
-export JSH_THEME="pure"
-```
+Franken Shell automatically initializes XDG Base Directory environment variables on startup if they're not already set. This ensures scripts and tools that depend on these variables work correctly.
 
-**`~/.config/jsh/env`** - XDG-compliant environment:
+| Variable | Default | Usage |
+|----------|---------|-------|
+| `XDG_CONFIG_HOME` | `~/.config` | Config files in `fsh/` |
+| `XDG_DATA_HOME` | `~/.local/share` | Data files in `fsh/` |
+| `XDG_STATE_HOME` | `~/.local/state` | State/history in `fsh/` |
+| `XDG_CACHE_HOME` | `~/.cache` | Cache files in `fsh/` |
+| `XDG_RUNTIME_DIR` | (system-set) | Runtime files (set by login manager) |
 
-```bash
-# XDG environment file (~/.config/jsh/env)
-# Alternative to ~/.jshenv
-export PATH="$HOME/.local/bin:$PATH"
-```
+The shell also automatically creates the `fsh/` subdirectories inside each XDG location on first startup.
 
-### XDG Base Directory Support
+## Performance
 
-jsh follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) by default:
+Despite all the features, Franken Shell is surprisingly fast:
 
-| Variable | Default | jsh Directory | Purpose |
-|----------|---------|---------------|---------|
-| `XDG_CONFIG_HOME` | `~/.config` | `~/.config/jsh/` | Configuration files |
-| `XDG_DATA_HOME` | `~/.local/share` | `~/.local/share/jsh/` | User data (plugins, completions) |
-| `XDG_STATE_HOME` | `~/.local/state` | `~/.local/state/jsh/` | State data (history) |
-| `XDG_CACHE_HOME` | `~/.cache` | `~/.cache/jsh/` | Cache files |
+| Benchmark | Time |
+|-----------|------|
+| Startup (non-interactive) | ~5ms |
+| Simple command | ~1ms |
+| Complex script | It depends™ |
 
-**XDG Configuration Files:**
-
-```
-$XDG_CONFIG_HOME/jsh/
-├── env           # Environment (always sourced, like ~/.jshenv)
-├── profile       # Login shell config (like ~/.jsh_profile)
-└── jshrc         # Interactive shell config (like ~/.jshrc)
-```
-
-**XDG State Files:**
-
-```
-$XDG_STATE_HOME/jsh/
-└── history       # Command history (default location for new installs)
-```
-
-**Migration from Legacy Locations:**
-
-jsh automatically detects existing files in legacy locations (`~/.jshrc`, `~/.jsh_history`, etc.) and continues to use them. New installations default to XDG-compliant paths.
-
-To migrate manually:
-```bash
-# Create XDG directories
-mkdir -p ~/.config/jsh ~/.local/state/jsh ~/.local/share/jsh ~/.cache/jsh
-
-# Move configuration files
-mv ~/.jshrc ~/.config/jsh/jshrc
-mv ~/.jshenv ~/.config/jsh/env
-mv ~/.jsh_profile ~/.config/jsh/profile
-mv ~/.jsh_history ~/.local/state/jsh/history
-```
-
-## Themes (Oh-My-Zsh Compatible)
-
-jsh includes an oh-my-zsh compatible theme system with prompt escape sequences, colors, and git integration.
-
-### Built-in Themes
-
-| Theme | Description |
-|-------|-------------|
-| `jsh` | Default two-line theme with user, host, git, and status |
-| `robbyrussell` | Classic oh-my-zsh default |
-| `agnoster` | Powerline-style segments |
-| `minimal` | Clean, simple prompt |
-| `powerlevel` | Powerline-inspired with time |
-| `simple` | Basic `user@host:path$` format |
-| `pure` | ZSH Pure theme inspired |
-| `gallifrey` | Doctor Who inspired - gold/orange time theme |
-
-### Setting a Theme
-
-**In `.jshrc`:**
-```bash
-export JSH_THEME="robbyrussell"
-```
-
-**Interactively:**
-```bash
-theme robbyrussell       # Set theme directly
-theme set agnoster       # Set with explicit command
-theme list               # List available themes
-theme preview            # Preview all themes
-```
-
-### Custom Prompts
-
-Set `PROMPT` and optionally `RPROMPT` for full control:
-
-```bash
-export PROMPT='%F{cyan}%n%f@%F{blue}%m%f:%F{yellow}%~%f$ '
-export RPROMPT='%F{8}%T%f'
-```
-
-### Prompt Escape Sequences
-
-| Sequence | Description |
-|----------|-------------|
-| `%n` | Username |
-| `%m` / `%M` | Short / full hostname |
-| `%~` | Current directory (~ for home) |
-| `%c` | Current directory name only |
-| `%T` / `%*` | Time (HH:MM / HH:MM:SS) |
-| `%D{fmt}` | Custom date format |
-| `%?` | Last exit status |
-| `%#` | `#` for root, `%` otherwise |
-| `%F{color}...%f` | Foreground color |
-| `%K{color}...%k` | Background color |
-| `%B...%b` | Bold |
-| `%(?.true.false)` | Conditional on exit status |
-| `$(git_prompt_info)` | Git branch and status |
-
-### Colors
-
-Colors can be specified as:
-- Names: `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`
-- Bright: `bright_red`, etc.
-- 256-color: `0`-`255`
-- True color: `#ff5500`
-
-### Example Custom Theme
-
-```bash
-# Two-line prompt with git
-export PROMPT='%F{cyan}%n%f %F{8}@%f %F{blue}%m%f$(git_prompt_info)
-%F{yellow}%~%f %(?.%F{green}.%F{red})❯%f '
-```
-
-## Built-in Commands
-
-jsh includes many built-in commands:
-
-| Command | Description |
-|---------|-------------|
-| `cd` | Change directory |
-| `pwd` | Print working directory |
-| `echo` | Print arguments |
-| `printf` | Formatted output |
-| `export` | Export variables |
-| `set` | Set shell options |
-| `unset` | Unset variables |
-| `source` / `.` | Execute script in current shell |
-| `eval` | Evaluate string as command |
-| `test` / `[` | Evaluate conditional |
-| `true` / `false` | Return success/failure |
-| `exit` | Exit the shell |
-| `return` | Return from function |
-| `break` / `continue` | Loop control |
-| `read` | Read input |
-| `type` / `which` | Describe command |
-| `help` | Display help |
-| `ssh_agent` | SSH agent control |
-| `fzf` | Fuzzy finder passthrough |
-| `fzf_history` | Fuzzy search command history |
-| `fzf_file` | Fuzzy file selection |
-| `fzf_dir` | Fuzzy directory selection |
-| `fzf_cd` | Fuzzy cd with preview |
-| `fzf_git_branch` | Fuzzy git branch selection |
-| `fzf_git_log` | Fuzzy git log selection |
-| `fzf_process` | Fuzzy process selection |
-| `fzf_kill` | Fuzzy process kill |
-| `plug` | Register a plugin |
-| `plug_install` | Install registered plugins |
-| `plug_update` | Update installed plugins |
-| `plug_clean` | Remove unused plugins |
-| `plug_list` | List plugins |
-| `plug_load` | Load all plugins |
-| `plug_source` | Source a specific plugin |
-| `plug_info` | Show plugin info |
-| `tmux` | Terminal multiplexer (tmux-compatible) |
-| `tmux-new` | Create new tmux session |
-| `tmux-ls` | List tmux sessions |
-| `tmux-attach` | Attach to tmux session |
-| `tmux-kill` | Kill tmux session |
-| `tmux-split` | Split tmux pane |
-| `tmux-theme` | Apply/list tmux themes |
-| `tmux-plugins` | Tmux plugin management |
-
-## Plugin Manager
-
-jsh includes a built-in plugin manager inspired by zplug/zinit for managing Oh-My-Zsh, Fish, Bash, and GitHub plugins.
-
-### Quick Start
-
-Add to your `~/.jshrc`:
-
-```bash
-# Register plugins
-plug "zsh-users/zsh-autosuggestions"
-plug "zsh-users/zsh-syntax-highlighting"
-plug "oh-my-zsh:plugins/git"
-plug "oh-my-zsh:plugins/docker"
-
-# Install and load
-plug_install
-plug_load
-```
-
-### Plugin Sources
-
-```bash
-# GitHub repository (user/repo)
-plug "zsh-users/zsh-autosuggestions"
-
-# Oh-My-Zsh plugins
-plug "oh-my-zsh:plugins/git"
-plug "omz:plugins/docker"            # shorthand
-
-# Oh-My-Zsh themes
-plug "oh-my-zsh:themes/robbyrussell"
-plug "omz:themes/agnoster"           # shorthand
-
-# Fish plugins
-plug "fish:jorgebucaran/fisher"
-plug "fish:PatrickF1/fzf.fish"
-
-# Direct Git URL
-plug "https://github.com/romkatv/powerlevel10k.git"
-
-# Local directory
-plug "local:/path/to/my-plugin"
-```
-
-### Plugin Options
-
-```bash
-# Load as theme
-plug "romkatv/powerlevel10k" as:theme
-
-# Use specific branch
-plug "zsh-users/zsh-autosuggestions" branch:develop
-
-# Use specific tag/version
-plug "zsh-users/zsh-autosuggestions" tag:v0.7.0
-
-# Lazy loading (defer)
-plug "heavy-plugin/slow-load" as:defer
-
-# Specific file to source
-plug "user/repo" use:init.sh
-
-# Run hook after loading
-plug "user/repo" hook:"echo Loaded!"
-
-# Don't update this plugin
-plug "user/repo" frozen
-
-# Multiple options
-plug "zsh-users/zsh-syntax-highlighting" branch:master depth:1
-```
-
-### Commands
-
-```bash
-# Register a plugin (in .jshrc)
-plug "source" [options...]
-
-# Install all registered plugins
-plug_install
-
-# Update all plugins (respects frozen)
-plug_update
-
-# Remove plugins not in config
-plug_clean
-
-# List plugins
-plug_list              # Registered plugins
-plug_list --installed  # Installed only
-
-# Load all plugins
-plug_load
-
-# Source specific plugin
-plug_source "plugin-name"
-
-# Show plugin info
-plug_info              # General help
-plug_info "plugin-name" # Specific plugin
-```
-
-### Example Configuration
-
-Full `~/.jshrc` example:
-
-```bash
-#!/usr/bin/env jsh
-# ~/.jshrc - jsh interactive configuration
-
-# ============================================
-# Plugin Manager
-# ============================================
-
-# Syntax highlighting (load early)
-plug "zsh-users/zsh-syntax-highlighting"
-
-# Autosuggestions
-plug "zsh-users/zsh-autosuggestions"
-
-# Oh-My-Zsh plugins
-plug "oh-my-zsh:plugins/git"
-plug "oh-my-zsh:plugins/docker"
-plug "oh-my-zsh:plugins/kubectl"
-plug "oh-my-zsh:plugins/npm"
-
-# Theme
-plug "romkatv/powerlevel10k" as:theme
-
-# Fish-like features
-plug "fish:PatrickF1/fzf.fish"
-
-# Install missing plugins
-plug_install
-
-# Load all plugins
-plug_load
-
-# ============================================
-# Shell Configuration
-# ============================================
-
-export EDITOR="nvim"
-export JSH_THEME="powerlevel10k"
-
-# Aliases
-alias ll="ls -la"
-alias g="git"
-alias k="kubectl"
-
-# Functions
-fn mkcd {
-    mkdir -p "$1" && cd "$1"
-}
-```
-
-### Directories
-
-Plugins are stored in XDG-compliant locations:
-
-- **Plugins**: `$XDG_DATA_HOME/jsh/plugins/` (default: `~/.local/share/jsh/plugins/`)
-- **Oh-My-Zsh**: `$XDG_DATA_HOME/jsh/oh-my-zsh/` (auto-installed when needed)
-- **Cache**: `$XDG_CACHE_HOME/jsh/plugins/` (default: `~/.cache/jsh/plugins/`)
-
-### Compatibility
-
-The plugin manager is compatible with plugins from:
-
-| Source | Example |
-|--------|---------|
-| Oh-My-Zsh | `plug "omz:plugins/git"` |
-| Prezto | `plug "sorin-ionescu/prezto"` |
-| Fish/Oh-My-Fish | `plug "fish:oh-my-fish/theme-bobthefish"` |
-| Antigen bundles | `plug "user/repo"` |
-| Zplug plugins | `plug "user/repo"` |
-| Generic Git repos | `plug "https://..."` |
-
-## Tmux Integration
-
-jsh includes a fully tmux-compatible terminal multiplexer module. Use your existing `.tmux.conf` and TPM plugins!
-
-### Quick Start
-
-```bash
-# Create a new session
-tmux new-session -s work
-
-# Or use shortcuts
-tmux-new -s work
-
-# List sessions
-tmux-ls
-
-# Attach to session
-tmux-attach -t work
-```
-
-### Session Management
-
-```bash
-# Create session
-tmux new-session [-d] [-s name]
-tmux-new -s myproject
-
-# List sessions
-tmux list-sessions
-tmux-ls
-
-# Attach/detach
-tmux attach -t session
-tmux detach
-
-# Kill session
-tmux kill-session -t session
-tmux-kill -t session
-
-# Rename session
-tmux rename-session new-name
-
-# Switch sessions
-tmux switch-client -n    # Next session
-tmux switch-client -p    # Previous session
-```
-
-### Window Management
-
-```bash
-# Create window
-tmux new-window [-n name]
-
-# Navigate windows
-tmux select-window -t 0
-tmux next-window
-tmux previous-window
-tmux last-window
-
-# Rename window
-tmux rename-window new-name
-
-# Kill window
-tmux kill-window
-
-# List windows
-tmux list-windows
-```
-
-### Pane Management
-
-```bash
-# Split panes
-tmux split-window         # Horizontal split
-tmux split-window -h      # Vertical split
-tmux-split -h             # Shortcut
-
-# Navigate panes
-tmux select-pane -U       # Up
-tmux select-pane -D       # Down
-tmux select-pane -L       # Left
-tmux select-pane -R       # Right
-tmux last-pane
-
-# Resize panes
-tmux resize-pane -U 5     # Up 5 cells
-tmux resize-pane -D 5     # Down
-tmux resize-pane -L 5     # Left
-tmux resize-pane -R 5     # Right
-
-# Kill pane
-tmux kill-pane
-
-# Display pane numbers
-tmux display-panes
-```
-
-### Layouts
-
-```bash
-# Set layout
-tmux select-layout even-horizontal
-tmux select-layout even-vertical
-tmux select-layout main-horizontal
-tmux select-layout main-vertical
-tmux select-layout tiled
-
-# Cycle layouts
-tmux next-layout
-```
-
-### Configuration
-
-jsh reads configuration from (in order):
-1. `$XDG_CONFIG_HOME/jsh/tmux.conf`
-2. `~/.tmux.conf`
-3. `~/.config/tmux/tmux.conf`
-
-```bash
-# Example ~/.tmux.conf
-set -g mouse on
-set -g base-index 1
-set -g history-limit 10000
-set -g prefix C-a
-
-# Pane navigation
-bind h select-pane -L
-bind j select-pane -D
-bind k select-pane -U
-bind l select-pane -R
-
-# Split shortcuts
-bind | split-window -h
-bind - split-window -v
-
-# Reload config
-bind r source-file ~/.tmux.conf \; display-message "Reloaded!"
-
-# Status bar
-set -g status-style 'bg=colour234 fg=colour137'
-set -g status-left '#[fg=colour233,bg=colour245,bold] #S '
-set -g status-right '#[fg=colour233,bg=colour245,bold] %H:%M '
-```
-
-### Themes
-
-jsh includes popular tmux themes:
-
-```bash
-# List available themes
-tmux list-themes
-tmux-theme
-
-# Apply a theme
-tmux set-theme dracula
-tmux-theme nord
-
-# Available themes:
-# - default
-# - powerline
-# - dracula
-# - nord
-# - gruvbox
-# - catppuccin-mocha
-# - tokyo-night
-# - one-dark
-# - minimal
-```
-
-### TPM Plugin Support
-
-jsh is compatible with [TPM (Tmux Plugin Manager)](https://github.com/tmux-plugins/tpm) plugins:
-
-```bash
-# In ~/.tmux.conf
-set -g @plugin 'tmux-plugins/tpm'
-set -g @plugin 'tmux-plugins/tmux-sensible'
-set -g @plugin 'tmux-plugins/tmux-resurrect'
-set -g @plugin 'dracula/tmux'
-
-# Install plugins
-tmux tpm-install
-tmux-plugins install
-
-# Update plugins
-tmux tpm-update
-tmux-plugins update
-
-# Clean unused plugins
-tmux tpm-clean
-tmux-plugins clean
-
-# List installed plugins
-tmux tpm-list
-tmux-plugins list
-```
-
-### Key Bindings
-
-Default prefix key is `C-b`. Common bindings:
-
-| Key | Action |
-|-----|--------|
-| `C-b c` | New window |
-| `C-b ,` | Rename window |
-| `C-b n` | Next window |
-| `C-b p` | Previous window |
-| `C-b 0-9` | Select window |
-| `C-b "` | Split horizontal |
-| `C-b %` | Split vertical |
-| `C-b o` | Next pane |
-| `C-b ;` | Last pane |
-| `C-b x` | Kill pane |
-| `C-b z` | Toggle zoom |
-| `C-b [` | Copy mode |
-| `C-b d` | Detach |
-| `C-b :` | Command prompt |
-| `C-b ?` | List keys |
-
-### Popular Plugin Compatibility
-
-| Plugin | Description |
-|--------|-------------|
-| tmux-sensible | Sensible defaults |
-| tmux-resurrect | Save/restore sessions |
-| tmux-continuum | Automatic saving |
-| tmux-yank | Copy to clipboard |
-| tmux-pain-control | Better pane navigation |
-| dracula/tmux | Dracula theme |
-| catppuccin/tmux | Catppuccin theme |
-
-## FZF Integration
-
-jsh includes built-in support for [fzf](https://github.com/junegunn/fzf), the command-line fuzzy finder.
-
-### Requirements
-
-Install fzf: https://github.com/junegunn/fzf#installation
-
-Optional but recommended:
-- `fd` - faster alternative to `find` for file/directory listing
-
-### Built-in FZF Commands
-
-```bash
-# Fuzzy search command history
-fzf_history
-fzf_history --multi  # Select multiple entries
-
-# Fuzzy file selection
-fzf_file             # Current directory
-fzf_file ~/projects  # Specific directory
-fzf_file --preview   # With file preview
-fzf_file --multi     # Select multiple files
-
-# Fuzzy directory selection
-fzf_dir              # Current directory
-fzf_dir ~ --preview  # Home with ls preview
-
-# Fuzzy cd (changes directory)
-fzf_cd               # Select and cd to directory
-fzf_cd ~/projects    # From specific base
-
-# Fuzzy git branch selection
-fzf_git_branch       # Local branches
-fzf_git_branch --all # Include remote branches
-
-# Fuzzy git log selection (returns commit hash)
-fzf_git_log          # Current branch
-fzf_git_log --all    # All branches
-
-# Fuzzy process selection
-fzf_process          # Returns PID
-fzf_process --multi  # Select multiple
-
-# Fuzzy kill process
-fzf_kill             # SIGTERM (default)
-fzf_kill -9          # SIGKILL
-```
-
-### Using FZF Results
-
-All fzf commands set `$FZF_RESULT` with the selection:
-
-```bash
-# Edit selected file
-vim $(fzf_file)
-
-# Checkout selected branch
-git checkout $(fzf_git_branch)
-
-# Use the result variable
-fzf_file
-echo "Selected: $FZF_RESULT"
-
-# Cherry-pick selected commit
-git cherry-pick $(fzf_git_log)
-```
-
-### Example Shell Functions
-
-Add these to your `~/.jshrc` for enhanced fzf workflows:
-
-```bash
-# fe - fuzzy edit
-fn fe {
-    local file=$(fzf_file --preview)
-    if [ -n "$file" ]; then
-        ${EDITOR:-vim} "$file"
-    fi
-}
-
-# fco - fuzzy checkout branch
-fn fco {
-    local branch=$(fzf_git_branch --all)
-    if [ -n "$branch" ]; then
-        git checkout "$branch"
-    fi
-}
-
-# fkill - fuzzy kill with confirmation
-fn fkill {
-    local pid=$(fzf_process)
-    if [ -n "$pid" ]; then
-        echo "Kill process $pid? [y/N]"
-        read -r confirm
-        if [ "$confirm" = "y" ]; then
-            kill -9 "$pid"
-        fi
-    fi
-}
-```
-
-## SSH Agent Integration
-
-jsh includes built-in support for automatic ssh-agent management.
-
-### Automatic Startup
-
-Enable automatic ssh-agent startup in your `~/.jshrc`, `~/.jsh_profile`, or `~/.jshenv`:
-
-```bash
-# Enable automatic ssh-agent startup
-export JSH_SSH_AGENT_AUTO_START=true
-
-# Optional: Use a custom socket path (e.g., for systemd user units)
-export JSH_SSH_AGENT_SOCKET="/run/user/$UID/ssh-agent.socket"
-```
-
-When enabled, jsh will:
-1. Check if `SSH_AUTH_SOCK` is set and the socket exists
-2. If not, automatically start `ssh-agent`
-3. Export `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables
-
-### Manual Control with `ssh_agent` Builtin
-
-```bash
-ssh_agent              # Show status (default)
-ssh_agent status       # Show status and loaded keys
-ssh_agent start        # Start ssh-agent if not running
-ssh_agent stop         # Stop the current ssh-agent
-ssh_agent add          # Add default SSH keys (~/.ssh/id_*)
-```
-
-### Example Configuration
-
-**For Login Shells (`~/.jsh_profile`):**
-```bash
-# Automatically start ssh-agent on login
-export JSH_SSH_AGENT_AUTO_START=true
-
-# Optionally auto-add keys (requires ssh-add to be set up with keychain or similar)
-ssh_agent add 2>/dev/null
-```
-
-**For systemd User Units:**
-```bash
-# Use systemd-managed ssh-agent socket
-export JSH_SSH_AGENT_SOCKET="$XDG_RUNTIME_DIR/ssh-agent.socket"
-```
-
-**For GPG-Agent SSH Support:**
-```bash
-# Use gpg-agent for SSH (if gpg-agent is configured with enable-ssh-support)
-export JSH_SSH_AGENT_SOCKET="$(gpgconf --list-dirs agent-ssh-socket)"
-```
-
-## Examples
-
-### Traditional Bash Style
-```bash
-#!/usr/bin/env jsh
-
-# Variables
-name="World"
-echo "Hello, $name!"
-
-# Conditionals
-if [ -f "config.txt" ]; then
-    echo "Config exists"
-elif [ -f "config.default.txt" ]; then
-    echo "Using default config"
-else
-    echo "No config found"
-fi
-
-# Loops
-for file in *.txt; do
-    echo "Processing: $file"
-done
-
-# Case statement
-case "$1" in
-    start)
-        echo "Starting..."
-        ;;
-    stop)
-        echo "Stopping..."
-        ;;
-    *)
-        echo "Unknown command"
-        ;;
-esac
-```
-
-### jsh Enhanced Style
-```bash
-#!/usr/bin/env jsh
-
-# Constants and variables
-const VERSION = "1.0.0"
-let counter = 0
-
-# Pattern matching
-match $1 {
-    start => {
-        echo "Starting version $VERSION..."
-        start_service
-    }
-    stop => {
-        echo "Stopping..."
-        stop_service
-    }
-    status => echo "Running"
-    * => echo "Usage: $0 {start|stop|status}"
-}
-
-# Error handling
-try {
-    let result = $(risky_operation)
-    echo "Success: $result"
-} catch e {
-    echo "Failed: $e"
-    exit 1
-} finally {
-    cleanup
-}
-
-# Modern function syntax
-fn process_file {
-    let file = $1
-    echo "Processing: $file"
-}
-
-# Infinite loop with break
-loop {
-    let counter = $((counter + 1))
-    echo "Iteration: $counter"
-    if [ $counter -ge 5 ]; then
-        break
-    fi
-}
-```
-
-### Fish-Style Scripting
-```fish
-#!/usr/bin/env jsh
-
-# Fish-style variable assignment
-set name "World"
-set -x PATH "/usr/local/bin" $PATH  # Export
-
-# String manipulation
-string upper "hello"                 # HELLO
-string split "," "a,b,c"             # a\nb\nc
-string join "-" a b c                # a-b-c
-string replace "old" "new" "old text"
-
-# Math operations
-math "2 + 3 * 4"                     # 14
-math "2 ^ 10"                        # 1024
-
-# List operations
-set fruits apple banana cherry
-contains apple $fruits && echo "Found!"
-
-# Fish-style switch
-switch $cmd
-    case start
-        echo "Starting..."
-    case stop
-        echo "Stopping..."
-    case '*'
-        echo "Unknown command"
-end
-
-# Status checks
-if status is-interactive
-    echo "Interactive mode"
-end
-
-# Function management
-functions                            # List all functions
-functions -q myfunction && echo "Exists"
-```
-
-## License
-
-This project is dual-licensed under either:
-
-- [MIT License](LICENSE-MIT)
-- [Apache License, Version 2.0](LICENSE-APACHE)
-
-at your option.
+*Results may vary. No shells were harmed in these benchmarks.*
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Found a bug? Want to add a feature? Have a complaint?
 
-## Copyright
+1. Fork the repo
+2. Create a branch (`git checkout -b feature/amazing-thing`)
+3. Write some code (tests appreciated but not required, we're not that organized)
+4. Submit a PR
+5. Wait patiently while we review it (or impatiently, we understand)
 
-Copyright © 2025 Pegasus Heavy Industries LLC
+## FAQ
+
+**Q: Is this production ready?**
+A: Define "production"
+
+**Q: Why is it called Franken Shell?**
+A: Because it's stitched together from the best (and worst) parts of every shell we could find
+
+**Q: Should I use this as my daily driver?**
+A: If you like living dangerously, absolutely
+
+**Q: Why does [feature] work like that?**
+A: It made sense at 3am
+
+**Q: Can I contribute?**
+A: Yes! We accept PRs, bug reports, and emotional support
+
+## License
+
+MIT OR Apache-2.0 (pick your favorite, we won't judge)
+
+---
+
+<p align="center">
+  <b>Made with ☕ and questionable decisions by Pegasus Heavy Industries</b>
+  <br>
+  <i>The vibe-coded shell that does everything stupidly™</i>
+  <br><br>
+  🧟⚡🔩
+</p>

@@ -199,7 +199,7 @@ impl TmuxConfig {
     pub fn load(path: &Path) -> Result<Self> {
         let content = fs::read_to_string(path)
             .map_err(|e| JshError::runtime(format!("Failed to read config: {}", e)))?;
-        
+
         let mut config = TmuxConfig::default();
         config.parse(&content)?;
         Ok(config)
@@ -209,7 +209,7 @@ impl TmuxConfig {
     pub fn parse(&mut self, content: &str) -> Result<()> {
         for line in content.lines() {
             let line = line.trim();
-            
+
             // Skip empty lines and comments
             if line.is_empty() || line.starts_with('#') {
                 continue;
@@ -265,7 +265,7 @@ impl TmuxConfig {
         let mut _global = false;
         let mut _append = false;
         let mut _quiet = false;
-        
+
         // Parse flags
         while let Some(arg) = args.peek() {
             match **arg {
@@ -709,11 +709,11 @@ fn shell_split(s: &str) -> Vec<&str> {
     let mut quote_char = ' ';
     let mut start = 0;
     let chars: Vec<char> = s.chars().collect();
-    
+
     let mut i = 0;
     while i < chars.len() {
         let c = chars[i];
-        
+
         if !in_quote {
             if c == '"' || c == '\'' {
                 in_quote = true;
@@ -733,17 +733,17 @@ fn shell_split(s: &str) -> Vec<&str> {
             in_quote = false;
             start = i + 1;
         }
-        
+
         i += 1;
     }
-    
+
     if start < s.len() {
         let part = &s[start..];
         if !part.trim().is_empty() {
             result.push(part.trim());
         }
     }
-    
+
     result
 }
 

@@ -28,7 +28,7 @@ pub struct Pane {
 impl Pane {
     pub fn new(id: usize, shell: Option<&str>) -> Self {
         let default_shell = std::env::var("SHELL").unwrap_or_else(|_| "/bin/sh".to_string());
-        
+
         Self {
             id,
             x: 0,
@@ -55,7 +55,7 @@ impl Pane {
     pub fn send_keys(&mut self, keys: &str, _literal: bool) {
         // In a real implementation, this would send keys to the PTY
         self.activity = Instant::now();
-        
+
         // For now, just update the title if it looks like a command
         if !keys.is_empty() && !keys.starts_with('\x1b') {
             self.current_command = Some(keys.to_string());
@@ -132,7 +132,7 @@ impl Pane {
     /// Search forward
     pub fn search_forward(&mut self, pattern: &str) -> Option<usize> {
         self.search_string = Some(pattern.to_string());
-        
+
         for (i, line) in self.history.iter().enumerate().skip(self.scroll_position + 1) {
             if line.contains(pattern) {
                 self.scroll_position = i;
@@ -145,7 +145,7 @@ impl Pane {
     /// Search backward
     pub fn search_backward(&mut self, pattern: &str) -> Option<usize> {
         self.search_string = Some(pattern.to_string());
-        
+
         for i in (0..self.scroll_position).rev() {
             if let Some(line) = self.history.get(i) {
                 if line.contains(pattern) {
@@ -185,7 +185,7 @@ impl Pane {
     pub fn visible_lines(&self) -> Vec<&str> {
         let start = self.scroll_position;
         let end = (start + self.height as usize).min(self.history.len());
-        
+
         self.history[start..end]
             .iter()
             .map(|s| s.as_str())
@@ -195,13 +195,13 @@ impl Pane {
     /// Capture pane contents
     pub fn capture(&self, start: Option<i32>, end: Option<i32>) -> String {
         let total = self.history.len() as i32;
-        
+
         let start_line = match start {
             Some(s) if s < 0 => (total + s).max(0) as usize,
             Some(s) => s as usize,
             None => 0,
         };
-        
+
         let end_line = match end {
             Some(e) if e < 0 => (total + e).max(0) as usize,
             Some(e) => e as usize,
