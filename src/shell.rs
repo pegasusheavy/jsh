@@ -1,6 +1,7 @@
-//! Shell REPL and configuration for jsh
+//! 🧟 Franken Shell - REPL and configuration
+//! The vibe-coded shell that does everything stupidly™
 
-use crate::error::{JshError, Result};
+use crate::error::{FrankenError, Result};
 use crate::interpreter::Interpreter;
 use crate::theme::{GitInfo, PromptContext, ThemeManager, list_builtin_themes};
 use chrono::Local;
@@ -8,7 +9,7 @@ use colored::Colorize;
 use rustyline::completion::{Completer, Pair};
 use rustyline::config::Configurer;
 use rustyline::error::ReadlineError;
-use rustyline::highlight::Highlighter;
+use rustyline::highlight::{CmdKind, Highlighter};
 use rustyline::hint::Hinter;
 use rustyline::history::DefaultHistory;
 use rustyline::validate::{ValidationContext, ValidationResult, Validator};
@@ -70,39 +71,96 @@ pub fn xdg_cache_home() -> PathBuf {
         })
 }
 
-/// Get jsh config directory ($XDG_CONFIG_HOME/jsh)
-pub fn jsh_config_dir() -> PathBuf {
-    xdg_config_home().join("jsh")
+/// Get XDG_RUNTIME_DIR (usually set by system, e.g., /run/user/$UID)
+pub fn xdg_runtime_dir() -> Option<PathBuf> {
+    std::env::var("XDG_RUNTIME_DIR").ok().map(PathBuf::from)
 }
 
-/// Get jsh data directory ($XDG_DATA_HOME/jsh)
-pub fn jsh_data_dir() -> PathBuf {
-    xdg_data_home().join("jsh")
+/// Initialize XDG Base Directory environment variables if not already set.
+/// This ensures all XDG variables have sensible defaults according to the spec.
+/// Should be called early in shell initialization.
+pub fn initialize_xdg_dirs() {
+    if let Some(home) = dirs::home_dir() {
+        // XDG_CONFIG_HOME defaults to ~/.config
+        if std::env::var("XDG_CONFIG_HOME").is_err() {
+            let config_home = home.join(".config");
+            // SAFETY: Setting environment variables during single-threaded initialization
+            unsafe { std::env::set_var("XDG_CONFIG_HOME", &config_home) };
+        }
+
+        // XDG_DATA_HOME defaults to ~/.local/share
+        if std::env::var("XDG_DATA_HOME").is_err() {
+            let data_home = home.join(".local").join("share");
+            unsafe { std::env::set_var("XDG_DATA_HOME", &data_home) };
+        }
+
+        // XDG_STATE_HOME defaults to ~/.local/state
+        if std::env::var("XDG_STATE_HOME").is_err() {
+            let state_home = home.join(".local").join("state");
+            unsafe { std::env::set_var("XDG_STATE_HOME", &state_home) };
+        }
+
+        // XDG_CACHE_HOME defaults to ~/.cache
+        if std::env::var("XDG_CACHE_HOME").is_err() {
+            let cache_home = home.join(".cache");
+            unsafe { std::env::set_var("XDG_CACHE_HOME", &cache_home) };
+        }
+
+        // XDG_RUNTIME_DIR is typically set by the system (e.g., systemd-logind)
+        // We don't set a default as per spec - it should be set by the login manager
+        // If needed, it would typically be /run/user/$UID
+
+        // Also ensure the fsh-specific XDG directories exist
+        let _ = std::fs::create_dir_all(fsh_config_dir());
+        let _ = std::fs::create_dir_all(fsh_data_dir());
+        let _ = std::fs::create_dir_all(fsh_state_dir());
+        let _ = std::fs::create_dir_all(fsh_cache_dir());
+    }
 }
 
-/// Get jsh state directory ($XDG_STATE_HOME/jsh)
-pub fn jsh_state_dir() -> PathBuf {
-    xdg_state_home().join("jsh")
+/// Get franken config directory ($XDG_CONFIG_HOME/franken)
+pub fn fsh_config_dir() -> PathBuf {
+    xdg_config_home().join("fsh")
 }
 
-/// Get jsh cache directory ($XDG_CACHE_HOME/jsh)
-pub fn jsh_cache_dir() -> PathBuf {
-    xdg_cache_home().join("jsh")
+/// Get franken data directory ($XDG_DATA_HOME/franken)
+pub fn fsh_data_dir() -> PathBuf {
+    xdg_data_home().join("fsh")
 }
+
+/// Get franken state directory ($XDG_STATE_HOME/franken)
+pub fn fsh_state_dir() -> PathBuf {
+    xdg_state_home().join("fsh")
+}
+
+/// Get franken cache directory ($XDG_CACHE_HOME/franken)
+pub fn fsh_cache_dir() -> PathBuf {
+    xdg_cache_home().join("fsh")
+}
+
+// Backward compatibility aliases
+pub fn jsh_config_dir() -> PathBuf { fsh_config_dir() }
+pub fn jsh_data_dir() -> PathBuf { fsh_data_dir() }
+pub fn jsh_state_dir() -> PathBuf { fsh_state_dir() }
+pub fn jsh_cache_dir() -> PathBuf { fsh_cache_dir() }
 
 /// Get default history file path (XDG-compliant)
-/// Uses $XDG_STATE_HOME/jsh/history, falls back to ~/.jsh_history if exists
+/// Uses $XDG_STATE_HOME/fsh/history, falls back to legacy paths if they exist
 pub fn default_history_file() -> PathBuf {
-    // Check for legacy ~/.jsh_history first (migration support)
+    // Check for legacy files first (migration support)
     if let Some(home) = dirs::home_dir() {
-        let legacy = home.join(".jsh_history");
-        if legacy.exists() {
-            return legacy;
+        let legacy_franken = home.join(".fsh_history");
+        if legacy_franken.exists() {
+            return legacy_franken;
+        }
+        let legacy_jsh = home.join(".jsh_history");
+        if legacy_jsh.exists() {
+            return legacy_jsh;
         }
     }
 
     // Use XDG-compliant path
-    let state_dir = jsh_state_dir();
+    let state_dir = fsh_state_dir();
     // Create directory if it doesn't exist
     let _ = std::fs::create_dir_all(&state_dir);
     state_dir.join("history")
@@ -133,21 +191,21 @@ impl Default for ShellConfig {
             prompt: String::new(), // Will be computed dynamically by theme
             continuation_prompt: "> ".to_string(),
             vi_mode: false,
-            theme_name: "jsh".to_string(),
+            theme_name: "fsh".to_string(),
             is_login_shell: false,
             is_interactive: true,
-            ssh_agent_auto_start: false, // Disabled by default, enable in .jshrc
+            ssh_agent_auto_start: false, // Disabled by default, enable in .fshrc
             ssh_agent_socket: None,
         }
     }
 }
 
 /// Helper for rustyline
-struct JshHelper;
+struct FrankenHelper;
 
-impl Helper for JshHelper {}
+impl Helper for FrankenHelper {}
 
-impl Completer for JshHelper {
+impl Completer for FrankenHelper {
     type Candidate = Pair;
 
     fn complete(
@@ -273,7 +331,7 @@ impl Completer for JshHelper {
     }
 }
 
-impl Highlighter for JshHelper {
+impl Highlighter for FrankenHelper {
     fn highlight<'l>(&self, line: &'l str, _pos: usize) -> Cow<'l, str> {
         // Basic syntax highlighting
         let mut result = String::new();
@@ -359,7 +417,7 @@ impl Highlighter for JshHelper {
         Cow::Owned(result)
     }
 
-    fn highlight_char(&self, _line: &str, _pos: usize, _forced: bool) -> bool {
+    fn highlight_char(&self, _line: &str, _pos: usize, _kind: CmdKind) -> bool {
         true
     }
 
@@ -372,7 +430,7 @@ impl Highlighter for JshHelper {
     }
 }
 
-impl Hinter for JshHelper {
+impl Hinter for FrankenHelper {
     type Hint = String;
 
     fn hint(&self, _line: &str, _pos: usize, _ctx: &Context<'_>) -> Option<String> {
@@ -380,7 +438,7 @@ impl Hinter for JshHelper {
     }
 }
 
-impl Validator for JshHelper {
+impl Validator for FrankenHelper {
     fn validate(&self, _ctx: &mut ValidationContext<'_>) -> rustyline::Result<ValidationResult> {
         Ok(ValidationResult::Valid(None))
     }
@@ -420,7 +478,7 @@ pub struct Shell {
     pub config: ShellConfig,
     pub interpreter: Interpreter,
     pub theme_manager: ThemeManager,
-    editor: Editor<JshHelper, DefaultHistory>,
+    editor: Editor<FrankenHelper, DefaultHistory>,
     history_num: usize,
 }
 
@@ -440,7 +498,7 @@ impl Shell {
 
         let mut editor = Editor::new()?;
         editor.set_max_history_size(config.history_size)?;
-        editor.set_helper(Some(JshHelper));
+        editor.set_helper(Some(FrankenHelper));
 
         // Load history
         let _ = editor.load_history(&config.history_file);
@@ -461,8 +519,15 @@ impl Shell {
 
     /// Initialize the shell environment
     fn initialize_environment(&mut self) {
-        // Always source ~/.jshenv first (like zsh's .zshenv - for ALL shell types)
-        self.source_jshenv();
+        // Initialize XDG Base Directory environment variables
+        // This must be done first so profiles can rely on these paths
+        initialize_xdg_dirs();
+
+        // Export XDG variables to the interpreter's environment
+        self.export_xdg_vars();
+
+        // Always source ~/.fshenv first (like zsh's .zshenv - for ALL shell types)
+        self.source_fshenv();
 
         // Source login shell profiles if this is a login shell
         if self.config.is_login_shell {
@@ -483,15 +548,43 @@ impl Shell {
         }
     }
 
+    /// Export XDG environment variables to the interpreter
+    fn export_xdg_vars(&mut self) {
+        // Export XDG_CONFIG_HOME
+        if let Ok(val) = std::env::var("XDG_CONFIG_HOME") {
+            self.interpreter.export_var("XDG_CONFIG_HOME", Some(&val));
+        }
+
+        // Export XDG_DATA_HOME
+        if let Ok(val) = std::env::var("XDG_DATA_HOME") {
+            self.interpreter.export_var("XDG_DATA_HOME", Some(&val));
+        }
+
+        // Export XDG_STATE_HOME
+        if let Ok(val) = std::env::var("XDG_STATE_HOME") {
+            self.interpreter.export_var("XDG_STATE_HOME", Some(&val));
+        }
+
+        // Export XDG_CACHE_HOME
+        if let Ok(val) = std::env::var("XDG_CACHE_HOME") {
+            self.interpreter.export_var("XDG_CACHE_HOME", Some(&val));
+        }
+
+        // Export XDG_RUNTIME_DIR if set (usually by system)
+        if let Ok(val) = std::env::var("XDG_RUNTIME_DIR") {
+            self.interpreter.export_var("XDG_RUNTIME_DIR", Some(&val));
+        }
+    }
+
     /// Check if SSH_AGENT_AUTO_START is set in environment/config
     fn check_ssh_agent_config(&mut self) {
         // Check if user enabled ssh-agent via environment variable
-        if let Some(val) = self.interpreter.get_var("JSH_SSH_AGENT_AUTO_START") {
+        if let Some(val) = self.interpreter.get_var("FSH_SSH_AGENT_AUTO_START") {
             self.config.ssh_agent_auto_start = matches!(val.to_lowercase().as_str(), "1" | "true" | "yes" | "on");
         }
 
         // Check for custom socket path
-        if let Some(socket) = self.interpreter.get_var("JSH_SSH_AGENT_SOCKET") {
+        if let Some(socket) = self.interpreter.get_var("FSH_SSH_AGENT_SOCKET") {
             if !socket.is_empty() {
                 self.config.ssh_agent_socket = Some(PathBuf::from(socket));
             }
@@ -561,48 +654,48 @@ impl Shell {
                 // Optionally notify the user
                 if self.config.is_interactive {
                     if let Some(pid) = self.interpreter.get_var("SSH_AGENT_PID") {
-                        eprintln!("jsh: ssh-agent started (pid {})", pid);
+                        eprintln!("franken: ssh-agent started (pid {})", pid);
                     }
                 }
             }
             Ok(_) => {
                 // ssh-agent failed to start
                 if self.config.is_interactive {
-                    eprintln!("jsh: warning: failed to start ssh-agent");
+                    eprintln!("franken: warning: failed to start ssh-agent");
                 }
             }
             Err(_) => {
                 // ssh-agent not found
                 if self.config.is_interactive {
-                    eprintln!("jsh: warning: ssh-agent not found in PATH");
+                    eprintln!("franken: warning: ssh-agent not found in PATH");
                 }
             }
         }
     }
 
-    /// Source ~/.jshenv - always sourced for ALL shell invocations
+    /// Source ~/.fshenv - always sourced for ALL shell invocations
     /// This is the right place for environment variables, PATH modifications, etc.
-    fn source_jshenv(&mut self) {
-        // System-wide jshenv
-        self.source_file_if_exists("/etc/jshenv");
+    fn source_fshenv(&mut self) {
+        // System-wide fshenv
+        self.source_file_if_exists("/etc/fshenv");
 
-        // User jshenv (legacy location)
+        // User fshenv (legacy location)
         if let Some(home) = dirs::home_dir() {
-            let jshenv = home.join(".jshenv");
-            if jshenv.exists() {
-                self.source_file_if_exists(&jshenv.to_string_lossy());
+            let fshenv = home.join(".fshenv");
+            if fshenv.exists() {
+                self.source_file_if_exists(&fshenv.to_string_lossy());
             }
         }
 
-        // XDG location: $XDG_CONFIG_HOME/jsh/env
-        let xdg_env = jsh_config_dir().join("env");
+        // XDG location: $XDG_CONFIG_HOME/fsh/env
+        let xdg_env = fsh_config_dir().join("env");
         if xdg_env.exists() {
             self.source_file_if_exists(&xdg_env.to_string_lossy());
         }
     }
 
     /// Source login shell profile files
-    /// Order: /etc/environment, /etc/profile, then first of ~/.jsh_profile, XDG profile, ~/.bash_profile, etc.
+    /// Order: /etc/environment, /etc/profile, then first of ~/.fsh_profile, XDG profile, ~/.bash_profile, etc.
     fn source_login_profiles(&mut self) {
         // Parse /etc/environment (simple KEY=VALUE format, not a shell script)
         self.parse_environment_file("/etc/environment");
@@ -613,22 +706,22 @@ impl Shell {
         // Source /etc/profile.d/*.sh files (common on Linux)
         self.source_profile_d("/etc/profile.d");
 
-        // System-wide jsh login profile
-        self.source_file_if_exists("/etc/jsh_profile");
+        // System-wide franken login profile
+        self.source_file_if_exists("/etc/fsh_profile");
 
         // User profile (first one that exists, in order)
         // Include XDG location in the search
-        let xdg_profile = jsh_config_dir().join("profile");
+        let xdg_profile = fsh_config_dir().join("profile");
 
         if let Some(home) = dirs::home_dir() {
-            // Check ~/.jsh_profile first (legacy)
-            let jsh_profile = home.join(".jsh_profile");
-            if jsh_profile.exists() {
-                self.source_file_if_exists(&jsh_profile.to_string_lossy());
+            // Check ~/.fsh_profile first (legacy)
+            let fsh_profile = home.join(".fsh_profile");
+            if fsh_profile.exists() {
+                self.source_file_if_exists(&fsh_profile.to_string_lossy());
                 return;
             }
 
-            // Check XDG location: $XDG_CONFIG_HOME/jsh/profile
+            // Check XDG location: $XDG_CONFIG_HOME/fsh/profile
             if xdg_profile.exists() {
                 self.source_file_if_exists(&xdg_profile.to_string_lossy());
                 return;
@@ -720,24 +813,24 @@ impl Shell {
 
     /// Source interactive shell profile files
     fn source_interactive_profiles(&mut self) {
-        // System-wide jshrc
-        self.source_file_if_exists("/etc/jsh.jshrc");
-        self.source_file_if_exists("/etc/jshrc");
+        // System-wide fshrc
+        self.source_file_if_exists("/etc/franken.fshrc");
+        self.source_file_if_exists("/etc/fshrc");
         self.source_file_if_exists("/etc/bash.bashrc");
 
         // User rc file - check in priority order
         if let Some(home) = dirs::home_dir() {
-            // 1. ~/.jshrc takes highest priority (legacy location)
-            let jshrc = home.join(".jshrc");
-            if jshrc.exists() {
-                self.source_file_if_exists(&jshrc.to_string_lossy());
+            // 1. ~/.fshrc takes highest priority (legacy location)
+            let fshrc = home.join(".fshrc");
+            if fshrc.exists() {
+                self.source_file_if_exists(&fshrc.to_string_lossy());
                 return;
             }
 
-            // 2. XDG location: $XDG_CONFIG_HOME/jsh/jshrc
-            let xdg_jshrc = jsh_config_dir().join("jshrc");
-            if xdg_jshrc.exists() {
-                self.source_file_if_exists(&xdg_jshrc.to_string_lossy());
+            // 2. XDG location: $XDG_CONFIG_HOME/fsh/fshrc
+            let xdg_fshrc = fsh_config_dir().join("fshrc");
+            if xdg_fshrc.exists() {
+                self.source_file_if_exists(&xdg_fshrc.to_string_lossy());
                 return;
             }
 
@@ -791,7 +884,7 @@ impl Shell {
             host: &host,
             last_status: self.interpreter.last_status.code,
             git: git_info,
-            shell_name: "jsh",
+            shell_name: "fsh",
             history_num: self.history_num,
             time: Local::now(),
         };
@@ -817,7 +910,7 @@ impl Shell {
             host: &host,
             last_status: self.interpreter.last_status.code,
             git: git_info,
-            shell_name: "jsh",
+            shell_name: "fsh",
             history_num: self.history_num,
             time: Local::now(),
         };
@@ -852,7 +945,7 @@ impl Shell {
         // Print welcome message
         println!(
             "{} {} - A ZSH/Bash-compatible shell",
-            "jsh".cyan().bold(),
+            "fsh".cyan().bold(),
             env!("CARGO_PKG_VERSION")
         );
         println!("Type {} for available commands", "help".yellow());
@@ -888,7 +981,7 @@ impl Shell {
 
                     match self.interpreter.execute_string(line) {
                         Ok(_) => {}
-                        Err(JshError::Exit(code)) => {
+                        Err(FrankenError::Exit(code)) => {
                             self.save_history();
                             return Ok(code);
                         }
@@ -917,8 +1010,8 @@ impl Shell {
     /// Sync theme settings from environment variables
     /// Apply theme settings from environment (called once at startup)
     fn apply_theme_from_env(&mut self) {
-        // Check for JSH_THEME environment variable
-        if let Some(theme) = self.interpreter.get_var("JSH_THEME").map(|s| s.to_string()) {
+        // Check for FSH_THEME environment variable
+        if let Some(theme) = self.interpreter.get_var("FSH_THEME").map(|s| s.to_string()) {
             if !theme.is_empty() {
                 let _ = self.set_theme(&theme);
             }
@@ -940,8 +1033,8 @@ impl Shell {
     }
 
     fn sync_theme_from_env(&mut self) {
-        // Check if JSH_THEME changed
-        let theme = self.interpreter.get_var("JSH_THEME").map(|s| s.to_string());
+        // Check if FSH_THEME changed
+        let theme = self.interpreter.get_var("FSH_THEME").map(|s| s.to_string());
         if let Some(theme) = theme {
             if !theme.is_empty() && theme != self.config.theme_name {
                 let _ = self.set_theme(&theme);
@@ -1023,7 +1116,7 @@ impl Shell {
                 println!("  theme preview <name> - Preview a specific theme");
                 println!();
                 println!("You can also set themes via:");
-                println!("  export JSH_THEME=<name>");
+                println!("  export FSH_THEME=<name>");
                 println!("  export PROMPT='<prompt string>'");
                 println!("  export RPROMPT='<right prompt>'");
             }
@@ -1032,11 +1125,11 @@ impl Shell {
 
     /// Run a script file
     pub fn run_script(&mut self, path: &str, args: &[String]) -> Result<i32> {
-        self.interpreter.positional_params = args.to_vec();
+        self.interpreter.positional_params = args.iter().cloned().collect();
 
         match self.interpreter.run_script(path) {
             Ok(status) => Ok(status.code),
-            Err(JshError::Exit(code)) => Ok(code),
+            Err(FrankenError::Exit(code)) => Ok(code),
             Err(e) => {
                 eprintln!("{}: {}", "error".red().bold(), e);
                 Ok(1)
@@ -1048,7 +1141,7 @@ impl Shell {
     pub fn run_command(&mut self, command: &str) -> Result<i32> {
         match self.interpreter.execute_string(command) {
             Ok(status) => Ok(status.code),
-            Err(JshError::Exit(code)) => Ok(code),
+            Err(FrankenError::Exit(code)) => Ok(code),
             Err(e) => {
                 eprintln!("{}: {}", "error".red().bold(), e);
                 Ok(1)
