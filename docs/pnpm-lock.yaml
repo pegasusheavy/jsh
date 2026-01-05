@@ -61,8 +61,8 @@ importers:
         specifier: ^21.0.0
         version: 21.0.6(@angular/compiler@21.0.6)(typescript@5.9.3)
       '@pegasusheavy/tailswatch':
-        specifier: ^1.1.1
-        version: 1.1.1(tailwindcss@4.1.18)
+        specifier: ^1.5.0
+        version: 1.5.0(tailwindcss@4.1.18)
       '@tailwindcss/postcss':
         specifier: ^4.1.12
         version: 4.1.18
@@ -1425,8 +1425,8 @@ packages:
       '@angular/core': ^19.0.0 || ^20.0.0 || ^21.0.0
       '@angular/forms': ^19.0.0 || ^20.0.0 || ^21.0.0
 
-  '@pegasusheavy/tailswatch@1.1.1':
-    resolution: {integrity: sha512-yUeyu+ylqglT/Mmu5Vmqq2jgIBb/HJXxMUt2GIV1Hko7euKIrrMxLznRzNjt0tmDobJq2gfgrKF31Cs2do56yQ==}
+  '@pegasusheavy/tailswatch@1.5.0':
+    resolution: {integrity: sha512-WM4l+Tp+YEfyrR75djcs2/icum5Xr4WADMGNXVTLQoiTDlR7b32589oqtJ7F9EXwtnaBO7pZw0XLqSXLvMOWrw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       tailwindcss: ^4.0.0
@@ -4421,7 +4421,7 @@ snapshots:
       '@angular/forms': 21.0.6(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2))(@angular/platform-browser@21.0.6(@angular/animations@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)))(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)))(rxjs@7.8.2)
       tslib: 2.8.1
 
-  '@pegasusheavy/tailswatch@1.1.1(tailwindcss@4.1.18)':
+  '@pegasusheavy/tailswatch@1.5.0(tailwindcss@4.1.18)':
     dependencies:
       tailwindcss: 4.1.18
 
