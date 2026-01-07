@@ -42,7 +42,7 @@
     "@angular/build": "^21.0.3",
     "@angular/cli": "^21.0.3",
     "@angular/compiler-cli": "^21.0.0",
-    "@pegasusheavy/tailswatch": "^1.1.1",
+    "@pegasusheavy/tailswatch": "^1.5.0",
     "@tailwindcss/postcss": "^4.1.12",
     "jsdom": "^27.4.0",
     "postcss": "^8.5.3",
