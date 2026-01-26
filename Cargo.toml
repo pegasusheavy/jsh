@@ -83,7 +83,7 @@ crossbeam-channel = "0.5"
 # ============================================
 
 # Cranelift code generator
-cranelift-codegen = { version = "0.127", optional = true }
+cranelift-codegen = { version = "0.128", optional = true }
 cranelift-frontend = { version = "0.127", optional = true }
 cranelift-module = { version = "0.127", optional = true }
 cranelift-jit = { version = "0.127", optional = true }
