@@ -61,8 +61,8 @@ importers:
         specifier: ^21.0.0
         version: 21.0.6(@angular/compiler@21.0.6)(typescript@5.9.3)
       '@pegasusheavy/tailswatch':
-        specifier: ^1.5.0
-        version: 1.5.0(tailwindcss@4.1.18)
+        specifier: ^1.6.0
+        version: 1.6.0(tailwindcss@4.1.18)
       '@tailwindcss/postcss':
         specifier: ^4.1.12
         version: 4.1.18
@@ -1425,8 +1425,8 @@ packages:
       '@angular/core': ^19.0.0 || ^20.0.0 || ^21.0.0
       '@angular/forms': ^19.0.0 || ^20.0.0 || ^21.0.0
 
-  '@pegasusheavy/tailswatch@1.5.0':
-    resolution: {integrity: sha512-WM4l+Tp+YEfyrR75djcs2/icum5Xr4WADMGNXVTLQoiTDlR7b32589oqtJ7F9EXwtnaBO7pZw0XLqSXLvMOWrw==}
+  '@pegasusheavy/tailswatch@1.6.0':
+    resolution: {integrity: sha512-lRZMNe5W+uNVUo5Aywr5chpLZnIkOLXUFGWOiSzNUvDTXjkp5G6hR1X54mtGwbxTNoOvBDejv9jww0R58QcFsg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       tailwindcss: ^4.0.0
@@ -2997,6 +2997,7 @@ packages:
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
@@ -4421,7 +4422,7 @@ snapshots:
       '@angular/forms': 21.0.6(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2))(@angular/platform-browser@21.0.6(@angular/animations@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)))(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)))(rxjs@7.8.2)
       tslib: 2.8.1
 
-  '@pegasusheavy/tailswatch@1.5.0(tailwindcss@4.1.18)':
+  '@pegasusheavy/tailswatch@1.6.0(tailwindcss@4.1.18)':
     dependencies:
       tailwindcss: 4.1.18
 
