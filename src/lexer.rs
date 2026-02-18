@@ -4,7 +4,7 @@
 //! Uses PHF for O(1) keyword lookup.
 
 use crate::error::{JshError, Result};
-use crate::token::{keyword_from_str, owned_str, Span, Token, TokenKind};
+use crate::token::{Span, Token, TokenKind, keyword_from_str, owned_str};
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -188,7 +188,15 @@ impl<'a> Lexer<'a> {
                     } else {
                         // Simple variable name or special character
                         while let Some(c) = self.peek() {
-                            if c.is_alphanumeric() || c == '_' || c == '?' || c == '!' || c == '#' || c == '@' || c == '*' || c == '-' {
+                            if c.is_alphanumeric()
+                                || c == '_'
+                                || c == '?'
+                                || c == '!'
+                                || c == '#'
+                                || c == '@'
+                                || c == '*'
+                                || c == '-'
+                            {
                                 string.push(c);
                                 self.advance();
                                 // Special characters are single-char variables
@@ -435,8 +443,8 @@ impl<'a> Lexer<'a> {
             while let Some(c) = self.peek() {
                 match c {
                     // Word terminators (but $ and quotes are conditional after =)
-                    ' ' | '\t' | '\n' | '\r' | ';' | '|' | '&' | '<' | '>' | '(' | ')' | '{' | '}'
-                    | '[' | ']' | '#' | '`' | ',' => break,
+                    ' ' | '\t' | '\n' | '\r' | ';' | '|' | '&' | '<' | '>' | '(' | ')' | '{'
+                    | '}' | '[' | ']' | '#' | '`' | ',' => break,
                     // Quotes are word terminators unless after = (to support local x="value")
                     '"' | '\'' if !after_equals => break,
                     '"' => {
@@ -482,8 +490,10 @@ impl<'a> Lexer<'a> {
                         self.advance();
                         // Continue reading the variable name/special char
                         if let Some(next) = self.peek() {
-                            if next.is_alphanumeric() || next == '_' ||
-                               matches!(next, '?' | '!' | '$' | '#' | '@' | '*' | '-') {
+                            if next.is_alphanumeric()
+                                || next == '_'
+                                || matches!(next, '?' | '!' | '$' | '#' | '@' | '*' | '-')
+                            {
                                 word.push(next);
                                 self.advance();
                                 // Read rest of variable name
@@ -777,8 +787,8 @@ impl<'a> Lexer<'a> {
                     self.read_variable()
                 }
             }
-            '|' | '&' | ';' | '<' | '>' | '=' | '!' | '(' | ')'
-            | '{' | '}' | '[' | ']' | ',' | '\n' => self.read_operator(),
+            '|' | '&' | ';' | '<' | '>' | '=' | '!' | '(' | ')' | '{' | '}' | '[' | ']' | ','
+            | '\n' => self.read_operator(),
             // Note: '*', '/', '%' are handled in read_word to allow them in paths and globs
             // Handle '-' and '+' specially: if followed by alphanumeric, it's part of a word (like -e, +o)
             '-' | '+' => {
@@ -802,23 +812,41 @@ impl<'a> Lexer<'a> {
                     if let Some(c) = self.peek() {
                         if c == '-' {
                             self.advance();
-                            Token::new(TokenKind::RedirectFd(2, -1), self.span_from(start, start_line, start_col))
+                            Token::new(
+                                TokenKind::RedirectFd(2, -1),
+                                self.span_from(start, start_line, start_col),
+                            )
                         } else if c.is_ascii_digit() {
                             let fd = (c as u8 - b'0') as i32;
                             self.advance();
-                            Token::new(TokenKind::RedirectFd(2, fd), self.span_from(start, start_line, start_col))
+                            Token::new(
+                                TokenKind::RedirectFd(2, fd),
+                                self.span_from(start, start_line, start_col),
+                            )
                         } else {
                             // 2>& followed by something else
-                            Token::new(TokenKind::RedirectErr, self.span_from(start, start_line, start_col))
+                            Token::new(
+                                TokenKind::RedirectErr,
+                                self.span_from(start, start_line, start_col),
+                            )
                         }
                     } else {
-                        Token::new(TokenKind::RedirectErr, self.span_from(start, start_line, start_col))
+                        Token::new(
+                            TokenKind::RedirectErr,
+                            self.span_from(start, start_line, start_col),
+                        )
                     }
                 } else if self.peek() == Some('>') {
                     self.advance();
-                    Token::new(TokenKind::RedirectErrAppend, self.span_from(start, start_line, start_col))
+                    Token::new(
+                        TokenKind::RedirectErrAppend,
+                        self.span_from(start, start_line, start_col),
+                    )
                 } else {
-                    Token::new(TokenKind::RedirectErr, self.span_from(start, start_line, start_col))
+                    Token::new(
+                        TokenKind::RedirectErr,
+                        self.span_from(start, start_line, start_col),
+                    )
                 }
             }
             _ => self.read_word(),
@@ -886,10 +914,28 @@ impl<'a> Lexer<'a> {
 
         // Scan for any word terminator (except =, which is handled specially)
         for (i, &b) in bytes.iter().enumerate() {
-            if matches!(b,
-                b' ' | b'\t' | b'\n' | b'\r' | b';' | b'|' | b'&' |
-                b'<' | b'>' | b'(' | b')' | b'{' | b'}' |
-                b'[' | b']' | b'#' | b'"' | b'\'' | b'`' | b'$' | b','
+            if matches!(
+                b,
+                b' ' | b'\t'
+                    | b'\n'
+                    | b'\r'
+                    | b';'
+                    | b'|'
+                    | b'&'
+                    | b'<'
+                    | b'>'
+                    | b'('
+                    | b')'
+                    | b'{'
+                    | b'}'
+                    | b'['
+                    | b']'
+                    | b'#'
+                    | b'"'
+                    | b'\''
+                    | b'`'
+                    | b'$'
+                    | b','
             ) {
                 return i;
             }
@@ -897,7 +943,6 @@ impl<'a> Lexer<'a> {
 
         bytes.len()
     }
-
 }
 
 #[cfg(test)]
@@ -975,4 +1020,3 @@ mod tests {
         assert!(matches!(tokens[3].kind, TokenKind::Then));
     }
 }
-

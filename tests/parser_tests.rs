@@ -168,7 +168,8 @@ fn test_parse_if_then_else_fi() {
 
 #[test]
 fn test_parse_if_elif_else_fi() {
-    let mut parser = Parser::from_str("if false; then echo a; elif true; then echo b; else echo c; fi").unwrap();
+    let mut parser =
+        Parser::from_str("if false; then echo a; elif true; then echo b; else echo c; fi").unwrap();
     let result = parser.parse_program();
     assert!(result.is_ok());
 }

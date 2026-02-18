@@ -139,10 +139,18 @@ pub fn fsh_cache_dir() -> PathBuf {
 }
 
 // Backward compatibility aliases
-pub fn jsh_config_dir() -> PathBuf { fsh_config_dir() }
-pub fn jsh_data_dir() -> PathBuf { fsh_data_dir() }
-pub fn jsh_state_dir() -> PathBuf { fsh_state_dir() }
-pub fn jsh_cache_dir() -> PathBuf { fsh_cache_dir() }
+pub fn jsh_config_dir() -> PathBuf {
+    fsh_config_dir()
+}
+pub fn jsh_data_dir() -> PathBuf {
+    fsh_data_dir()
+}
+pub fn jsh_state_dir() -> PathBuf {
+    fsh_state_dir()
+}
+pub fn jsh_cache_dir() -> PathBuf {
+    fsh_cache_dir()
+}
 
 /// Get default history file path (XDG-compliant)
 /// Uses $XDG_STATE_HOME/fsh/history, falls back to legacy paths if they exist
@@ -459,7 +467,8 @@ fn highlight_word(word: &str) -> String {
         "cd", "pwd", "echo", "printf", "test", "[", "true", "false", ":", "exit", "return",
         "source", ".", "eval", "exec", "set", "unset", "export", "alias", "unalias", "type",
         "which", "command", "builtin", "help", "read", "jobs", "fg", "bg", "wait", "kill", "trap",
-        "umask", "ulimit", "pushd", "popd", "dirs", "history", "hash", "getopts", "enable", "shopt",
+        "umask", "ulimit", "pushd", "popd", "dirs", "history", "hash", "getopts", "enable",
+        "shopt",
     ];
 
     if KEYWORDS.contains(&word) {
@@ -580,7 +589,8 @@ impl Shell {
     fn check_ssh_agent_config(&mut self) {
         // Check if user enabled ssh-agent via environment variable
         if let Some(val) = self.interpreter.get_var("FSH_SSH_AGENT_AUTO_START") {
-            self.config.ssh_agent_auto_start = matches!(val.to_lowercase().as_str(), "1" | "true" | "yes" | "on");
+            self.config.ssh_agent_auto_start =
+                matches!(val.to_lowercase().as_str(), "1" | "true" | "yes" | "on");
         }
 
         // Check for custom socket path
@@ -609,8 +619,10 @@ impl Shell {
             if custom_sock.exists() {
                 // SAFETY: We're setting environment variables in a single-threaded initialization context
                 unsafe { std::env::set_var("SSH_AUTH_SOCK", custom_sock) };
-                self.interpreter.set_var("SSH_AUTH_SOCK", &custom_sock.to_string_lossy());
-                self.interpreter.export_var("SSH_AUTH_SOCK", Some(&custom_sock.to_string_lossy()));
+                self.interpreter
+                    .set_var("SSH_AUTH_SOCK", &custom_sock.to_string_lossy());
+                self.interpreter
+                    .export_var("SSH_AUTH_SOCK", Some(&custom_sock.to_string_lossy()));
                 return;
             }
         }
@@ -776,7 +788,9 @@ impl Shell {
                     }
 
                     // Set the environment variable
-                    self.interpreter.env.insert(key.to_string(), value.to_string());
+                    self.interpreter
+                        .env
+                        .insert(key.to_string(), value.to_string());
                     // SAFETY: Single-threaded shell environment setup
                     unsafe { std::env::set_var(key, value) };
                 }
@@ -794,12 +808,7 @@ impl Shell {
         if let Ok(entries) = std::fs::read_dir(&path) {
             let mut files: Vec<_> = entries
                 .filter_map(|e| e.ok())
-                .filter(|e| {
-                    e.path()
-                        .extension()
-                        .map(|ext| ext == "sh")
-                        .unwrap_or(false)
-                })
+                .filter(|e| e.path().extension().map(|ext| ext == "sh").unwrap_or(false))
                 .collect();
 
             // Sort for consistent ordering
@@ -854,8 +863,11 @@ impl Shell {
         let path = PathBuf::from(path);
         if path.exists() && path.is_file() {
             // Check if file is readable
-            if std::fs::metadata(&path).map(|m| !m.permissions().readonly()).unwrap_or(false) ||
-               std::fs::read_to_string(&path).is_ok() {
+            if std::fs::metadata(&path)
+                .map(|m| !m.permissions().readonly())
+                .unwrap_or(false)
+                || std::fs::read_to_string(&path).is_ok()
+            {
                 let _ = self.interpreter.run_script(&path.to_string_lossy());
             }
         }
@@ -870,7 +882,11 @@ impl Shell {
     /// Generate the prompt string using the theme system
     fn generate_prompt(&self) -> String {
         let home = self.interpreter.get_var("HOME").unwrap_or("").to_string();
-        let user = self.interpreter.get_var("USER").unwrap_or("user").to_string();
+        let user = self
+            .interpreter
+            .get_var("USER")
+            .unwrap_or("user")
+            .to_string();
         let host = hostname::get()
             .map(|h| h.to_string_lossy().to_string())
             .unwrap_or_else(|_| "localhost".to_string());
@@ -896,7 +912,11 @@ impl Shell {
     #[allow(dead_code)]
     fn generate_rprompt(&self) -> Option<String> {
         let home = self.interpreter.get_var("HOME").unwrap_or("").to_string();
-        let user = self.interpreter.get_var("USER").unwrap_or("user").to_string();
+        let user = self
+            .interpreter
+            .get_var("USER")
+            .unwrap_or("user")
+            .to_string();
         let host = hostname::get()
             .map(|h| h.to_string_lossy().to_string())
             .unwrap_or_else(|_| "localhost".to_string());
@@ -949,7 +969,8 @@ impl Shell {
             env!("CARGO_PKG_VERSION")
         );
         println!("Type {} for available commands", "help".yellow());
-        println!("Current theme: {} (use {} to list themes)\n",
+        println!(
+            "Current theme: {} (use {} to list themes)\n",
             self.config.theme_name.cyan(),
             "theme list".yellow()
         );
@@ -1059,7 +1080,11 @@ impl Shell {
             Some("list") | Some("ls") => {
                 println!("{}", "Available themes:".cyan().bold());
                 for theme in self.list_themes() {
-                    let marker = if theme == self.config.theme_name { "* " } else { "  " };
+                    let marker = if theme == self.config.theme_name {
+                        "* "
+                    } else {
+                        "  "
+                    };
                     println!("{}{}", marker.green(), theme);
                 }
             }

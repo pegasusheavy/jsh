@@ -1,8 +1,8 @@
 //! Unit tests for the shell module
 
+use franken_shell::Shell;
 use franken_shell::shell::{fsh_cache_dir, fsh_config_dir, fsh_data_dir, fsh_state_dir};
 use franken_shell::shell::{xdg_cache_home, xdg_config_home, xdg_data_home, xdg_state_home};
-use franken_shell::Shell;
 
 #[test]
 fn test_shell_new() {

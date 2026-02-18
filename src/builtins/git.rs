@@ -470,14 +470,7 @@ pub fn builtin_git_info(args: &[String], interp: &mut Interpreter) -> Result<Exi
             "root" => root.clone(),
             "dirty" => if is_dirty { "true" } else { "false" }.to_string(),
             "staged" => if has_staged { "true" } else { "false" }.to_string(),
-            "untracked" => {
-                if has_untracked {
-                    "true"
-                } else {
-                    "false"
-                }
-                .to_string()
-            }
+            "untracked" => if has_untracked { "true" } else { "false" }.to_string(),
             "ahead" => ahead.to_string(),
             "behind" => behind.to_string(),
             "tag" => tag.clone(),
@@ -681,4 +674,3 @@ pub fn builtin_in_git_repo(args: &[String], interp: &mut Interpreter) -> Result<
         Ok(ExitStatus::failure(1))
     }
 }
-

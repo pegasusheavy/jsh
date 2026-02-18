@@ -84,10 +84,7 @@ impl Parser {
     /// Advance and return the consumed token
     pub(crate) fn advance(&mut self) -> Token {
         if self.pos < self.tokens.len() {
-            let token = std::mem::replace(
-                &mut self.tokens[self.pos],
-                EOF_TOKEN.clone(),
-            );
+            let token = std::mem::replace(&mut self.tokens[self.pos], EOF_TOKEN.clone());
             self.pos += 1;
             token
         } else {
@@ -131,7 +128,9 @@ impl Parser {
     #[allow(dead_code)]
     pub(crate) fn check_any(&self, kinds: &[TokenKind]) -> bool {
         let current = self.peek_kind();
-        kinds.iter().any(|k| std::mem::discriminant(current) == std::mem::discriminant(k))
+        kinds
+            .iter()
+            .any(|k| std::mem::discriminant(current) == std::mem::discriminant(k))
     }
 
     pub(crate) fn skip_newlines(&mut self) {
@@ -317,8 +316,7 @@ impl Parser {
                     || matches!(
                         self.peek().kind,
                         TokenKind::String(_) | TokenKind::Number(_)
-                    )
-                {
+                    ) {
                     Some(self.parse_word()?)
                 } else {
                     None
@@ -483,7 +481,7 @@ impl Parser {
                 | TokenKind::Assign    // = as word (for test string comparison)
                 | TokenKind::Not       // ! as word (for test negation)
                 | TokenKind::Ne        // != as word (for test)
-                | TokenKind::Eq        // == as word (for test)
+                | TokenKind::Eq // == as word (for test)
         )
     }
 
@@ -592,4 +590,3 @@ impl Parser {
         })
     }
 }
-

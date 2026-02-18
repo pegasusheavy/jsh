@@ -148,7 +148,8 @@ impl Interpreter {
             } else if let Some(pos) = expr.find(op_str) {
                 let var = expr[..pos].trim();
                 if is_valid_var_name(var) {
-                    let current = self.get_var(var)
+                    let current = self
+                        .get_var(var)
                         .and_then(|v| v.parse::<i64>().ok())
                         .unwrap_or(0);
                     let value = self.eval_arithmetic_uncached(&expr[pos + op_str.len()..])?;
@@ -260,7 +261,11 @@ impl Interpreter {
             let left = self.eval_arithmetic_uncached(&expr[..pos])?;
             let op = expr.as_bytes()[pos] as char;
             let right = self.eval_arithmetic_uncached(&expr[pos + 1..])?;
-            return Ok(if op == '+' { left + right } else { left - right });
+            return Ok(if op == '+' {
+                left + right
+            } else {
+                left - right
+            });
         }
 
         // Handle multiplication, division, modulo
@@ -317,9 +322,11 @@ impl Interpreter {
         if expr.starts_with("++") {
             let var = expr[2..].trim();
             if is_valid_var_name(var) {
-                let value = self.get_var(var)
+                let value = self
+                    .get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
-                    .unwrap_or(0) + 1;
+                    .unwrap_or(0)
+                    + 1;
                 self.set_var(var, &value.to_string());
                 return Ok(value);
             }
@@ -327,9 +334,11 @@ impl Interpreter {
         if expr.starts_with("--") {
             let var = expr[2..].trim();
             if is_valid_var_name(var) {
-                let value = self.get_var(var)
+                let value = self
+                    .get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
-                    .unwrap_or(0) - 1;
+                    .unwrap_or(0)
+                    - 1;
                 self.set_var(var, &value.to_string());
                 return Ok(value);
             }
@@ -339,7 +348,8 @@ impl Interpreter {
         if expr.ends_with("++") {
             let var = expr[..expr.len() - 2].trim();
             if is_valid_var_name(var) {
-                let value = self.get_var(var)
+                let value = self
+                    .get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
                     .unwrap_or(0);
                 self.set_var(var, &(value + 1).to_string());
@@ -349,7 +359,8 @@ impl Interpreter {
         if expr.ends_with("--") {
             let var = expr[..expr.len() - 2].trim();
             if is_valid_var_name(var) {
-                let value = self.get_var(var)
+                let value = self
+                    .get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
                     .unwrap_or(0);
                 self.set_var(var, &(value - 1).to_string());
@@ -365,14 +376,16 @@ impl Interpreter {
         // Handle variables
         if expr.starts_with('$') {
             let var = &expr[1..];
-            return Ok(self.get_var(var)
+            return Ok(self
+                .get_var(var)
                 .and_then(|v| v.parse::<i64>().ok())
                 .unwrap_or(0));
         }
 
         // Handle bare variable names
         if is_valid_var_name(expr) {
-            return Ok(self.get_var(expr)
+            return Ok(self
+                .get_var(expr)
                 .and_then(|v| v.parse::<i64>().ok())
                 .unwrap_or(0));
         }
@@ -469,7 +482,22 @@ fn find_assignment_equals(expr: &str) -> Option<usize> {
                 // Check it's not ==, !=, <=, >=, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=
                 let prev = if i > 0 { bytes[i - 1] } else { 0 };
                 let next = if i + 1 < bytes.len() { bytes[i + 1] } else { 0 };
-                if next != b'=' && !matches!(prev, b'=' | b'!' | b'<' | b'>' | b'+' | b'-' | b'*' | b'/' | b'%' | b'&' | b'|' | b'^') {
+                if next != b'='
+                    && !matches!(
+                        prev,
+                        b'=' | b'!'
+                            | b'<'
+                            | b'>'
+                            | b'+'
+                            | b'-'
+                            | b'*'
+                            | b'/'
+                            | b'%'
+                            | b'&'
+                            | b'|'
+                            | b'^'
+                    )
+                {
                     return Some(i);
                 }
             }
@@ -504,7 +532,25 @@ fn find_top_level_additive(expr: &str) -> Option<usize> {
                     continue;
                 }
                 // Skip if previous char indicates unary (operator or start)
-                if matches!(prev, b'(' | b',' | b'?' | b':' | b'<' | b'>' | b'=' | b'!' | b'&' | b'|' | b'^' | b'~' | b'+' | b'-' | b'*' | b'/' | b'%') {
+                if matches!(
+                    prev,
+                    b'(' | b','
+                        | b'?'
+                        | b':'
+                        | b'<'
+                        | b'>'
+                        | b'='
+                        | b'!'
+                        | b'&'
+                        | b'|'
+                        | b'^'
+                        | b'~'
+                        | b'+'
+                        | b'-'
+                        | b'*'
+                        | b'/'
+                        | b'%'
+                ) {
                     continue;
                 }
                 return Some(i);
@@ -544,4 +590,3 @@ fn find_top_level_multiplicative(expr: &str) -> Option<usize> {
     }
     None
 }
-

@@ -2,7 +2,7 @@
 //!
 //! Provides non-blocking I/O for pipeline stages and background jobs.
 
-use crossbeam_channel::{bounded, Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, bounded};
 use std::io::{BufRead, BufReader, Read, Write};
 use std::process::{Child, ChildStderr, ChildStdout, Stdio};
 use std::thread::{self, JoinHandle};
@@ -68,17 +68,15 @@ impl AsyncCommand {
         // Spawn process waiter thread
         let wait_thread = {
             let tx_wait = tx;
-            Some(thread::spawn(move || {
-                match child.wait() {
-                    Ok(status) => {
-                        let code = status.code().unwrap_or(-1);
-                        let _ = tx_wait.send(CommandOutput::Done(code));
-                        code
-                    }
-                    Err(e) => {
-                        let _ = tx_wait.send(CommandOutput::Error(e.to_string()));
-                        -1
-                    }
+            Some(thread::spawn(move || match child.wait() {
+                Ok(status) => {
+                    let code = status.code().unwrap_or(-1);
+                    let _ = tx_wait.send(CommandOutput::Done(code));
+                    code
+                }
+                Err(e) => {
+                    let _ = tx_wait.send(CommandOutput::Error(e.to_string()));
+                    -1
                 }
             }))
         };
@@ -227,9 +225,9 @@ impl Write for ChannelWriter {
     fn flush(&mut self) -> std::io::Result<()> {
         if !self.buffer.is_empty() {
             let data = std::mem::take(&mut self.buffer);
-            self.tx
-                .send(data)
-                .map_err(|_| std::io::Error::new(std::io::ErrorKind::BrokenPipe, "channel closed"))?;
+            self.tx.send(data).map_err(|_| {
+                std::io::Error::new(std::io::ErrorKind::BrokenPipe, "channel closed")
+            })?;
         }
         Ok(())
     }
@@ -337,4 +335,3 @@ mod tests {
         assert!(stderr.is_empty());
     }
 }
-

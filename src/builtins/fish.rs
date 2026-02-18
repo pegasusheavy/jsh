@@ -641,7 +641,19 @@ fn find_top_level_op(expr: &str, ops: &[char]) -> Option<usize> {
             ')' => depth -= 1,
             c if depth == 0 && ops.contains(&c) => {
                 // Skip if this is part of a number (e.g., -5)
-                if c == '-' && (i == 0 || matches!(chars.get(i - 1), Some(&'(') | Some(&'+') | Some(&'-') | Some(&'*') | Some(&'/') | Some(&'%') | Some(&'^'))) {
+                if c == '-'
+                    && (i == 0
+                        || matches!(
+                            chars.get(i - 1),
+                            Some(&'(')
+                                | Some(&'+')
+                                | Some(&'-')
+                                | Some(&'*')
+                                | Some(&'/')
+                                | Some(&'%')
+                                | Some(&'^')
+                        ))
+                {
                     continue;
                 }
                 return Some(i);
@@ -651,4 +663,3 @@ fn find_top_level_op(expr: &str, ops: &[char]) -> Option<usize> {
     }
     None
 }
-

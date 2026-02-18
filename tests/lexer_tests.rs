@@ -173,21 +173,33 @@ fn test_lexer_ampersand() {
 fn test_lexer_redirect_out() {
     let mut lexer = Lexer::new("cmd > file");
     let tokens = lexer.tokenize().unwrap();
-    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::RedirectOut)));
+    assert!(
+        tokens
+            .iter()
+            .any(|t| matches!(t.kind, TokenKind::RedirectOut))
+    );
 }
 
 #[test]
 fn test_lexer_redirect_in() {
     let mut lexer = Lexer::new("cmd < file");
     let tokens = lexer.tokenize().unwrap();
-    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::RedirectIn)));
+    assert!(
+        tokens
+            .iter()
+            .any(|t| matches!(t.kind, TokenKind::RedirectIn))
+    );
 }
 
 #[test]
 fn test_lexer_redirect_append() {
     let mut lexer = Lexer::new("cmd >> file");
     let tokens = lexer.tokenize().unwrap();
-    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::RedirectAppend)));
+    assert!(
+        tokens
+            .iter()
+            .any(|t| matches!(t.kind, TokenKind::RedirectAppend))
+    );
 }
 
 #[test]
@@ -236,7 +248,10 @@ fn test_lexer_keyword_for() {
     let tokens = lexer.tokenize().unwrap();
     assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::For)));
     // "in" might be recognized as Word in some contexts, so check for both
-    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::In) || matches!(&t.kind, TokenKind::Word(s) if s == "in")));
+    assert!(
+        tokens.iter().any(|t| matches!(t.kind, TokenKind::In)
+            || matches!(&t.kind, TokenKind::Word(s) if s == "in"))
+    );
     assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::Do)));
     assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::Done)));
 }
@@ -254,7 +269,8 @@ fn test_lexer_keyword_case() {
     let tokens = lexer.tokenize().unwrap();
     assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::Case)));
     // esac might be recognized as Word in some contexts
-    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::Esac) || matches!(&t.kind, TokenKind::Word(s) if s == "esac")));
+    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::Esac)
+        || matches!(&t.kind, TokenKind::Word(s) if s == "esac")));
 }
 
 #[test]
@@ -346,7 +362,10 @@ fn test_lexer_complex_pipeline() {
     let tokens = lexer.tokenize().unwrap();
     assert!(tokens.len() > 1);
     // Should have 2 pipes
-    let pipe_count = tokens.iter().filter(|t| matches!(t.kind, TokenKind::Pipe)).count();
+    let pipe_count = tokens
+        .iter()
+        .filter(|t| matches!(t.kind, TokenKind::Pipe))
+        .count();
     assert_eq!(pipe_count, 2);
 }
 
@@ -378,14 +397,19 @@ fn test_lexer_equals_sign() {
     let mut lexer = Lexer::new("test x = y");
     let tokens = lexer.tokenize().unwrap();
     // The = should be tokenized
-    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::Assign) || matches!(&t.kind, TokenKind::Word(s) if s == "=")));
+    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::Assign)
+        || matches!(&t.kind, TokenKind::Word(s) if s == "=")));
 }
 
 #[test]
 fn test_lexer_double_semicolon() {
     let mut lexer = Lexer::new("case a in x) echo x;; esac");
     let tokens = lexer.tokenize().unwrap();
-    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::DoubleSemi)));
+    assert!(
+        tokens
+            .iter()
+            .any(|t| matches!(t.kind, TokenKind::DoubleSemi))
+    );
 }
 
 #[test]

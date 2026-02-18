@@ -346,7 +346,10 @@ impl Window {
         }
 
         // Reassign IDs
-        let panes: Vec<_> = ids.iter().map(|id| self.panes.remove(id).unwrap()).collect();
+        let panes: Vec<_> = ids
+            .iter()
+            .map(|id| self.panes.remove(id).unwrap())
+            .collect();
 
         let new_ids: Vec<usize> = self.panes.keys().cloned().collect();
         for (i, pane) in panes.into_iter().enumerate() {
@@ -371,19 +374,22 @@ impl Window {
         let mut panes: Vec<_> = self.panes.iter().collect();
         panes.sort_by_key(|(id, _)| *id);
 
-        panes.into_iter().map(|(id, pane)| {
-            let p = pane.lock().unwrap();
-            PaneInfo {
-                id: *id,
-                active: *id == self.active_pane,
-                width: p.width,
-                height: p.height,
-                x: p.x,
-                y: p.y,
-                title: p.title.clone(),
-                current_command: p.current_command.clone(),
-            }
-        }).collect()
+        panes
+            .into_iter()
+            .map(|(id, pane)| {
+                let p = pane.lock().unwrap();
+                PaneInfo {
+                    id: *id,
+                    active: *id == self.active_pane,
+                    width: p.width,
+                    height: p.height,
+                    x: p.x,
+                    y: p.y,
+                    title: p.title.clone(),
+                    current_command: p.current_command.clone(),
+                }
+            })
+            .collect()
     }
 
     /// Resize pane
@@ -418,7 +424,13 @@ impl Window {
 
     /// Next layout
     pub fn next_layout(&mut self) {
-        let layouts = ["even-horizontal", "even-vertical", "main-horizontal", "main-vertical", "tiled"];
+        let layouts = [
+            "even-horizontal",
+            "even-vertical",
+            "main-horizontal",
+            "main-vertical",
+            "tiled",
+        ];
         let current = layouts.iter().position(|&l| l == self.layout).unwrap_or(0);
         let next = (current + 1) % layouts.len();
         self.set_layout(layouts[next]);
@@ -441,8 +453,11 @@ pub struct PaneInfo {
 impl std::fmt::Display for PaneInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let marker = if self.active { "*" } else { " " };
-        write!(f, "{}:{} [{}x{}] [{},{}]",
-            self.id, marker, self.width, self.height, self.x, self.y)
+        write!(
+            f,
+            "{}:{} [{}x{}] [{},{}]",
+            self.id, marker, self.width, self.height, self.x, self.y
+        )
     }
 }
 
@@ -461,13 +476,27 @@ pub struct WindowFlags {
 impl WindowFlags {
     pub fn to_string(&self) -> String {
         let mut flags = String::new();
-        if self.activity { flags.push('!'); }
-        if self.bell { flags.push('#'); }
-        if self.silence { flags.push('~'); }
-        if self.zoomed { flags.push('Z'); }
-        if self.last { flags.push('-'); }
-        if self.linked { flags.push('L'); }
-        if self.marked { flags.push('M'); }
+        if self.activity {
+            flags.push('!');
+        }
+        if self.bell {
+            flags.push('#');
+        }
+        if self.silence {
+            flags.push('~');
+        }
+        if self.zoomed {
+            flags.push('Z');
+        }
+        if self.last {
+            flags.push('-');
+        }
+        if self.linked {
+            flags.push('L');
+        }
+        if self.marked {
+            flags.push('M');
+        }
         flags
     }
 }
@@ -552,4 +581,3 @@ fn terminal_size() -> (u16, u16) {
     // Default fallback
     (80, 24)
 }
-

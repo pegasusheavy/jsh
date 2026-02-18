@@ -64,7 +64,8 @@ impl GitInfo {
                     .output()
                 {
                     if output.status.success() {
-                        info.commit_short = Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
+                        info.commit_short =
+                            Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
                     }
                 }
             }
@@ -227,7 +228,8 @@ pub fn expand_prompt(prompt: &str, ctx: &PromptContext) -> String {
                             }
                         }
                         let path = ctx.pwd_tilde();
-                        let components: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+                        let components: Vec<&str> =
+                            path.split('/').filter(|s| !s.is_empty()).collect();
                         let start = components.len().saturating_sub(num);
                         result.push_str(&components[start..].join("/"));
                     }
@@ -374,7 +376,7 @@ pub fn expand_prompt(prompt: &str, ctx: &PromptContext) -> String {
                     't' => result.push('\t'),
                     'e' | 'E' => result.push('\x1b'),
                     '[' => result.push_str("\x1b["), // Start color sequence
-                    ']' => {}, // End color sequence (for bash length calc)
+                    ']' => {}                        // End color sequence (for bash length calc)
                     'u' => result.push_str(ctx.user),
                     'h' => {
                         if let Some(dot_pos) = ctx.host.find('.') {
@@ -425,18 +427,30 @@ fn expand_conditional(cond: &str, ctx: &PromptContext) -> String {
     let result_text = match condition {
         "?" => {
             // %(?.true.false) - based on exit status
-            if ctx.last_status == 0 { true_text } else { false_text }
+            if ctx.last_status == 0 {
+                true_text
+            } else {
+                false_text
+            }
         }
         "#" => {
             // %(#.true.false) - root check
-            if ctx.user == "root" { true_text } else { false_text }
+            if ctx.user == "root" {
+                true_text
+            } else {
+                false_text
+            }
         }
         _ => {
             // Check for number comparison like "1?"
             if condition.ends_with('?') {
-                let num_str = &condition[..condition.len()-1];
+                let num_str = &condition[..condition.len() - 1];
                 if let Ok(num) = num_str.parse::<i32>() {
-                    if ctx.last_status == num { true_text } else { false_text }
+                    if ctx.last_status == num {
+                        true_text
+                    } else {
+                        false_text
+                    }
                 } else {
                     false_text
                 }
@@ -514,7 +528,9 @@ pub fn git_prompt_info(git: &GitInfo, format: &str) -> String {
         return String::new();
     }
 
-    let branch = git.branch.as_ref()
+    let branch = git
+        .branch
+        .as_ref()
         .or(git.commit_short.as_ref())
         .map(|s| s.as_str())
         .unwrap_or("unknown");
@@ -526,12 +542,20 @@ pub fn git_prompt_info(git: &GitInfo, format: &str) -> String {
     result = result.replace("%b", branch);
 
     // Dirty indicator
-    let dirty = if git.is_dirty || git.has_staged { "✗" } else { "" };
+    let dirty = if git.is_dirty || git.has_staged {
+        "✗"
+    } else {
+        ""
+    };
     result = result.replace("$(git_prompt_dirty)", dirty);
     result = result.replace("%d", dirty);
 
     // Clean indicator
-    let clean = if !git.is_dirty && !git.has_staged { "✓" } else { "" };
+    let clean = if !git.is_dirty && !git.has_staged {
+        "✓"
+    } else {
+        ""
+    };
     result = result.replace("$(git_prompt_clean)", clean);
 
     // Untracked indicator
@@ -539,13 +563,22 @@ pub fn git_prompt_info(git: &GitInfo, format: &str) -> String {
     result = result.replace("%u", untracked);
 
     // Ahead/behind
-    let ahead = if git.ahead > 0 { format!("↑{}", git.ahead) } else { String::new() };
-    let behind = if git.behind > 0 { format!("↓{}", git.behind) } else { String::new() };
+    let ahead = if git.ahead > 0 {
+        format!("↑{}", git.ahead)
+    } else {
+        String::new()
+    };
+    let behind = if git.behind > 0 {
+        format!("↓{}", git.behind)
+    } else {
+        String::new()
+    };
     result = result.replace("%a", &ahead);
     result = result.replace("%A", &behind);
 
     // Status symbols
-    let status = format!("{}{}{}",
+    let status = format!(
+        "{}{}{}",
         if git.has_staged { "●" } else { "" },
         if git.is_dirty { "✚" } else { "" },
         if git.has_untracked { "…" } else { "" }
@@ -1701,7 +1734,10 @@ impl ThemeManager {
             self.current_theme = theme;
             Ok(())
         } else {
-            Err(crate::error::JshError::runtime(format!("Theme '{}' not found", name)))
+            Err(crate::error::JshError::runtime(format!(
+                "Theme '{}' not found",
+                name
+            )))
         }
     }
 
@@ -1740,4 +1776,3 @@ impl ThemeManager {
         })
     }
 }
-

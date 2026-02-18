@@ -142,9 +142,7 @@ pub fn arena_str(s: &str) -> String {
 /// Get the current allocated bytes in the parse arena
 #[inline]
 pub fn arena_allocated_bytes() -> usize {
-    PARSE_ARENA.with(|arena| {
-        arena.borrow().allocated_bytes()
-    })
+    PARSE_ARENA.with(|arena| arena.borrow().allocated_bytes())
 }
 
 /// A pool for reusing String allocations
@@ -322,4 +320,3 @@ mod tests {
         // Note: Bump arena keeps its capacity, so we just verify reset doesn't panic
     }
 }
-

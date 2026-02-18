@@ -162,7 +162,9 @@ impl Interpreter {
                 if self.functions.contains_key(name) {
                     let word_args: Vec<crate::ast::Word> = args
                         .iter()
-                        .map(|a| crate::ast::Word::literal(a.clone(), crate::token::Span::default()))
+                        .map(|a| {
+                            crate::ast::Word::literal(a.clone(), crate::token::Span::default())
+                        })
                         .collect();
                     self.call_function(name, &word_args)?;
                     return Ok(None);
@@ -201,16 +203,14 @@ impl Interpreter {
                 self.call_function(name, args)?;
                 Ok(None)
             }
-            CommandKind::Coproc { name: _, command } => self.spawn_ast_command(command, stdin, stdout),
+            CommandKind::Coproc { name: _, command } => {
+                self.spawn_ast_command(command, stdin, stdout)
+            }
         }
     }
 
     /// Set up redirections for a command
-    fn setup_redirects(
-        &self,
-        cmd: &mut ProcessCommand,
-        redirects: &[Redirect],
-    ) -> Result<()> {
+    fn setup_redirects(&self, cmd: &mut ProcessCommand, redirects: &[Redirect]) -> Result<()> {
         for redirect in redirects {
             match &redirect.kind {
                 RedirectKind::Output | RedirectKind::Clobber => {
@@ -229,10 +229,7 @@ impl Interpreter {
                 RedirectKind::Append => {
                     if let RedirectTarget::File(path) = &redirect.target {
                         let path = self.expand_word(path)?;
-                        let file = OpenOptions::new()
-                            .create(true)
-                            .append(true)
-                            .open(&path)?;
+                        let file = OpenOptions::new().create(true).append(true).open(&path)?;
                         let fd = redirect.fd.unwrap_or(1);
                         match fd {
                             1 => cmd.stdout(unsafe { Stdio::from_raw_fd(file.as_raw_fd()) }),
@@ -326,4 +323,3 @@ impl Interpreter {
         Ok(())
     }
 }
-

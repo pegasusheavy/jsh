@@ -1,6 +1,8 @@
 //! Plugin manager module tests
 
-use franken_shell::plugins::{Plugin, PluginLoad, PluginSource, PluginManager, plugins_dir, omz_dir, plugin_cache_dir};
+use franken_shell::plugins::{
+    Plugin, PluginLoad, PluginManager, PluginSource, omz_dir, plugin_cache_dir, plugins_dir,
+};
 use std::path::PathBuf;
 
 // =============================================================================
@@ -180,16 +182,28 @@ fn test_plugin_manager_add() {
 #[test]
 fn test_plugin_manager_add_multiple() {
     let mut manager = PluginManager::new();
-    manager.add(Plugin::new("plugin1", PluginSource::GitHub("user/repo1".to_string())));
-    manager.add(Plugin::new("plugin2", PluginSource::GitHub("user/repo2".to_string())));
-    manager.add(Plugin::new("plugin3", PluginSource::OhMyZsh("git".to_string())));
+    manager.add(Plugin::new(
+        "plugin1",
+        PluginSource::GitHub("user/repo1".to_string()),
+    ));
+    manager.add(Plugin::new(
+        "plugin2",
+        PluginSource::GitHub("user/repo2".to_string()),
+    ));
+    manager.add(Plugin::new(
+        "plugin3",
+        PluginSource::OhMyZsh("git".to_string()),
+    ));
     assert_eq!(manager.plugins.len(), 3);
 }
 
 #[test]
 fn test_plugin_manager_plugins_accessible() {
     let mut manager = PluginManager::new();
-    manager.add(Plugin::new("my-plugin", PluginSource::GitHub("user/repo".to_string())));
+    manager.add(Plugin::new(
+        "my-plugin",
+        PluginSource::GitHub("user/repo".to_string()),
+    ));
 
     // Access via the public plugins field (HashMap)
     let plugin = manager.plugins.get("my-plugin");
@@ -209,7 +223,10 @@ fn test_plugin_manager_list_installed() {
 #[test]
 fn test_plugin_manager_generate_load_commands() {
     let mut manager = PluginManager::new();
-    manager.add(Plugin::new("plugin1", PluginSource::GitHub("user/repo1".to_string())));
+    manager.add(Plugin::new(
+        "plugin1",
+        PluginSource::GitHub("user/repo1".to_string()),
+    ));
 
     // Generate load commands
     let commands = manager.generate_load_commands();
@@ -305,13 +322,19 @@ fn test_all_plugin_loads() {
 
 #[test]
 fn test_plugin_is_installed_uninstalled() {
-    let plugin = Plugin::new("nonexistent-xyz-123", PluginSource::GitHub("user/repo".to_string()));
+    let plugin = Plugin::new(
+        "nonexistent-xyz-123",
+        PluginSource::GitHub("user/repo".to_string()),
+    );
     assert!(!plugin.is_installed());
 }
 
 #[test]
 fn test_plugin_get_source_files_uninstalled() {
-    let plugin = Plugin::new("nonexistent-xyz-123", PluginSource::GitHub("user/repo".to_string()));
+    let plugin = Plugin::new(
+        "nonexistent-xyz-123",
+        PluginSource::GitHub("user/repo".to_string()),
+    );
     let files = plugin.get_source_files();
     assert!(files.is_empty());
 }

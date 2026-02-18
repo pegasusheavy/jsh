@@ -158,4 +158,3 @@ pub fn builtin_getopts(_args: &[String], _interp: &mut Interpreter) -> Result<Ex
     // TODO: Implement getopts
     Ok(ExitStatus::failure(1))
 }
-

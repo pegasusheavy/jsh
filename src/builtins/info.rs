@@ -121,9 +121,7 @@ pub fn builtin_help(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
         println!();
         println!("Fish-compatible builtins:");
         println!("  set      - Fish-style variable assignment");
-        println!(
-            "  string   - String manipulation (length, upper, lower, split, join, replace)"
-        );
+        println!("  string   - String manipulation (length, upper, lower, split, join, replace)");
         println!("  math     - Arithmetic evaluation");
         println!("  contains - List membership test");
         println!("  status   - Shell status queries");
@@ -183,9 +181,7 @@ pub fn builtin_help(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
                     println!("Colors:");
                     println!("  %F{{color}}text%f - foreground color");
                     println!("  %K{{color}}text%k - background color");
-                    println!(
-                        "  Colors: black, red, green, yellow, blue, magenta, cyan, white"
-                    );
+                    println!("  Colors: black, red, green, yellow, blue, magenta, cyan, white");
                     println!("  Also: 0-255 for 256-color, or #RRGGBB for true color");
                     println!();
                     println!("Formatting:");
@@ -206,4 +202,3 @@ pub fn builtin_help(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
 
     Ok(ExitStatus::success())
 }
-

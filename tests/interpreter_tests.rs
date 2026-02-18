@@ -196,7 +196,9 @@ fn test_while_loop() {
 fn test_break_in_loop() {
     let mut interp = Interpreter::new();
     interp.execute_string("count=0").unwrap();
-    let result = interp.execute_string("for i in 1 2 3 4 5; do count=$((count + 1)); if [ $count -eq 2 ]; then break; fi; done");
+    let result = interp.execute_string(
+        "for i in 1 2 3 4 5; do count=$((count + 1)); if [ $count -eq 2 ]; then break; fi; done",
+    );
     assert!(result.is_ok());
     assert_eq!(interp.get_var("count"), Some("2"));
 }
@@ -206,7 +208,9 @@ fn test_continue_in_loop() {
     let mut interp = Interpreter::new();
     interp.execute_string("sum=0").unwrap();
     // Skip 2 by continuing
-    let result = interp.execute_string("for i in 1 2 3; do if [ $i -eq 2 ]; then continue; fi; sum=$((sum + i)); done");
+    let result = interp.execute_string(
+        "for i in 1 2 3; do if [ $i -eq 2 ]; then continue; fi; sum=$((sum + i)); done",
+    );
     assert!(result.is_ok());
     // sum = 1 + 3 = 4
     assert_eq!(interp.get_var("sum"), Some("4"));
@@ -226,7 +230,9 @@ fn test_function_definition() {
 #[test]
 fn test_function_call() {
     let mut interp = Interpreter::new();
-    interp.execute_string("myfunc() { result=called; }").unwrap();
+    interp
+        .execute_string("myfunc() { result=called; }")
+        .unwrap();
     let result = interp.execute_string("myfunc");
     assert!(result.is_ok());
     assert_eq!(interp.get_var("result"), Some("called"));
@@ -573,7 +579,8 @@ fn test_match_expression_parses() {
 fn test_loop_with_break() {
     let mut interp = Interpreter::new();
     interp.execute_string("count=0").unwrap();
-    let result = interp.execute_string("loop { count=$((count + 1)); if [ $count -ge 3 ]; then break; fi; }");
+    let result = interp
+        .execute_string("loop { count=$((count + 1)); if [ $count -ge 3 ]; then break; fi; }");
     assert!(result.is_ok());
     assert_eq!(interp.get_var("count"), Some("3"));
 }

@@ -1,8 +1,8 @@
 //! Tmux module tests
 
 use franken_shell::tmux::{
-    TmuxServer, TmuxConfig, Session, Window, Pane,
-    KeyBinding, KeyTable, StatusBarTheme, TmuxPluginManager,
+    KeyBinding, KeyTable, Pane, Session, StatusBarTheme, TmuxConfig, TmuxPluginManager, TmuxServer,
+    Window,
 };
 use std::path::PathBuf;
 

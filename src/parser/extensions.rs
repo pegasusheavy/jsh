@@ -181,7 +181,11 @@ impl Parser {
             stmts
         };
 
-        Ok(Statement::Loop(LoopStatement { body, span, loop_id: crate::jit::LoopId::new() }))
+        Ok(Statement::Loop(LoopStatement {
+            body,
+            span,
+            loop_id: crate::jit::LoopId::new(),
+        }))
     }
 
     /// Parse franken let binding
@@ -498,4 +502,3 @@ mod tests {
         assert!(matches!(program.statements[0], Statement::Match(_)));
     }
 }
-

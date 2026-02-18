@@ -133,7 +133,12 @@ impl Pane {
     pub fn search_forward(&mut self, pattern: &str) -> Option<usize> {
         self.search_string = Some(pattern.to_string());
 
-        for (i, line) in self.history.iter().enumerate().skip(self.scroll_position + 1) {
+        for (i, line) in self
+            .history
+            .iter()
+            .enumerate()
+            .skip(self.scroll_position + 1)
+        {
             if line.contains(pattern) {
                 self.scroll_position = i;
                 return Some(i);
@@ -291,4 +296,3 @@ impl RemainOnExit {
         }
     }
 }
-

@@ -2,12 +2,12 @@
 //!
 //! Benchmarks glob pattern matching and expansion performance.
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use std::hint::black_box;
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use franken_shell::interpreter::Interpreter;
 use franken_shell::lexer::Lexer;
 use franken_shell::parser::Parser;
 use std::fs::{self, File};
+use std::hint::black_box;
 use std::io::Write;
 use tempfile::TempDir;
 
@@ -129,8 +129,17 @@ fn bench_multiple_globs(c: &mut Criterion) {
     let patterns = [
         ("single", format!("echo {}/*.txt", path)),
         ("double", format!("echo {}/*.txt {}/*.log", path, path)),
-        ("triple", format!("echo {}/*.txt {}/*.log {}/*.dat", path, path, path)),
-        ("quad", format!("echo {}/*.txt {}/*.log {}/*.dat {}/*", path, path, path, path)),
+        (
+            "triple",
+            format!("echo {}/*.txt {}/*.log {}/*.dat", path, path, path),
+        ),
+        (
+            "quad",
+            format!(
+                "echo {}/*.txt {}/*.log {}/*.dat {}/*",
+                path, path, path, path
+            ),
+        ),
     ];
 
     for (name, cmd) in patterns.iter() {
@@ -172,14 +181,9 @@ fn bench_glob_in_loop(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("glob_loop");
 
-    let cmd = format!(
-        "for f in {}/*.txt; do echo $f; done",
-        path
-    );
+    let cmd = format!("for f in {}/*.txt; do echo $f; done", path);
 
-    group.bench_function("for_loop", |b| {
-        b.iter(|| execute_input(black_box(&cmd)))
-    });
+    group.bench_function("for_loop", |b| b.iter(|| execute_input(black_box(&cmd))));
 
     group.finish();
 }
@@ -219,4 +223,3 @@ criterion_group!(
 );
 
 criterion_main!(benches);
-

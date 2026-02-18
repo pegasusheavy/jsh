@@ -1,6 +1,6 @@
 //! Token module tests
 
-use franken_shell::token::{keyword_from_str, owned_str, Span, Token, TokenKind};
+use franken_shell::token::{Span, Token, TokenKind, keyword_from_str, owned_str};
 
 // =============================================================================
 // Span Tests

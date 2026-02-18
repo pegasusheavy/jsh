@@ -157,7 +157,7 @@ impl JitRuntime {
 impl JitRuntime {
     /// Try to JIT compile a hot loop
     pub fn try_compile_loop(&mut self, loop_id: LoopId) -> bool {
-        if let Some(compiler) = &mut self.compiler {
+        if let Some(_compiler) = &mut self.compiler {
             // In a full implementation, we would:
             // 1. Get the loop AST
             // 2. Analyze it for JIT-ability
@@ -218,4 +218,3 @@ mod tests {
         assert!(!runtime.record_loop_execution(loop_id));
     }
 }
-

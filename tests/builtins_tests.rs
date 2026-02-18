@@ -501,7 +501,9 @@ fn test_builtin_return() {
 #[test]
 fn test_builtin_return_default() {
     let mut interp = Interpreter::new();
-    interp.execute_string("test_ret() { true; return; }").unwrap();
+    interp
+        .execute_string("test_ret() { true; return; }")
+        .unwrap();
     interp.execute_string("test_ret").unwrap();
     assert_eq!(interp.last_status.code, 0);
 }
@@ -514,7 +516,9 @@ fn test_builtin_return_default() {
 fn test_builtin_break() {
     let mut interp = Interpreter::new();
     interp.execute_string("x=0").unwrap();
-    interp.execute_string("for i in 1 2 3 4 5; do x=$i; if [ $i -eq 3 ]; then break; fi; done").unwrap();
+    interp
+        .execute_string("for i in 1 2 3 4 5; do x=$i; if [ $i -eq 3 ]; then break; fi; done")
+        .unwrap();
     assert_eq!(interp.get_var("x"), Some("3"));
 }
 
@@ -523,7 +527,11 @@ fn test_builtin_continue() {
     let mut interp = Interpreter::new();
     interp.execute_string("sum=0").unwrap();
     // Skip 2 using continue
-    interp.execute_string("for i in 1 2 3; do if [ $i -eq 2 ]; then continue; fi; sum=$((sum + i)); done").unwrap();
+    interp
+        .execute_string(
+            "for i in 1 2 3; do if [ $i -eq 2 ]; then continue; fi; sum=$((sum + i)); done",
+        )
+        .unwrap();
     // 1 + 3 = 4
     assert_eq!(interp.get_var("sum"), Some("4"));
 }

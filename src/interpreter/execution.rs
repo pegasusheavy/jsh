@@ -36,7 +36,8 @@ impl Interpreter {
             Statement::Case(case_stmt) => self.execute_case(case_stmt),
             Statement::Select(select_stmt) => self.execute_select(select_stmt),
             Statement::Function(func_def) => {
-                self.functions.insert(func_def.name.clone(), func_def.clone());
+                self.functions
+                    .insert(func_def.name.clone(), func_def.clone());
                 Ok(ExitStatus::success())
             }
             Statement::Match(match_expr) => self.execute_match(match_expr),
@@ -354,4 +355,3 @@ impl Interpreter {
         result
     }
 }
-

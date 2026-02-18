@@ -205,7 +205,9 @@ fn test_scope_guard_auto_pop() {
 
     {
         let mut guard = ScopeGuard::new(&mut stack);
-        guard.stack_mut().set_local("inner", "inner_value".to_string());
+        guard
+            .stack_mut()
+            .set_local("inner", "inner_value".to_string());
         assert_eq!(guard.stack().depth(), 1);
     }
     // Guard dropped, scope automatically popped
@@ -303,7 +305,10 @@ fn test_stress_shadowing_deep_hierarchy() {
     }
 
     // Verify deepest shadow
-    assert_eq!(stack.get("shared"), Some(&format!("level_{}", DEPTH - 1)[..]));
+    assert_eq!(
+        stack.get("shared"),
+        Some(&format!("level_{}", DEPTH - 1)[..])
+    );
 
     // Pop and verify each level sees correct shadow
     for i in (0..DEPTH).rev() {
@@ -432,7 +437,8 @@ fn test_stress_interpreter_nested_function_calls() {
     let mut shell = Shell::with_options(false, false).unwrap();
 
     // Define nested functions that call each other
-    let result = shell.run_command(r#"
+    let result = shell.run_command(
+        r#"
         level1() {
             local x=1
             echo "level1 x=$x"
@@ -448,7 +454,8 @@ fn test_stress_interpreter_nested_function_calls() {
             echo "level3 x=$x"
         }
         level3
-    "#);
+    "#,
+    );
 
     // Should complete without stack issues
     assert!(result.is_ok());
@@ -461,7 +468,8 @@ fn test_stress_interpreter_deep_nested_loops() {
     let mut shell = Shell::with_options(false, false).unwrap();
 
     // Create deeply nested loops (each creates a scope)
-    let result = shell.run_command(r#"
+    let result = shell.run_command(
+        r#"
         COUNT=0
         for i in 1 2 3; do
             for j in 1 2 3; do
@@ -472,7 +480,8 @@ fn test_stress_interpreter_deep_nested_loops() {
                 done
             done
         done
-    "#);
+    "#,
+    );
 
     assert!(result.is_ok());
     // 3^4 = 81 iterations
@@ -486,7 +495,8 @@ fn test_stress_interpreter_many_local_variables() {
     let mut shell = Shell::with_options(false, false).unwrap();
 
     // Function with many local variables - test they don't interfere
-    let result = shell.run_command(r#"
+    let result = shell.run_command(
+        r#"
         many_locals() {
             local a=1
             local b=2
@@ -498,7 +508,8 @@ fn test_stress_interpreter_many_local_variables() {
         OUTER=100
         many_locals
         # OUTER should not be affected by local vars
-    "#);
+    "#,
+    );
 
     assert!(result.is_ok());
     assert_eq!(shell.interpreter.get_var("OUTER"), Some("100"));
@@ -515,10 +526,7 @@ fn test_stress_scope_guard_deeply_nested() {
         stack.push_scope();
         stack.set_local("depth", format!("{}", i));
 
-        assert_eq!(
-            stack.get("depth"),
-            Some(&format!("{}", i)[..])
-        );
+        assert_eq!(stack.get("depth"), Some(&format!("{}", i)[..]));
     }
 
     // Verify deepest value
@@ -526,10 +534,7 @@ fn test_stress_scope_guard_deeply_nested() {
 
     // Pop all scopes and verify each level
     for i in (0..DEPTH).rev() {
-        assert_eq!(
-            stack.get("depth"),
-            Some(&format!("{}", i)[..])
-        );
+        assert_eq!(stack.get("depth"), Some(&format!("{}", i)[..]));
         stack.pop_scope();
     }
 
@@ -537,4 +542,3 @@ fn test_stress_scope_guard_deeply_nested() {
     assert!(stack.is_global());
     assert_eq!(stack.get("depth"), None);
 }
-

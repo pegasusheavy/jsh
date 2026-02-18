@@ -1,9 +1,12 @@
 //! Theme module tests
 
-use franken_shell::theme::{expand_prompt, get_builtin_theme, git_prompt_info, list_builtin_themes, GitInfo, PromptContext, Theme, ThemeManager};
-use std::path::PathBuf;
 use chrono::Local;
+use franken_shell::theme::{
+    GitInfo, PromptContext, Theme, ThemeManager, expand_prompt, get_builtin_theme, git_prompt_info,
+    list_builtin_themes,
+};
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 // =============================================================================
 // Theme Structure Tests
@@ -707,7 +710,11 @@ fn test_get_builtin_theme_monokai() {
 fn test_list_builtin_themes_count() {
     let themes = list_builtin_themes();
     // We should have at least 130 themes now (with all Oh-My-ZSH themes)
-    assert!(themes.len() >= 130, "Expected at least 130 themes, got {}", themes.len());
+    assert!(
+        themes.len() >= 130,
+        "Expected at least 130 themes, got {}",
+        themes.len()
+    );
 }
 
 #[test]
@@ -715,6 +722,10 @@ fn test_all_listed_themes_exist() {
     let themes = list_builtin_themes();
     for theme_name in themes {
         let theme = get_builtin_theme(theme_name);
-        assert!(theme.is_some(), "Theme '{}' is listed but doesn't exist", theme_name);
+        assert!(
+            theme.is_some(),
+            "Theme '{}' is listed but doesn't exist",
+            theme_name
+        );
     }
 }

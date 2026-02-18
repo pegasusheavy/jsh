@@ -77,11 +77,15 @@ impl Interpreter {
     #[inline]
     fn expand_word_uncached(&self, word: &Word) -> Result<String> {
         // Pre-allocate based on estimated size
-        let estimated_size: usize = word.parts.iter().map(|p| match p {
-            WordPart::Literal(s) => s.len(),
-            WordPart::Glob(s) => s.len(),
-            _ => 16, // reasonable estimate for variable values
-        }).sum();
+        let estimated_size: usize = word
+            .parts
+            .iter()
+            .map(|p| match p {
+                WordPart::Literal(s) => s.len(),
+                WordPart::Glob(s) => s.len(),
+                _ => 16, // reasonable estimate for variable values
+            })
+            .sum();
 
         let mut result = String::with_capacity(estimated_size);
 
@@ -366,10 +370,7 @@ impl Interpreter {
     }
 
     /// Expand command substitution
-    pub(crate) fn expand_command_sub(
-        &self,
-        _stmts: &[crate::ast::Statement],
-    ) -> Result<String> {
+    pub(crate) fn expand_command_sub(&self, _stmts: &[crate::ast::Statement]) -> Result<String> {
         // This is tricky because we need a mutable self
         // In a real implementation, we'd fork and capture output
         // For now, just return empty string
@@ -620,12 +621,18 @@ impl Interpreter {
                         return Ok(if left >= right { 1 } else { 0 });
                     }
                 }
-                b'<' if depth == 0 && (i == 0 || bytes[i - 1] != b'<') && (i + 1 >= bytes.len() || bytes[i + 1] != b'=') => {
+                b'<' if depth == 0
+                    && (i == 0 || bytes[i - 1] != b'<')
+                    && (i + 1 >= bytes.len() || bytes[i + 1] != b'=') =>
+                {
                     let left = self.eval_arith_comparison(&expr[..i])?;
                     let right = self.eval_arith_additive(&expr[i + 1..])?;
                     return Ok(if left < right { 1 } else { 0 });
                 }
-                b'>' if depth == 0 && (i == 0 || bytes[i - 1] != b'>') && (i + 1 >= bytes.len() || bytes[i + 1] != b'=') => {
+                b'>' if depth == 0
+                    && (i == 0 || bytes[i - 1] != b'>')
+                    && (i + 1 >= bytes.len() || bytes[i + 1] != b'=') =>
+                {
                     let left = self.eval_arith_comparison(&expr[..i])?;
                     let right = self.eval_arith_additive(&expr[i + 1..])?;
                     return Ok(if left > right { 1 } else { 0 });
@@ -650,10 +657,27 @@ impl Interpreter {
                 b'+' | b'-' if depth == 0 => {
                     // Check it's not unary
                     let prev = bytes[i - 1];
-                    if !matches!(prev, b'(' | b'+' | b'-' | b'*' | b'/' | b'%' | b'<' | b'>' | b'=' | b'!' | b'&' | b'|') {
+                    if !matches!(
+                        prev,
+                        b'(' | b'+'
+                            | b'-'
+                            | b'*'
+                            | b'/'
+                            | b'%'
+                            | b'<'
+                            | b'>'
+                            | b'='
+                            | b'!'
+                            | b'&'
+                            | b'|'
+                    ) {
                         let left = self.eval_arith_additive(&expr[..i])?;
                         let right = self.eval_arith_multiplicative(&expr[i + 1..])?;
-                        return Ok(if bytes[i] == b'+' { left + right } else { left - right });
+                        return Ok(if bytes[i] == b'+' {
+                            left + right
+                        } else {
+                            left - right
+                        });
                     }
                 }
                 _ => {}
@@ -755,26 +779,27 @@ impl Interpreter {
         // Variable
         if expr.starts_with('$') {
             let var = &expr[1..];
-            return Ok(self.get_var(var)
-                .and_then(|v| v.parse().ok())
-                .unwrap_or(0));
+            return Ok(self.get_var(var).and_then(|v| v.parse().ok()).unwrap_or(0));
         }
 
         // Bare variable name
-        if expr.chars().next().is_some_and(|c| c.is_alphabetic() || c == '_')
+        if expr
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_alphabetic() || c == '_')
             && expr.chars().all(|c| c.is_alphanumeric() || c == '_')
         {
-            return Ok(self.get_var(expr)
-                .and_then(|v| v.parse().ok())
-                .unwrap_or(0));
+            return Ok(self.get_var(expr).and_then(|v| v.parse().ok()).unwrap_or(0));
         }
 
         // Number
         if let Some(hex) = expr.strip_prefix("0x").or_else(|| expr.strip_prefix("0X")) {
-            return i64::from_str_radix(hex, 16).map_err(|_| crate::error::JshError::Arithmetic(format!("invalid hex: {}", expr)));
+            return i64::from_str_radix(hex, 16)
+                .map_err(|_| crate::error::JshError::Arithmetic(format!("invalid hex: {}", expr)));
         }
 
-        expr.parse().map_err(|_| crate::error::JshError::Arithmetic(format!("invalid number: {}", expr)))
+        expr.parse()
+            .map_err(|_| crate::error::JshError::Arithmetic(format!("invalid number: {}", expr)))
     }
 
     /// Expand special variable
@@ -788,15 +813,33 @@ impl Interpreter {
             '-' => {
                 // Return current shell option flags (POSIX)
                 let mut flags = String::new();
-                if self.options.errexit { flags.push('e'); }
-                if self.options.nounset { flags.push('u'); }
-                if self.options.xtrace { flags.push('x'); }
-                if self.options.noexec { flags.push('n'); }
-                if self.options.allexport { flags.push('a'); }
-                if self.options.noclobber { flags.push('C'); }
-                if self.options.notify { flags.push('b'); }
-                if self.options.noglob { flags.push('f'); }
-                if atty::is(atty::Stream::Stdin) { flags.push('i'); } // interactive
+                if self.options.errexit {
+                    flags.push('e');
+                }
+                if self.options.nounset {
+                    flags.push('u');
+                }
+                if self.options.xtrace {
+                    flags.push('x');
+                }
+                if self.options.noexec {
+                    flags.push('n');
+                }
+                if self.options.allexport {
+                    flags.push('a');
+                }
+                if self.options.noclobber {
+                    flags.push('C');
+                }
+                if self.options.notify {
+                    flags.push('b');
+                }
+                if self.options.noglob {
+                    flags.push('f');
+                }
+                if atty::is(atty::Stream::Stdin) {
+                    flags.push('i');
+                } // interactive
                 flags
             }
             '_' => {
@@ -806,10 +849,7 @@ impl Interpreter {
             '0' => "fsh".to_string(),
             c @ '1'..='9' => {
                 let idx = (c as usize) - ('1' as usize);
-                self.positional_params
-                    .get(idx)
-                    .cloned()
-                    .unwrap_or_default()
+                self.positional_params.get(idx).cloned().unwrap_or_default()
             }
             _ => String::new(),
         }
@@ -837,4 +877,3 @@ impl Interpreter {
             .unwrap_or(false)
     }
 }
-

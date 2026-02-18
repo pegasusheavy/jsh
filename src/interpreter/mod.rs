@@ -419,7 +419,8 @@ impl Interpreter {
     #[inline]
     pub fn update_dynamic_vars(&mut self) {
         // Update LINENO
-        self.env.insert("LINENO".to_string(), self.lineno.to_string());
+        self.env
+            .insert("LINENO".to_string(), self.lineno.to_string());
 
         // Update _ (last argument)
         if !self.last_arg.is_empty() {
@@ -430,7 +431,9 @@ impl Interpreter {
         let random = (std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
-            .as_nanos() as u32 ^ self.shell_pid) % 32768;
+            .as_nanos() as u32
+            ^ self.shell_pid)
+            % 32768;
         self.env.insert("RANDOM".to_string(), random.to_string());
     }
 
@@ -564,4 +567,3 @@ impl Interpreter {
         self.execute_string(&contents)
     }
 }
-
