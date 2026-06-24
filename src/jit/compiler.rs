@@ -5,12 +5,11 @@
 use super::{LoopId, MAX_COMPILED_LOOPS};
 use rustc_hash::FxHashMap;
 
-use cranelift_codegen::entity::EntityRef;
 use cranelift_codegen::ir::{types, AbiParam, InstBuilder, Signature, UserFuncName};
 use cranelift_codegen::isa::CallConv;
 use cranelift_codegen::settings::{self, Configurable};
 use cranelift_codegen::Context;
-use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext, Variable};
+use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext};
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::{DataDescription, Linkage, Module};
 
@@ -43,7 +42,8 @@ impl JitCompiler {
         // Create ISA (Instruction Set Architecture) for the host
         let mut flag_builder = settings::builder();
         flag_builder.set("opt_level", "speed").map_err(|e| e.to_string())?;
-        flag_builder.set("is_pic", "true").map_err(|e| e.to_string())?;
+        // cranelift-jit requires position-independent code to be disabled.
+        flag_builder.set("is_pic", "false").map_err(|e| e.to_string())?;
 
         let isa_builder = cranelift_native::builder()
             .map_err(|e| format!("Failed to get native ISA: {}", e))?;
@@ -119,10 +119,8 @@ impl JitCompiler {
             builder.seal_block(entry_block);
 
             // Create variables
-            let var_sum = Variable::new(0);
-            let var_i = Variable::new(1);
-            builder.declare_var(var_sum, types::I64);
-            builder.declare_var(var_i, types::I64);
+            let var_sum = builder.declare_var(types::I64);
+            let var_i = builder.declare_var(types::I64);
 
             // Initialize: sum = 0, i = 1
             let zero = builder.ins().iconst(types::I64, 0);
@@ -148,7 +146,6 @@ impl JitCompiler {
                 limit,
             );
             builder.ins().brif(cond, loop_body, &[], loop_exit, &[]);
-            builder.seal_block(loop_header);
 
             // Loop body: sum += i; i++
             builder.switch_to_block(loop_body);
@@ -160,6 +157,10 @@ impl JitCompiler {
             builder.def_var(var_i, new_i);
             builder.ins().jump(loop_header, &[]);
             builder.seal_block(loop_body);
+
+            // Seal the loop header only after its back-edge predecessor
+            // (the loop body) has been added.
+            builder.seal_block(loop_header);
 
             // Loop exit: return sum
             builder.switch_to_block(loop_exit);
@@ -227,10 +228,8 @@ impl JitCompiler {
             builder.switch_to_block(entry_block);
             builder.seal_block(entry_block);
 
-            let var_acc = Variable::new(0);
-            let var_i = Variable::new(1);
-            builder.declare_var(var_acc, types::I64);
-            builder.declare_var(var_i, types::I64);
+            let var_acc = builder.declare_var(types::I64);
+            let var_i = builder.declare_var(types::I64);
 
             let init_val = builder.ins().iconst(types::I64, initial);
             let zero = builder.ins().iconst(types::I64, 0);
@@ -254,7 +253,6 @@ impl JitCompiler {
                 limit,
             );
             builder.ins().brif(cond, loop_body, &[], loop_exit, &[]);
-            builder.seal_block(loop_header);
 
             builder.switch_to_block(loop_body);
             let acc_val = builder.use_var(var_acc);
@@ -266,6 +264,10 @@ impl JitCompiler {
             builder.def_var(var_i, new_i);
             builder.ins().jump(loop_header, &[]);
             builder.seal_block(loop_body);
+
+            // Seal the loop header only after its back-edge predecessor
+            // (the loop body) has been added.
+            builder.seal_block(loop_header);
 
             builder.switch_to_block(loop_exit);
             let result = builder.use_var(var_acc);
