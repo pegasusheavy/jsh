@@ -67,8 +67,8 @@ jobs:
       - name: Run shell integration tests
         run: |
           cargo build --release
-          timeout 5 ./target/release/jsh -c 'echo "Hello from jsh"'
-          timeout 5 ./target/release/jsh -c 'for i in 1 2 3; do echo $i; done'
+          timeout 5 ./target/release/fsh -c 'echo "Hello from jsh"'
+          timeout 5 ./target/release/fsh -c 'for i in 1 2 3; do echo $i; done'
 
   fmt:
     name: Rustfmt
