@@ -121,25 +121,41 @@ impl AsyncCommand {
     }
 
     /// Collect all output into vectors
-    pub fn collect_output(self) -> (Vec<String>, Vec<String>, i32) {
+    pub fn collect_output(mut self) -> (Vec<String>, Vec<String>, i32) {
         let mut stdout_lines = Vec::new();
         let mut stderr_lines = Vec::new();
         let mut exit_code = 0;
 
+        // Drain the channel until every sender (both reader threads and the
+        // wait thread) has been dropped. We must NOT stop as soon as `Done`
+        // arrives: `child.wait()` can return before a reader thread has flushed
+        // its final line, so breaking on `Done` would race and drop output.
+        // Because the channel is bounded, we keep receiving concurrently with
+        // the reader threads (rather than joining them first, which could
+        // deadlock once a reader fills the buffer with no one draining it).
+        // The `iter()` ends naturally when all senders are gone, by which point
+        // all output has been received.
         for output in self.output_rx.iter() {
             match output {
                 CommandOutput::Stdout(line) => stdout_lines.push(line),
                 CommandOutput::Stderr(line) => stderr_lines.push(line),
-                CommandOutput::Done(code) => {
-                    exit_code = code;
-                    break;
-                }
+                CommandOutput::Done(code) => exit_code = code,
                 CommandOutput::Error(e) => {
                     stderr_lines.push(format!("Error: {}", e));
                     exit_code = -1;
-                    break;
                 }
             }
+        }
+
+        // All output drained; reap the worker threads so they don't linger.
+        if let Some(handle) = self.stdout_thread.take() {
+            let _ = handle.join();
+        }
+        if let Some(handle) = self.stderr_thread.take() {
+            let _ = handle.join();
+        }
+        if let Some(handle) = self.wait_thread.take() {
+            let _ = handle.join();
         }
 
         (stdout_lines, stderr_lines, exit_code)
