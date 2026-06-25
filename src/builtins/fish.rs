@@ -125,12 +125,12 @@ pub fn builtin_string(args: &[String], _interp: &mut Interpreter) -> Result<Exit
         "replace" => {
             // string replace [-a] PATTERN REPLACEMENT STRINGS...
             let mut all = false;
-            let mut args_iter = rest.iter();
+            let args_iter = rest.iter();
             let mut pattern = String::new();
             let mut replacement = String::new();
             let mut strings = Vec::new();
 
-            while let Some(arg) = args_iter.next() {
+            for arg in args_iter {
                 match arg.as_str() {
                     "-a" | "--all" => all = true,
                     _ if pattern.is_empty() => pattern = arg.clone(),
@@ -547,18 +547,16 @@ fn evaluate_math_with_depth(expr: &str, depth: usize) -> std::result::Result<f64
     }
 
     // Handle parentheses first (find matching pair)
-    if expr.starts_with('(') {
-        if let Some(end) = find_matching_paren(&expr) {
-            if end == expr.len() - 1 {
+    if expr.starts_with('(')
+        && let Some(end) = find_matching_paren(&expr)
+            && end == expr.len() - 1 {
                 return evaluate_math_with_depth(&expr[1..end], depth + 1);
             }
-        }
-    }
 
     // Handle addition/subtraction (lowest precedence, process right-to-left)
     // Skip operators inside parentheses
-    if let Some(pos) = find_top_level_op(&expr, &['+', '-']) {
-        if pos > 0 {
+    if let Some(pos) = find_top_level_op(&expr, &['+', '-'])
+        && pos > 0 {
             let left = evaluate_math_with_depth(&expr[..pos], depth + 1)?;
             let op = expr.chars().nth(pos).unwrap();
             let right = evaluate_math_with_depth(&expr[pos + 1..], depth + 1)?;
@@ -568,7 +566,6 @@ fn evaluate_math_with_depth(expr: &str, depth: usize) -> std::result::Result<f64
                 _ => unreachable!(),
             };
         }
-    }
 
     // Handle multiplication/division/modulo
     if let Some(pos) = find_top_level_op(&expr, &['*', '/', '%']) {

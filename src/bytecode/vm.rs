@@ -64,6 +64,7 @@ pub type VMResult<T> = std::result::Result<T, VMError>;
 
 /// Value on the VM stack
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub enum Value {
     /// String value
     String(String),
@@ -72,16 +73,12 @@ pub enum Value {
     /// Boolean value
     Bool(bool),
     /// Null/empty
+    #[default]
     Null,
     /// Array value
     Array(Vec<Value>),
 }
 
-impl Default for Value {
-    fn default() -> Self {
-        Value::Null
-    }
-}
 
 impl Value {
     /// Convert to string
@@ -139,8 +136,6 @@ struct CallFrame {
     return_ip: usize,
     /// Stack base pointer
     base_ptr: usize,
-    /// Local variables
-    locals: Vec<Value>,
 }
 
 /// Bytecode virtual machine
@@ -404,7 +399,6 @@ impl VM {
                         self.call_stack.push(CallFrame {
                             return_ip: self.ip,
                             base_ptr: self.stack.len(),
-                            locals: Vec::new(),
                         });
                         self.ip = start;
                     }

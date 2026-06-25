@@ -393,7 +393,7 @@ impl ArgParser {
         let mut help = String::new();
 
         // Usage line
-        help.push_str(&format!("{}", self.name));
+        help.push_str(&self.name.to_string());
         if !self.description.is_empty() {
             help.push_str(&format!(" - {}", self.description));
         }
@@ -443,7 +443,7 @@ impl ArgParser {
 
             for arg in flags {
                 let short = arg.short.as_ref().map(|s| format!("{}, ", s)).unwrap_or_default();
-                let long = arg.long.as_ref().map(|s| s.as_str()).unwrap_or("");
+                let long = arg.long.as_deref().unwrap_or("");
                 help.push_str(&format!("  {}{:<12}  {}\n", short, long, arg.help));
             }
             help.push('\n');
@@ -453,7 +453,7 @@ impl ArgParser {
             help.push_str("Options:\n");
             for arg in options {
                 let short = arg.short.as_ref().map(|s| format!("{}, ", s)).unwrap_or_default();
-                let long = arg.long.as_ref().map(|s| s.as_str()).unwrap_or("");
+                let long = arg.long.as_deref().unwrap_or("");
                 let required = if arg.required { " (required)" } else { "" };
                 help.push_str(&format!("  {}{:<12}  {}{}\n", short, long, arg.help, required));
             }
@@ -737,8 +737,8 @@ pub fn quick_parse(args: &[String]) -> (HashMap<String, bool>, HashMap<String, S
             let key = parts[0][2..].to_string();
             let value = parts[1].to_string();
             options.insert(key, value);
-        } else if arg.starts_with("--") {
-            let key = arg[2..].to_string();
+        } else if let Some(key) = arg.strip_prefix("--") {
+            let key = key.to_string();
             // Check if next arg is a value
             if i + 1 < args.len() && !args[i + 1].starts_with('-') {
                 options.insert(key, args[i + 1].clone());

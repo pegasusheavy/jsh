@@ -171,8 +171,8 @@ impl Interpreter {
                 continue;
             }
 
-            if let Ok(num) = input.parse::<usize>() {
-                if num > 0 && num <= items.len() {
+            if let Ok(num) = input.parse::<usize>()
+                && num > 0 && num <= items.len() {
                     self.set_var(&select_stmt.var, &items[num - 1]);
                     self.set_var("REPLY", input);
 
@@ -186,7 +186,6 @@ impl Interpreter {
                         }
                     }
                 }
-            }
         }
 
         self.loop_depth -= 1;

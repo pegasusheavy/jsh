@@ -248,13 +248,12 @@ impl Interpreter {
         };
 
         // HOSTNAME
-        if !env.contains_key("HOSTNAME") {
-            if let Ok(hostname) = hostname::get() {
+        if !env.contains_key("HOSTNAME")
+            && let Ok(hostname) = hostname::get() {
                 let hostname_str = hostname.to_string_lossy().to_string();
                 env.insert("HOSTNAME".to_string(), hostname_str.clone());
                 unsafe { env::set_var("HOSTNAME", &hostname_str) };
             }
-        }
 
         // TERM - ensure a default terminal type
         if !env.contains_key("TERM") {
@@ -290,12 +289,11 @@ impl Interpreter {
         }
 
         // HISTFILE - history file location
-        if !env.contains_key("HISTFILE") {
-            if let Some(home) = dirs::home_dir() {
+        if !env.contains_key("HISTFILE")
+            && let Some(home) = dirs::home_dir() {
                 let histfile = home.join(".fsh_history").to_string_lossy().to_string();
                 env.insert("HISTFILE".to_string(), histfile);
             }
-        }
 
         // HISTSIZE - number of history entries
         if !env.contains_key("HISTSIZE") {
@@ -545,7 +543,7 @@ impl Interpreter {
     /// Execute a string as shell code
     #[inline]
     pub fn execute_string(&mut self, input: &str) -> Result<ExitStatus> {
-        let mut parser = Parser::from_str(input)?;
+        let mut parser = input.parse::<Parser>()?;
         let program = parser.parse_program()?;
         self.execute(&program)
     }

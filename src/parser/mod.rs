@@ -38,16 +38,21 @@ pub struct Parser {
     pos: usize,
 }
 
+impl std::str::FromStr for Parser {
+    type Err = JshError;
+
+    fn from_str(input: &str) -> Result<Self> {
+        let mut lexer = Lexer::new(input);
+        let tokens = lexer.tokenize()?;
+        Ok(Self::new(tokens))
+    }
+}
+
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
         Self { tokens, pos: 0 }
     }
 
-    pub fn from_str(input: &str) -> Result<Self> {
-        let mut lexer = Lexer::new(input);
-        let tokens = lexer.tokenize()?;
-        Ok(Self::new(tokens))
-    }
 
     // ========================================================================
     // Core token manipulation methods (optimized)
@@ -197,11 +202,9 @@ impl Parser {
                 && !first.negated
                 && !first.background
                 && first.commands[0].redirects.is_empty()
-            {
-                if let CommandKind::Compound(stmt) = &first.commands[0].kind {
+                && let CommandKind::Compound(stmt) = &first.commands[0].kind {
                     return Ok(stmt.as_ref().clone());
                 }
-            }
             Ok(Statement::Pipeline(first))
         } else {
             Ok(Statement::List(List { first, rest }))
@@ -453,14 +456,12 @@ impl Parser {
                 .next()
                 .is_some_and(|c| c.is_alphabetic() || c == '_')
                 && name.chars().all(|c| c.is_alphanumeric() || c == '_')
-            {
-                if matches!(
+                && matches!(
                     self.peek_nth(1).kind,
                     TokenKind::Assign | TokenKind::PlusAssign
                 ) {
                     return true;
                 }
-            }
         }
         false
     }

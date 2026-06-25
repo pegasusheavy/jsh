@@ -322,11 +322,10 @@ fn cmd_kill_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
     let mut target = s.current_window;
 
     for (i, arg) in args.iter().enumerate() {
-        if *arg == "-t" && i + 1 < args.len() {
-            if let Ok(idx) = args[i + 1].parse() {
+        if *arg == "-t" && i + 1 < args.len()
+            && let Ok(idx) = args[i + 1].parse() {
                 target = idx;
             }
-        }
     }
 
     if s.kill_window(target) {
@@ -490,11 +489,10 @@ fn cmd_kill_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
 
         let mut target = w.active_pane;
         for (i, arg) in args.iter().enumerate() {
-            if *arg == "-t" && i + 1 < args.len() {
-                if let Ok(idx) = args[i + 1].parse() {
+            if *arg == "-t" && i + 1 < args.len()
+                && let Ok(idx) = args[i + 1].parse() {
                     target = idx;
                 }
-            }
         }
 
         if w.kill_pane(target) {
@@ -529,11 +527,10 @@ fn cmd_select_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
         } else {
             // Target pane number
             for (i, arg) in args.iter().enumerate() {
-                if *arg == "-t" && i + 1 < args.len() {
-                    if let Ok(idx) = args[i + 1].parse() {
+                if *arg == "-t" && i + 1 < args.len()
+                    && let Ok(idx) = args[i + 1].parse() {
                         w.select_pane(idx);
                     }
-                }
             }
         }
 
@@ -729,7 +726,7 @@ fn cmd_set_option(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
     }
 
     let option = args.next().ok_or_else(|| JshError::runtime("No option specified"))?;
-    let value = args.next().map(|s| *s).unwrap_or("");
+    let value = args.next().copied().unwrap_or("");
 
     server.config.set_option(option, value)?;
     Ok(format!("Set {} = {}", option, value))
@@ -795,8 +792,7 @@ fn cmd_unbind_key(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
 fn cmd_list_keys(server: &TmuxServer, args: &[&str]) -> Result<String> {
     let table_name = args.iter()
         .skip_while(|a| *a != &"-T")
-        .nth(1)
-        .map(|s| *s)
+        .nth(1).copied()
         .unwrap_or("prefix");
 
     if let Some(table) = server.config.key_tables.get(table_name) {
@@ -865,8 +861,7 @@ fn cmd_send_keys(server: &TmuxServer, args: &[&str]) -> Result<String> {
         if let Some(pane) = w.active_pane() {
             let literal = args.contains(&"-l");
             let keys = args.iter()
-                .filter(|a| !a.starts_with('-'))
-                .map(|s| *s)
+                .filter(|a| !a.starts_with('-')).copied()
                 .collect::<Vec<_>>()
                 .join(" ");
 
@@ -888,8 +883,7 @@ fn cmd_send_prefix(server: &TmuxServer) -> Result<String> {
 
 fn cmd_display_message(_server: &TmuxServer, args: &[&str]) -> Result<String> {
     let message = args.iter()
-        .filter(|a| !a.starts_with('-'))
-        .map(|s| *s)
+        .filter(|a| !a.starts_with('-')).copied()
         .collect::<Vec<_>>()
         .join(" ");
 
@@ -918,8 +912,7 @@ fn cmd_show_messages(_server: &TmuxServer) -> Result<String> {
 
 fn cmd_run_shell(args: &[&str]) -> Result<String> {
     let command = args.iter()
-        .filter(|a| !a.starts_with('-'))
-        .map(|s| *s)
+        .filter(|a| !a.starts_with('-')).copied()
         .collect::<Vec<_>>()
         .join(" ");
 

@@ -32,7 +32,7 @@ fn test_span_len() {
 #[test]
 fn test_span_clone() {
     let span1 = Span::new(5, 10, 3, 7);
-    let span2 = span1.clone();
+    let span2 = span1;
     assert_eq!(span1, span2);
 }
 
@@ -126,8 +126,8 @@ fn test_token_kind_number() {
 
 #[test]
 fn test_token_kind_float() {
-    let kind = TokenKind::Float(3.14);
-    assert!(matches!(kind, TokenKind::Float(f) if (f - 3.14).abs() < 0.001));
+    let kind = TokenKind::Float(2.5);
+    assert!(matches!(kind, TokenKind::Float(f) if (f - 2.5).abs() < 0.001));
 }
 
 // =============================================================================

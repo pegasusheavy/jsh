@@ -562,11 +562,10 @@ impl<'a> Lexer<'a> {
 
         // Check if it's a keyword (only at command position)
         // PHF lookup is O(1)
-        if self.at_command_start {
-            if let Some(kw) = keyword_from_str(&word) {
+        if self.at_command_start
+            && let Some(kw) = keyword_from_str(&word) {
                 return Token::new(kw, span);
             }
-        }
 
         // Check if it's a number
         if let Ok(n) = word.parse::<i64>() {

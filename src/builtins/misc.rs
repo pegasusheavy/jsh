@@ -45,15 +45,6 @@ pub fn builtin_ulimit(_args: &[String], _interp: &mut Interpreter) -> Result<Exi
     Ok(ExitStatus::success())
 }
 
-/// times - display process times (stub, real implementation in posix.rs)
-#[allow(dead_code)]
-pub fn builtin_times(_args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
-    // Stub - the real implementation is in posix::builtin_times_posix
-    println!("0m0.000s 0m0.000s");
-    println!("0m0.000s 0m0.000s");
-    Ok(ExitStatus::success())
-}
-
 /// enable - enable/disable builtins
 pub fn builtin_enable(_args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
     // TODO: Implement enable
@@ -139,8 +130,8 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
                                 interp.set_var("SSH_AUTH_SOCK", sock);
                                 interp.export_var("SSH_AUTH_SOCK", Some(sock));
                             }
-                        } else if line.starts_with("SSH_AGENT_PID=") {
-                            if let Some(pid) = line
+                        } else if line.starts_with("SSH_AGENT_PID=")
+                            && let Some(pid) = line
                                 .strip_prefix("SSH_AGENT_PID=")
                                 .and_then(|s| s.strip_suffix("; export SSH_AGENT_PID;"))
                             {
@@ -149,7 +140,6 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
                                 interp.set_var("SSH_AGENT_PID", pid);
                                 interp.export_var("SSH_AGENT_PID", Some(pid));
                             }
-                        }
                     }
 
                     if let Some(pid) = interp.get_var("SSH_AGENT_PID") {

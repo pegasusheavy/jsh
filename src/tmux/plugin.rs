@@ -4,7 +4,7 @@ use crate::error::{JshError, Result};
 use crate::shell::fsh_data_dir;
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 /// TPM-compatible plugin manager
@@ -343,7 +343,7 @@ impl TmuxPlugin {
 
             let name = repo
                 .split('/')
-                .last()
+                .next_back()
                 .unwrap_or("plugin")
                 .to_string();
 
@@ -361,7 +361,7 @@ impl TmuxPlugin {
     }
 
     /// Check if plugin is installed
-    pub fn is_installed(&self, plugins_dir: &PathBuf) -> bool {
+    pub fn is_installed(&self, plugins_dir: &Path) -> bool {
         plugins_dir.join(&self.name).exists()
     }
 }

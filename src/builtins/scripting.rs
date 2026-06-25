@@ -111,9 +111,10 @@ pub fn builtin_read(args: &[String], interp: &mut Interpreter) -> Result<ExitSta
             Err(_) => return Ok(ExitStatus::failure(1)),
         }
     } else {
-        // Read until delimiter
+        // Read until delimiter. Lock stdin so the byte-wise read goes through
+        // the buffered `StdinLock` rather than re-locking on every byte.
         let stdin = io::stdin();
-        for byte in stdin.bytes() {
+        for byte in stdin.lock().bytes() {
             match byte {
                 Ok(b) if b as char == delimiter => break,
                 Ok(b) => input.push(b as char),

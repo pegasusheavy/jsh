@@ -34,7 +34,7 @@ fn test_plugin_source_fish() {
 #[test]
 fn test_plugin_source_local() {
     let source = PluginSource::Local(PathBuf::from("/path/to/plugin"));
-    assert!(matches!(source, PluginSource::Local(p) if p == PathBuf::from("/path/to/plugin")));
+    assert!(matches!(source, PluginSource::Local(p) if p == *"/path/to/plugin"));
 }
 
 #[test]
@@ -201,9 +201,8 @@ fn test_plugin_manager_plugins_accessible() {
 fn test_plugin_manager_list_installed() {
     let manager = PluginManager::new();
     // list_installed returns installed plugins from disk
-    let installed = manager.list_installed();
-    // This returns whatever is actually installed, so just check it doesn't crash
-    assert!(installed.len() >= 0);
+    // This returns whatever is actually installed, so just check it doesn't crash.
+    let _installed = manager.list_installed();
 }
 
 #[test]
@@ -211,10 +210,9 @@ fn test_plugin_manager_generate_load_commands() {
     let mut manager = PluginManager::new();
     manager.add(Plugin::new("plugin1", PluginSource::GitHub("user/repo1".to_string())));
 
-    // Generate load commands
-    let commands = manager.generate_load_commands();
-    // Commands list should exist (may be empty if plugins not installed)
-    assert!(commands.len() >= 0);
+    // Generate load commands; the list may be empty if plugins are not
+    // installed, so just confirm the call succeeds without panicking.
+    let _commands = manager.generate_load_commands();
 }
 
 // =============================================================================
@@ -275,26 +273,22 @@ fn test_plugin_load_equality() {
 
 #[test]
 fn test_all_plugin_sources() {
-    let sources = vec![
-        PluginSource::GitHub("user/repo".to_string()),
+    let sources = [PluginSource::GitHub("user/repo".to_string()),
         PluginSource::OhMyZsh("git".to_string()),
         PluginSource::OhMyZshTheme("robbyrussell".to_string()),
         PluginSource::Fish("bass".to_string()),
         PluginSource::Local(PathBuf::from("/path/to/plugin")),
-        PluginSource::Git("https://example.com/repo.git".to_string()),
-    ];
+        PluginSource::Git("https://example.com/repo.git".to_string())];
 
     assert_eq!(sources.len(), 6);
 }
 
 #[test]
 fn test_all_plugin_loads() {
-    let loads = vec![
-        PluginLoad::Source,
+    let loads = [PluginLoad::Source,
         PluginLoad::Path,
         PluginLoad::Theme,
-        PluginLoad::Defer,
-    ];
+        PluginLoad::Defer];
 
     assert_eq!(loads.len(), 4);
 }

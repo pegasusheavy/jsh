@@ -4,7 +4,7 @@
 
 use crossbeam_channel::{bounded, Receiver, Sender};
 use std::io::{BufRead, BufReader, Read, Write};
-use std::process::{Child, ChildStderr, ChildStdout, Stdio};
+use std::process::Child;
 use std::thread::{self, JoinHandle};
 
 /// Size of the I/O buffer
@@ -36,8 +36,6 @@ pub struct AsyncCommand {
     wait_thread: Option<JoinHandle<i32>>,
     /// Receiver for output
     pub output_rx: Receiver<CommandOutput>,
-    /// Child process handle (for killing)
-    child: Option<Child>,
 }
 
 impl AsyncCommand {
@@ -88,7 +86,6 @@ impl AsyncCommand {
             stderr_thread,
             wait_thread,
             output_rx: rx,
-            child: None, // Already moved to wait thread
         }
     }
 
@@ -300,7 +297,7 @@ impl Read for ChannelReader {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::process::Command;
+    use std::process::{Command, Stdio};
 
     #[test]
     fn test_pipe_buffer() {

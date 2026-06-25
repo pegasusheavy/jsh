@@ -128,12 +128,11 @@ pub fn builtin_git_branch(args: &[String], interp: &mut Interpreter) -> Result<E
         cmd.current_dir(&interp.cwd);
 
         let output = cmd.output();
-        if let Ok(output) = output {
-            if output.status.success() {
+        if let Ok(output) = output
+            && output.status.success() {
                 print!("{}", String::from_utf8_lossy(&output.stdout));
                 return Ok(ExitStatus::success());
             }
-        }
         return Ok(ExitStatus::failure(1));
     }
 

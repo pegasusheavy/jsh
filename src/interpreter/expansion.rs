@@ -10,6 +10,7 @@ use crate::interpreter::Interpreter;
 use crate::parser::Parser;
 use glob::glob;
 use std::hash::{Hash, Hasher};
+use std::str::FromStr;
 
 /// Maximum word cache size (LRU eviction when exceeded)
 const MAX_WORD_CACHE_SIZE: usize = 512;
@@ -93,7 +94,7 @@ impl Interpreter {
                         let expr = &s[10..s.len() - 2];
                         match self.eval_arithmetic_const(expr) {
                             Ok(value) => result.push_str(&value.to_string()),
-                            Err(_) => result.push_str("0"),
+                            Err(_) => result.push('0'),
                         }
                     } else {
                         // Expand any embedded variables in the literal (from double-quoted strings)
@@ -290,8 +291,8 @@ impl Interpreter {
         }
 
         // Alternative without null check +
-        if let Some(idx) = content.find('+') {
-            if idx > 0 && !content[..idx].ends_with(':') {
+        if let Some(idx) = content.find('+')
+            && idx > 0 && !content[..idx].ends_with(':') {
                 let var = &content[..idx];
                 let alt = &content[idx + 1..];
                 if self.get_var(var).is_some() {
@@ -299,7 +300,6 @@ impl Interpreter {
                 }
                 return String::new();
             }
-        }
 
         // Greedy prefix removal ##
         if let Some(idx) = content.find("##") {
@@ -316,8 +316,8 @@ impl Interpreter {
         }
 
         // Non-greedy prefix removal #
-        if let Some(idx) = content.find('#') {
-            if idx > 0 {
+        if let Some(idx) = content.find('#')
+            && idx > 0 {
                 let var = &content[..idx];
                 let pattern = &content[idx + 1..];
                 let value = self.get_var(var).unwrap_or("").to_string();
@@ -329,7 +329,6 @@ impl Interpreter {
                 }
                 return value;
             }
-        }
 
         // Greedy suffix removal %%
         if let Some(idx) = content.find("%%") {
@@ -346,8 +345,8 @@ impl Interpreter {
         }
 
         // Non-greedy suffix removal %
-        if let Some(idx) = content.find('%') {
-            if idx > 0 {
+        if let Some(idx) = content.find('%')
+            && idx > 0 {
                 let var = &content[..idx];
                 let pattern = &content[idx + 1..];
                 let value = self.get_var(var).unwrap_or("").to_string();
@@ -359,7 +358,6 @@ impl Interpreter {
                 }
                 return value;
             }
-        }
 
         // Simple variable expansion
         self.get_var(content).unwrap_or("").to_string()
@@ -418,7 +416,7 @@ impl Interpreter {
                             // Command substitution $(...)
                             let mut cmd = String::new();
                             let mut depth = 1;
-                            while let Some(c) = chars.next() {
+                            for c in chars.by_ref() {
                                 if c == '(' {
                                     depth += 1;
                                     cmd.push(c);
@@ -727,18 +725,18 @@ impl Interpreter {
     fn eval_arith_unary(&self, expr: &str) -> Result<i64> {
         let expr = expr.trim();
 
-        if expr.starts_with('-') {
-            return Ok(-self.eval_arith_unary(&expr[1..])?);
+        if let Some(rest) = expr.strip_prefix('-') {
+            return Ok(-self.eval_arith_unary(rest)?);
         }
-        if expr.starts_with('+') {
-            return self.eval_arith_unary(&expr[1..]);
+        if let Some(rest) = expr.strip_prefix('+') {
+            return self.eval_arith_unary(rest);
         }
-        if expr.starts_with('!') {
-            let val = self.eval_arith_unary(&expr[1..])?;
+        if let Some(rest) = expr.strip_prefix('!') {
+            let val = self.eval_arith_unary(rest)?;
             return Ok(if val == 0 { 1 } else { 0 });
         }
-        if expr.starts_with('~') {
-            return Ok(!self.eval_arith_unary(&expr[1..])?);
+        if let Some(rest) = expr.strip_prefix('~') {
+            return Ok(!self.eval_arith_unary(rest)?);
         }
 
         self.eval_arith_primary(expr)
@@ -753,8 +751,7 @@ impl Interpreter {
         }
 
         // Variable
-        if expr.starts_with('$') {
-            let var = &expr[1..];
+        if let Some(var) = expr.strip_prefix('$') {
             return Ok(self.get_var(var)
                 .and_then(|v| v.parse().ok())
                 .unwrap_or(0));

@@ -147,12 +147,11 @@ impl Pane {
         self.search_string = Some(pattern.to_string());
 
         for i in (0..self.scroll_position).rev() {
-            if let Some(line) = self.history.get(i) {
-                if line.contains(pattern) {
+            if let Some(line) = self.history.get(i)
+                && line.contains(pattern) {
                     self.scroll_position = i;
                     return Some(i);
                 }
-            }
         }
         None
     }

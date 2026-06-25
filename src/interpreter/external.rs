@@ -253,10 +253,13 @@ impl Interpreter {
                 RedirectKind::InputOutput => {
                     if let RedirectTarget::File(path) = &redirect.target {
                         let path = self.expand_word(path)?;
+                        // `<>` opens for read+write and must NOT truncate the
+                        // existing file contents; state that explicitly.
                         let file = OpenOptions::new()
                             .read(true)
                             .write(true)
                             .create(true)
+                            .truncate(false)
                             .open(&path)?;
                         let fd = file.as_raw_fd();
                         cmd.stdin(unsafe { Stdio::from_raw_fd(fd) });
@@ -265,12 +268,11 @@ impl Interpreter {
                     }
                 }
                 RedirectKind::DupOutput => {
-                    if let RedirectTarget::Fd(target_fd) = &redirect.target {
-                        if *target_fd == 1 {
+                    if let RedirectTarget::Fd(target_fd) = &redirect.target
+                        && *target_fd == 1 {
                             // 2>&1 - stderr to stdout
                             cmd.stderr(Stdio::inherit());
                         }
-                    }
                 }
                 RedirectKind::DupInput => {
                     // Handle input duplication

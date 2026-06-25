@@ -26,14 +26,13 @@ pub fn builtin_kill(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
             list_signals = true;
             i += 1;
             // If there's a number after -l, show signal name for that number
-            if i < args.len() {
-                if let Ok(num) = args[i].parse::<i32>() {
+            if i < args.len()
+                && let Ok(num) = args[i].parse::<i32>() {
                     if let Ok(sig) = Signal::try_from(num) {
                         println!("{}", format!("{:?}", sig).strip_prefix("SIG").unwrap_or(&format!("{:?}", sig)));
                     }
                     return Ok(ExitStatus::success());
                 }
-            }
         } else if arg == "-s" {
             i += 1;
             if i < args.len() {
@@ -41,13 +40,12 @@ pub fn builtin_kill(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
             }
         } else if arg == "-n" {
             i += 1;
-            if i < args.len() {
-                if let Ok(num) = args[i].parse::<i32>() {
+            if i < args.len()
+                && let Ok(num) = args[i].parse::<i32>() {
                     signal = Signal::try_from(num).map_err(|_| {
                         crate::error::JshError::InvalidArgument(format!("invalid signal: {}", num))
                     })?;
                 }
-            }
         } else if arg.starts_with('-') && arg.len() > 1 {
             // -SIGNAME or -signum
             let sig_part = &arg[1..];

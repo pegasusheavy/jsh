@@ -1,6 +1,7 @@
 //! Parser module tests
 
 use franken_shell::parser::Parser;
+use std::str::FromStr;
 
 // =============================================================================
 // Basic Parse Tests

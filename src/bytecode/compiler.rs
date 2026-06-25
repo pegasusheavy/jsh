@@ -14,8 +14,6 @@ pub struct Compiler {
     chunk: Chunk,
     /// Current line number
     current_line: u32,
-    /// Local variable names in current scope
-    locals: Vec<String>,
     /// Loop break targets (for patching)
     break_targets: Vec<Vec<usize>>,
     /// Loop continue targets
@@ -34,7 +32,6 @@ impl Compiler {
         Self {
             chunk: Chunk::new(),
             current_line: 1,
-            locals: Vec::new(),
             break_targets: Vec::new(),
             continue_targets: Vec::new(),
         }

@@ -298,7 +298,7 @@ impl Window {
             }
             "tiled" => {
                 let cols = (pane_count as f64).sqrt().ceil() as u16;
-                let rows = (pane_count as u16 + cols - 1) / cols;
+                let rows = (pane_count as u16).div_ceil(cols);
                 let pane_width = width / cols;
                 let pane_height = height / rows;
 
@@ -458,17 +458,16 @@ pub struct WindowFlags {
     pub marked: bool,
 }
 
-impl WindowFlags {
-    pub fn to_string(&self) -> String {
-        let mut flags = String::new();
-        if self.activity { flags.push('!'); }
-        if self.bell { flags.push('#'); }
-        if self.silence { flags.push('~'); }
-        if self.zoomed { flags.push('Z'); }
-        if self.last { flags.push('-'); }
-        if self.linked { flags.push('L'); }
-        if self.marked { flags.push('M'); }
-        flags
+impl std::fmt::Display for WindowFlags {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.activity { f.write_str("!")?; }
+        if self.bell { f.write_str("#")?; }
+        if self.silence { f.write_str("~")?; }
+        if self.zoomed { f.write_str("Z")?; }
+        if self.last { f.write_str("-")?; }
+        if self.linked { f.write_str("L")?; }
+        if self.marked { f.write_str("M")?; }
+        Ok(())
     }
 }
 

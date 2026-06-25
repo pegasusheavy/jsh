@@ -216,9 +216,9 @@ impl TmuxConfig {
             }
 
             // Handle line continuations
-            let line = if line.ends_with('\\') {
+            let line = if let Some(stripped) = line.strip_suffix('\\') {
                 // TODO: Handle multi-line commands
-                &line[..line.len() - 1]
+                stripped
             } else {
                 line
             };
@@ -283,7 +283,7 @@ impl TmuxConfig {
             None => return Ok(()),
         };
 
-        let value = args.map(|s| *s).collect::<Vec<_>>().join(" ");
+        let value = args.copied().collect::<Vec<_>>().join(" ");
         let value = value.trim_matches(|c| c == '"' || c == '\'');
 
         self.set_option(option, value)
@@ -326,7 +326,7 @@ impl TmuxConfig {
             None => return Ok(()),
         };
 
-        let command: String = args.map(|s| *s).collect::<Vec<_>>().join(" ");
+        let command: String = args.copied().collect::<Vec<_>>().join(" ");
 
         let binding = KeyBinding {
             key: key.clone(),
@@ -336,7 +336,7 @@ impl TmuxConfig {
 
         self.key_tables
             .entry(table)
-            .or_insert_with(KeyTable::new)
+            .or_default()
             .bindings
             .insert(key, binding);
 
@@ -372,11 +372,10 @@ impl TmuxConfig {
             }
         }
 
-        if let Some(key) = args.next() {
-            if let Some(kt) = self.key_tables.get_mut(&table) {
+        if let Some(key) = args.next()
+            && let Some(kt) = self.key_tables.get_mut(&table) {
                 kt.bindings.remove(*key);
             }
-        }
 
         Ok(())
     }
@@ -399,11 +398,11 @@ impl TmuxConfig {
             None => return Ok(()),
         };
 
-        let command: String = args.map(|s| *s).collect::<Vec<_>>().join(" ");
+        let command: String = args.copied().collect::<Vec<_>>().join(" ");
 
         self.hooks
             .entry(hook_name)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(command);
 
         Ok(())
@@ -694,11 +693,10 @@ fn parse_bool(s: &str) -> bool {
 }
 
 fn expand_path(path: &str) -> String {
-    if path.starts_with('~') {
-        if let Ok(home) = std::env::var("HOME") {
+    if path.starts_with('~')
+        && let Ok(home) = std::env::var("HOME") {
             return path.replacen('~', &home, 1);
         }
-    }
     path.to_string()
 }
 

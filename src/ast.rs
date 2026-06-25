@@ -300,11 +300,10 @@ impl Word {
     /// Get the literal value if this is a simple literal word
     #[inline]
     pub fn as_literal(&self) -> Option<&str> {
-        if self.parts.len() == 1 {
-            if let WordPart::Literal(s) = &self.parts[0] {
+        if self.parts.len() == 1
+            && let WordPart::Literal(s) = &self.parts[0] {
                 return Some(s);
             }
-        }
         None
     }
 

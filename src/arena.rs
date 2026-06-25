@@ -168,7 +168,7 @@ impl StringPool {
     /// Get a string from the pool or create a new one
     #[inline]
     pub fn get(&mut self) -> String {
-        self.pool.pop().unwrap_or_else(String::new)
+        self.pool.pop().unwrap_or_default()
     }
 
     /// Get a string with pre-allocated capacity
@@ -226,7 +226,7 @@ impl<T> VecPool<T> {
     /// Get a vec from the pool or create a new one
     #[inline]
     pub fn get(&mut self) -> Vec<T> {
-        self.pool.pop().unwrap_or_else(Vec::new)
+        self.pool.pop().unwrap_or_default()
     }
 
     /// Get a vec with pre-allocated capacity

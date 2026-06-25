@@ -279,15 +279,13 @@ impl ScopeStack {
 
     /// Merge current scope into parent (for export-like behavior)
     pub fn merge_into_parent(&mut self) {
-        if self.scopes.len() > 1 {
-            if let Some(current) = self.scopes.pop() {
-                if let Some(parent) = self.scopes.last_mut() {
+        if self.scopes.len() > 1
+            && let Some(current) = self.scopes.pop()
+                && let Some(parent) = self.scopes.last_mut() {
                     for (name, value) in current.iter() {
                         parent.set(name, value.clone());
                     }
                 }
-            }
-        }
     }
 }
 

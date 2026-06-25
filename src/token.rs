@@ -353,7 +353,8 @@ enum KeywordId {
     // Fish-compatible
     End, Begin, Switch,
     And, Or, Not,
-    Contains,
+    // Note: there is no `Contains` keyword id on purpose: "contains" is a Fish
+    // builtin command, not a keyword (see the KEYWORDS map below).
 }
 
 /// Perfect hash map for keyword lookup (O(1) lookup, generated at compile time)
@@ -443,7 +444,6 @@ pub fn keyword_from_str(s: &str) -> Option<TokenKind> {
         KeywordId::And => TokenKind::And_,
         KeywordId::Or => TokenKind::Or_,
         KeywordId::Not => TokenKind::Not_,
-        KeywordId::Contains => TokenKind::Contains,
     })
 }
 

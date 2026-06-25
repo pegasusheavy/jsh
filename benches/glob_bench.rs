@@ -8,7 +8,6 @@ use franken_shell::interpreter::Interpreter;
 use franken_shell::lexer::Lexer;
 use franken_shell::parser::Parser;
 use std::fs::{self, File};
-use std::io::Write;
 use tempfile::TempDir;
 
 /// Create a temporary directory with test files

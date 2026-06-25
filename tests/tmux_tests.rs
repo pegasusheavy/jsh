@@ -4,7 +4,6 @@ use franken_shell::tmux::{
     TmuxServer, TmuxConfig, Session, Window, Pane,
     KeyBinding, KeyTable, StatusBarTheme, TmuxPluginManager,
 };
-use std::path::PathBuf;
 
 // =============================================================================
 // TmuxServer Tests
@@ -142,7 +141,7 @@ fn test_session_new() {
 fn test_session_new_window() {
     let mut session = Session::new("test");
     let _window = session.new_window(Some("win1"));
-    assert!(session.windows.len() >= 1);
+    assert!(!session.windows.is_empty());
 }
 
 #[test]
@@ -249,7 +248,7 @@ fn test_window_list_panes() {
     window.split_horizontal(None);
 
     let panes = window.list_panes();
-    assert!(panes.len() >= 1);
+    assert!(!panes.is_empty());
 }
 
 #[test]
@@ -367,7 +366,7 @@ fn test_tmux_config_default() {
 #[test]
 fn test_tmux_config_set_option() {
     let mut config = TmuxConfig::default();
-    config.set_option("mouse", "on");
+    config.set_option("mouse", "on").unwrap();
     assert!(config.mouse);
 }
 
@@ -524,10 +523,8 @@ fn test_tmux_plugin_manager_add() {
 #[test]
 fn test_tmux_plugin_manager_list_installed() {
     let manager = TmuxPluginManager::new();
-    // List installed plugins (may be empty)
-    let installed = manager.list_installed();
-    // Just check it doesn't crash
-    assert!(installed.len() >= 0);
+    // List installed plugins (may be empty); just check it doesn't crash.
+    let _installed = manager.list_installed();
 }
 
 #[test]
@@ -535,10 +532,9 @@ fn test_tmux_plugin_manager_generate_load_commands() {
     let mut manager = TmuxPluginManager::new();
     let _ = manager.add("tmux-plugins/tmux-sensible");
 
-    // Generate load commands
-    let commands = manager.generate_load_commands();
-    // May be empty if plugins not installed
-    assert!(commands.len() >= 0);
+    // Generate load commands; may be empty if plugins not installed, so just
+    // confirm the call succeeds without panicking.
+    let _commands = manager.generate_load_commands();
 }
 
 // =============================================================================

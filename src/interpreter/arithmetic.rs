@@ -26,25 +26,23 @@ fn is_constant_expr(expr: &str) -> bool {
             b'$' => return false,
             b'a'..=b'z' | b'A'..=b'Z' | b'_' => {
                 // Allow 0x, 0X, 0b, 0B prefixes
-                if i > 0 && bytes[i - 1] == b'0' {
-                    if bytes[i] == b'x' || bytes[i] == b'X' || bytes[i] == b'b' || bytes[i] == b'B'
+                if i > 0 && bytes[i - 1] == b'0'
+                    && (bytes[i] == b'x' || bytes[i] == b'X' || bytes[i] == b'b' || bytes[i] == b'B')
                     {
                         i += 1;
                         continue;
                     }
-                }
                 // Allow hex digits a-f, A-F if preceded by 0x
                 if bytes[i] >= b'a' && bytes[i] <= b'f' || bytes[i] >= b'A' && bytes[i] <= b'F' {
                     // Check if we're in a hex context - look back for 0x
                     let mut j = i;
                     while j > 0 {
                         j -= 1;
-                        if bytes[j] == b'x' || bytes[j] == b'X' {
-                            if j > 0 && bytes[j - 1] == b'0' {
+                        if (bytes[j] == b'x' || bytes[j] == b'X')
+                            && j > 0 && bytes[j - 1] == b'0' {
                                 i += 1;
                                 break;
                             }
-                        }
                         if !bytes[j].is_ascii_hexdigit() {
                             return false;
                         }
@@ -75,11 +73,10 @@ impl Interpreter {
 
         // Fast path: check cache for constant expressions
         if is_constant_expr(expr) {
-            if let Ok(cache) = ARITH_CACHE.lock() {
-                if let Some(&result) = cache.get(expr) {
+            if let Ok(cache) = ARITH_CACHE.lock()
+                && let Some(&result) = cache.get(expr) {
                     return Ok(result);
                 }
-            }
             // Evaluate and cache
             let result = self.eval_arithmetic_uncached(expr)?;
             if let Ok(mut cache) = ARITH_CACHE.lock() {
@@ -108,8 +105,8 @@ impl Interpreter {
         }
 
         // Handle ternary operator
-        if let Some(q_pos) = find_top_level_char(expr, '?') {
-            if let Some(c_pos) = find_top_level_char(&expr[q_pos + 1..], ':') {
+        if let Some(q_pos) = find_top_level_char(expr, '?')
+            && let Some(c_pos) = find_top_level_char(&expr[q_pos + 1..], ':') {
                 let condition = self.eval_arithmetic_uncached(&expr[..q_pos])?;
                 let then_part = &expr[q_pos + 1..q_pos + 1 + c_pos];
                 let else_part = &expr[q_pos + 1 + c_pos + 1..];
@@ -119,7 +116,6 @@ impl Interpreter {
                     self.eval_arithmetic_uncached(else_part)
                 };
             }
-        }
 
         // Handle assignment operators
         for (op_str, op_fn) in &[
@@ -297,25 +293,29 @@ impl Interpreter {
 
         // Handle unary operators
         let expr = expr.trim();
-        if expr.starts_with('!') {
-            let operand = self.eval_arithmetic_uncached(&expr[1..])?;
+        if let Some(rest) = expr.strip_prefix('!') {
+            let operand = self.eval_arithmetic_uncached(rest)?;
             return Ok(if operand == 0 { 1 } else { 0 });
         }
-        if expr.starts_with('~') {
-            let operand = self.eval_arithmetic_uncached(&expr[1..])?;
+        if let Some(rest) = expr.strip_prefix('~') {
+            let operand = self.eval_arithmetic_uncached(rest)?;
             return Ok(!operand);
         }
-        if expr.starts_with('-') && !expr[1..].starts_with(|c: char| c.is_ascii_digit()) {
-            let operand = self.eval_arithmetic_uncached(&expr[1..])?;
+        if let Some(rest) = expr.strip_prefix('-')
+            && !rest.starts_with(|c: char| c.is_ascii_digit())
+        {
+            let operand = self.eval_arithmetic_uncached(rest)?;
             return Ok(-operand);
         }
-        if expr.starts_with('+') && !expr[1..].starts_with(|c: char| c.is_ascii_digit()) {
-            return self.eval_arithmetic_uncached(&expr[1..]);
+        if let Some(rest) = expr.strip_prefix('+')
+            && !rest.starts_with(|c: char| c.is_ascii_digit())
+        {
+            return self.eval_arithmetic_uncached(rest);
         }
 
         // Handle pre-increment/decrement
-        if expr.starts_with("++") {
-            let var = expr[2..].trim();
+        if let Some(rest) = expr.strip_prefix("++") {
+            let var = rest.trim();
             if is_valid_var_name(var) {
                 let value = self.get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
@@ -324,8 +324,8 @@ impl Interpreter {
                 return Ok(value);
             }
         }
-        if expr.starts_with("--") {
-            let var = expr[2..].trim();
+        if let Some(rest) = expr.strip_prefix("--") {
+            let var = rest.trim();
             if is_valid_var_name(var) {
                 let value = self.get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
@@ -336,8 +336,8 @@ impl Interpreter {
         }
 
         // Handle post-increment/decrement
-        if expr.ends_with("++") {
-            let var = expr[..expr.len() - 2].trim();
+        if let Some(rest) = expr.strip_suffix("++") {
+            let var = rest.trim();
             if is_valid_var_name(var) {
                 let value = self.get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
@@ -346,8 +346,8 @@ impl Interpreter {
                 return Ok(value);
             }
         }
-        if expr.ends_with("--") {
-            let var = expr[..expr.len() - 2].trim();
+        if let Some(rest) = expr.strip_suffix("--") {
+            let var = rest.trim();
             if is_valid_var_name(var) {
                 let value = self.get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
@@ -363,8 +363,7 @@ impl Interpreter {
         }
 
         // Handle variables
-        if expr.starts_with('$') {
-            let var = &expr[1..];
+        if let Some(var) = expr.strip_prefix('$') {
             return Ok(self.get_var(var)
                 .and_then(|v| v.parse::<i64>().ok())
                 .unwrap_or(0));

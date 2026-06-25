@@ -49,11 +49,10 @@ pub fn builtin_command(args: &[String], interp: &mut Interpreter) -> Result<Exit
     // Skip -v, -V, -p options
     let mut idx = 0;
     while idx < args.len() && args[idx].starts_with('-') {
-        if args[idx] == "-v" {
-            if idx + 1 < args.len() {
+        if args[idx] == "-v"
+            && idx + 1 < args.len() {
                 return builtin_type(&args[idx + 1..], interp);
             }
-        }
         idx += 1;
     }
 

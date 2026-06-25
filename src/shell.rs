@@ -223,9 +223,8 @@ impl Completer for FrankenHelper {
 
         let mut completions = Vec::new();
 
-        if word.starts_with('$') {
+        if let Some(var_prefix) = word.strip_prefix('$') {
             // Variable completion
-            let var_prefix = &word[1..];
             for (key, _) in std::env::vars() {
                 if key.starts_with(var_prefix) {
                     completions.push(Pair {
@@ -489,9 +488,11 @@ impl Shell {
 
     /// Create a new shell with specific options
     pub fn with_options(is_login: bool, is_interactive: bool) -> Result<Self> {
-        let mut config = ShellConfig::default();
-        config.is_login_shell = is_login;
-        config.is_interactive = is_interactive;
+        let config = ShellConfig {
+            is_login_shell: is_login,
+            is_interactive,
+            ..ShellConfig::default()
+        };
 
         let interpreter = Interpreter::new();
         let theme_manager = ThemeManager::new();
@@ -584,11 +585,10 @@ impl Shell {
         }
 
         // Check for custom socket path
-        if let Some(socket) = self.interpreter.get_var("FSH_SSH_AGENT_SOCKET") {
-            if !socket.is_empty() {
+        if let Some(socket) = self.interpreter.get_var("FSH_SSH_AGENT_SOCKET")
+            && !socket.is_empty() {
                 self.config.ssh_agent_socket = Some(PathBuf::from(socket));
             }
-        }
     }
 
     /// Start ssh-agent if not already running
@@ -605,15 +605,14 @@ impl Shell {
         }
 
         // Check if custom socket is specified and exists
-        if let Some(ref custom_sock) = self.config.ssh_agent_socket {
-            if custom_sock.exists() {
+        if let Some(ref custom_sock) = self.config.ssh_agent_socket
+            && custom_sock.exists() {
                 // SAFETY: We're setting environment variables in a single-threaded initialization context
                 unsafe { std::env::set_var("SSH_AUTH_SOCK", custom_sock) };
                 self.interpreter.set_var("SSH_AUTH_SOCK", &custom_sock.to_string_lossy());
                 self.interpreter.export_var("SSH_AUTH_SOCK", Some(&custom_sock.to_string_lossy()));
                 return;
             }
-        }
 
         // Try to start ssh-agent
         let output = Command::new("ssh-agent")
@@ -638,8 +637,8 @@ impl Shell {
                             self.interpreter.set_var("SSH_AUTH_SOCK", sock);
                             self.interpreter.export_var("SSH_AUTH_SOCK", Some(sock));
                         }
-                    } else if line.starts_with("SSH_AGENT_PID=") {
-                        if let Some(pid) = line
+                    } else if line.starts_with("SSH_AGENT_PID=")
+                        && let Some(pid) = line
                             .strip_prefix("SSH_AGENT_PID=")
                             .and_then(|s| s.strip_suffix("; export SSH_AGENT_PID;"))
                         {
@@ -648,15 +647,13 @@ impl Shell {
                             self.interpreter.set_var("SSH_AGENT_PID", pid);
                             self.interpreter.export_var("SSH_AGENT_PID", Some(pid));
                         }
-                    }
                 }
 
                 // Optionally notify the user
-                if self.config.is_interactive {
-                    if let Some(pid) = self.interpreter.get_var("SSH_AGENT_PID") {
+                if self.config.is_interactive
+                    && let Some(pid) = self.interpreter.get_var("SSH_AGENT_PID") {
                         eprintln!("franken: ssh-agent started (pid {})", pid);
                     }
-                }
             }
             Ok(_) => {
                 // ssh-agent failed to start
@@ -1011,51 +1008,46 @@ impl Shell {
     /// Apply theme settings from environment (called once at startup)
     fn apply_theme_from_env(&mut self) {
         // Check for FSH_THEME environment variable
-        if let Some(theme) = self.interpreter.get_var("FSH_THEME").map(|s| s.to_string()) {
-            if !theme.is_empty() {
+        if let Some(theme) = self.interpreter.get_var("FSH_THEME").map(|s| s.to_string())
+            && !theme.is_empty() {
                 let _ = self.set_theme(&theme);
             }
-        }
 
         // Check for custom PROMPT
-        if let Some(prompt) = self.interpreter.get_var("PROMPT").map(|s| s.to_string()) {
-            if !prompt.is_empty() {
+        if let Some(prompt) = self.interpreter.get_var("PROMPT").map(|s| s.to_string())
+            && !prompt.is_empty() {
                 self.set_prompt(&prompt);
             }
-        }
 
         // Check for custom RPROMPT
-        if let Some(rprompt) = self.interpreter.get_var("RPROMPT").map(|s| s.to_string()) {
-            if !rprompt.is_empty() {
+        if let Some(rprompt) = self.interpreter.get_var("RPROMPT").map(|s| s.to_string())
+            && !rprompt.is_empty() {
                 self.set_rprompt(Some(&rprompt));
             }
-        }
     }
 
     fn sync_theme_from_env(&mut self) {
         // Check if FSH_THEME changed
         let theme = self.interpreter.get_var("FSH_THEME").map(|s| s.to_string());
-        if let Some(theme) = theme {
-            if !theme.is_empty() && theme != self.config.theme_name {
+        if let Some(theme) = theme
+            && !theme.is_empty() && theme != self.config.theme_name {
                 let _ = self.set_theme(&theme);
             }
-        }
 
         // Dynamic PROMPT changes
         let prompt = self.interpreter.get_var("PROMPT").map(|s| s.to_string());
         let current_prompt = self.theme_manager.current_theme.prompt.clone();
-        if let Some(prompt) = prompt {
-            if !prompt.is_empty() && prompt != current_prompt {
+        if let Some(prompt) = prompt
+            && !prompt.is_empty() && prompt != current_prompt {
                 self.set_prompt(&prompt);
             }
-        }
     }
 
     /// Handle theme command for immediate effect
     fn handle_theme_command(&mut self, line: &str) {
         let parts: Vec<&str> = line.split_whitespace().collect();
 
-        match parts.get(1).map(|s| *s) {
+        match parts.get(1).copied() {
             Some("list") | Some("ls") => {
                 println!("{}", "Available themes:".cyan().bold());
                 for theme in self.list_themes() {

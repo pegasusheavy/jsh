@@ -146,8 +146,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs::{self, File};
-    use std::io::Write;
+    use std::fs::File;
+    
     use tempfile::tempdir;
 
     #[test]

@@ -12,7 +12,7 @@ use crate::error::{JshError, Result};
 use crate::shell::{fsh_data_dir, fsh_cache_dir};
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 /// Plugin source type
@@ -242,12 +242,11 @@ impl PluginManager {
                     "use" => plugin.use_files.push(value.to_string()),
                     "hook" => plugin.hook = Some(value.to_string()),
                     "name" | "rename-to" => plugin.name = value.to_string(),
-                    "if" => {
+                    "if"
                         // Conditional loading - simple check
-                        if value != "true" && value != "1" {
+                        if value != "true" && value != "1" => {
                             plugin.enabled = false;
                         }
-                    }
                     _ => {}
                 }
             } else {
@@ -389,7 +388,7 @@ impl PluginManager {
     }
 
     /// Clone a git repository
-    fn git_clone(&self, url: &str, dest: &PathBuf, plugin: &Plugin) -> Result<()> {
+    fn git_clone(&self, url: &str, dest: &Path, plugin: &Plugin) -> Result<()> {
         let mut args = vec!["clone"];
 
         if let Some(depth) = plugin.depth {
@@ -611,14 +610,14 @@ fn parse_plugin_source(source: &str) -> Result<(PluginSource, String)> {
     }
 
     if let Some(repo) = source.strip_prefix("fish:") {
-        let name = repo.split('/').last().unwrap_or(repo).to_string();
+        let name = repo.split('/').next_back().unwrap_or(repo).to_string();
         return Ok((PluginSource::Fish(repo.to_string()), name));
     }
 
     if source.starts_with("https://") || source.starts_with("git@") || source.starts_with("git://") {
         let name = source
             .split('/')
-            .last()
+            .next_back()
             .unwrap_or("plugin")
             .trim_end_matches(".git")
             .to_string();
@@ -627,7 +626,7 @@ fn parse_plugin_source(source: &str) -> Result<(PluginSource, String)> {
 
     // Default: GitHub user/repo
     if source.contains('/') {
-        let name = source.split('/').last().unwrap_or(source).to_string();
+        let name = source.split('/').next_back().unwrap_or(source).to_string();
         return Ok((PluginSource::GitHub(source.to_string()), name));
     }
 

@@ -50,18 +50,6 @@ pub struct HotspotTracker {
     counts: FxHashMap<LoopId, u64>,
     /// Cached signatures for loops
     signatures: FxHashMap<LoopId, LoopSignature>,
-    /// Compiled code cache (signature hash -> compiled function)
-    #[cfg(feature = "jit")]
-    compiled_cache: FxHashMap<u64, CompiledLoop>,
-}
-
-#[cfg(feature = "jit")]
-/// Compiled loop function
-pub struct CompiledLoop {
-    /// Function pointer to the compiled code
-    pub func_ptr: *const u8,
-    /// Size of the compiled code in bytes
-    pub code_size: usize,
 }
 
 impl Default for HotspotTracker {
@@ -75,8 +63,6 @@ impl HotspotTracker {
         Self {
             counts: FxHashMap::default(),
             signatures: FxHashMap::default(),
-            #[cfg(feature = "jit")]
-            compiled_cache: FxHashMap::default(),
         }
     }
 

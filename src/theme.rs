@@ -62,11 +62,9 @@ impl GitInfo {
                     .args(["rev-parse", "--short", "HEAD"])
                     .current_dir(path)
                     .output()
-                {
-                    if output.status.success() {
+                    && output.status.success() {
                         info.commit_short = Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
                     }
-                }
             }
         }
 
@@ -75,8 +73,7 @@ impl GitInfo {
             .args(["status", "--porcelain"])
             .current_dir(path)
             .output()
-        {
-            if output.status.success() {
+            && output.status.success() {
                 let status = String::from_utf8_lossy(&output.stdout);
                 for line in status.lines() {
                     if line.starts_with("??") {
@@ -88,15 +85,13 @@ impl GitInfo {
                     }
                 }
             }
-        }
 
         // Check ahead/behind
         if let Ok(output) = std::process::Command::new("git")
             .args(["rev-list", "--left-right", "--count", "HEAD...@{upstream}"])
             .current_dir(path)
             .output()
-        {
-            if output.status.success() {
+            && output.status.success() {
                 let counts = String::from_utf8_lossy(&output.stdout);
                 let parts: Vec<&str> = counts.trim().split('\t').collect();
                 if parts.len() == 2 {
@@ -104,21 +99,18 @@ impl GitInfo {
                     info.behind = parts[1].parse().unwrap_or(0);
                 }
             }
-        }
 
         // Get remote
         if let Ok(output) = std::process::Command::new("git")
             .args(["remote"])
             .current_dir(path)
             .output()
-        {
-            if output.status.success() {
+            && output.status.success() {
                 let remote = String::from_utf8_lossy(&output.stdout);
                 if let Some(first_remote) = remote.lines().next() {
                     info.remote = Some(first_remote.to_string());
                 }
             }
-        }
 
         info
     }
@@ -291,7 +283,7 @@ pub fn expand_prompt(prompt: &str, ctx: &PromptContext) -> String {
                         // %(condition.true.false)
                         let mut cond = String::new();
                         let mut depth = 1;
-                        while let Some(c) = chars.next() {
+                        for c in chars.by_ref() {
                             if c == '(' {
                                 depth += 1;
                             } else if c == ')' {
@@ -433,8 +425,7 @@ fn expand_conditional(cond: &str, ctx: &PromptContext) -> String {
         }
         _ => {
             // Check for number comparison like "1?"
-            if condition.ends_with('?') {
-                let num_str = &condition[..condition.len()-1];
+            if let Some(num_str) = condition.strip_suffix('?') {
                 if let Ok(num) = num_str.parse::<i32>() {
                     if ctx.last_status == num { true_text } else { false_text }
                 } else {
@@ -480,8 +471,8 @@ fn start_color(color: &str, foreground: bool) -> String {
                 };
             }
             // Hex color support
-            if color.starts_with('#') && color.len() == 7 {
-                if let (Ok(r), Ok(g), Ok(b)) = (
+            if color.starts_with('#') && color.len() == 7
+                && let (Ok(r), Ok(g), Ok(b)) = (
                     u8::from_str_radix(&color[1..3], 16),
                     u8::from_str_radix(&color[3..5], 16),
                     u8::from_str_radix(&color[5..7], 16),
@@ -492,7 +483,6 @@ fn start_color(color: &str, foreground: bool) -> String {
                         format!("\x1b[48;2;{};{};{}m", r, g, b)
                     };
                 }
-            }
             "9"
         }
     };

@@ -3,6 +3,7 @@
 use crate::ast::*;
 use crate::error::{JshError, Result};
 use crate::token::{Span, TokenKind};
+use std::str::FromStr;
 
 use super::Parser;
 
@@ -116,9 +117,9 @@ impl Parser {
         let content = content.trim();
 
         // Length ${#var}
-        if content.starts_with('#') {
+        if let Some(rest) = content.strip_prefix('#') {
             return Ok(WordPart::BraceExpansion(BraceExpansion::Length(
-                content[1..].to_string(),
+                rest.to_string(),
             )));
         }
 
@@ -197,8 +198,8 @@ impl Parser {
         }
 
         // Default without null check (must check after :-)
-        if let Some(idx) = content.find('-') {
-            if !content[..idx].contains(':') {
+        if let Some(idx) = content.find('-')
+            && !content[..idx].contains(':') {
                 let var = &content[..idx];
                 let rest = &content[idx + 1..];
                 return Ok(WordPart::BraceExpansion(BraceExpansion::Default {
@@ -207,11 +208,10 @@ impl Parser {
                     null_or_unset: false,
                 }));
             }
-        }
 
         // Assign default without null check
-        if let Some(idx) = content.find('=') {
-            if !content[..idx].contains(':') {
+        if let Some(idx) = content.find('=')
+            && !content[..idx].contains(':') {
                 let var = &content[..idx];
                 let rest = &content[idx + 1..];
                 return Ok(WordPart::BraceExpansion(BraceExpansion::AssignDefault {
@@ -220,11 +220,10 @@ impl Parser {
                     null_or_unset: false,
                 }));
             }
-        }
 
         // Alternative without null check
-        if let Some(idx) = content.find('+') {
-            if !content[..idx].contains(':') {
+        if let Some(idx) = content.find('+')
+            && !content[..idx].contains(':') {
                 let var = &content[..idx];
                 let rest = &content[idx + 1..];
                 return Ok(WordPart::BraceExpansion(BraceExpansion::Alternative {
@@ -233,7 +232,6 @@ impl Parser {
                     null_or_unset: false,
                 }));
             }
-        }
 
         // Non-greedy prefix removal
         if let Some(idx) = content.find('#') {
