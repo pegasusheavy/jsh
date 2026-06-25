@@ -65,10 +65,21 @@ jobs:
         run: cargo test --all-features --verbose
 
       - name: Run shell integration tests
+        shell: bash
         run: |
           cargo build --release
-          timeout 5 ./target/release/fsh -c 'echo "Hello from jsh"'
-          timeout 5 ./target/release/fsh -c 'for i in 1 2 3; do echo $i; done'
+          # GNU `timeout` is not present on macOS runners (it ships as
+          # `gtimeout` via coreutils, if at all); fall back to running the
+          # binary directly when no timeout command is available.
+          if command -v timeout >/dev/null 2>&1; then
+            run_timeout() { timeout 5 "$@"; }
+          elif command -v gtimeout >/dev/null 2>&1; then
+            run_timeout() { gtimeout 5 "$@"; }
+          else
+            run_timeout() { "$@"; }
+          fi
+          run_timeout ./target/release/fsh -c 'echo "Hello from jsh"'
+          run_timeout ./target/release/fsh -c 'for i in 1 2 3; do echo $i; done'
 
   fmt:
     name: Rustfmt
