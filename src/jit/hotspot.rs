@@ -2,7 +2,7 @@
 //!
 //! Tracks loop execution counts and identifies hot loops eligible for JIT compilation.
 
-use super::{LoopId, HOT_LOOP_THRESHOLD};
+use super::{HOT_LOOP_THRESHOLD, LoopId};
 use rustc_hash::FxHashMap;
 use std::hash::{Hash, Hasher};
 
@@ -195,4 +195,3 @@ mod tests {
         assert!(!tracker.is_jittable(loop_id2));
     }
 }
-

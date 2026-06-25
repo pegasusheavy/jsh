@@ -2,10 +2,10 @@
 //!
 //! Benchmarks parsing performance for various shell constructs.
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use std::hint::black_box;
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use franken_shell::lexer::Lexer;
 use franken_shell::parser::Parser;
+use std::hint::black_box;
 
 /// Helper to parse input
 fn parse_input(input: &str) -> franken_shell::ast::Program {
@@ -41,7 +41,10 @@ fn bench_pipelines(c: &mut Criterion) {
     let inputs = [
         ("two_stage", "ls | grep foo"),
         ("three_stage", "cat file | grep pattern | sort"),
-        ("five_stage", "cat file | grep -v '^#' | sort | uniq | wc -l"),
+        (
+            "five_stage",
+            "cat file | grep -v '^#' | sort | uniq | wc -l",
+        ),
         (
             "with_redirects",
             "cat < input.txt | grep pattern > output.txt 2>&1",
@@ -101,7 +104,10 @@ fn bench_functions(c: &mut Criterion) {
     let inputs = [
         ("simple", "foo() { echo hello; }"),
         ("with_params", "greet() { echo \"Hello, $1!\"; }"),
-        ("with_local", "foo() { local x=1; local y=2; echo $((x+y)); }"),
+        (
+            "with_local",
+            "foo() { local x=1; local y=2; echo $((x+y)); }",
+        ),
         (
             "complex",
             r#"process_file() {
@@ -131,14 +137,23 @@ fn bench_functions(c: &mut Criterion) {
 /// franken-specific syntax parsing
 fn bench_jsh_syntax(c: &mut Criterion) {
     let inputs = [
-        ("match_simple", "match $x { 1 => echo one; * => echo other }"),
+        (
+            "match_simple",
+            "match $x { 1 => echo one; * => echo other }",
+        ),
         (
             "match_complex",
             "match $cmd { start => start_service; stop => stop_service; restart => { stop_service; start_service }; * => echo \"Unknown: $cmd\" }",
         ),
-        ("loop_simple", "loop { read line; if [ \"$line\" = quit ]; then break; fi }"),
+        (
+            "loop_simple",
+            "loop { read line; if [ \"$line\" = quit ]; then break; fi }",
+        ),
         ("let_binding", "let x = 42; let name = \"world\""),
-        ("const_binding", "const PI = 3.14159; const VERSION = \"1.0.0\""),
+        (
+            "const_binding",
+            "const PI = 3.14159; const VERSION = \"1.0.0\"",
+        ),
         (
             "try_catch",
             "try { risky_operation } catch e { echo \"Error: $e\" } finally { cleanup }",
@@ -341,4 +356,3 @@ criterion_group!(
 );
 
 criterion_main!(benches);
-

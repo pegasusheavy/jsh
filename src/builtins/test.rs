@@ -226,4 +226,3 @@ pub fn evaluate_test(args: &[&str], interp: &Interpreter) -> Result<bool> {
 
     Ok(false)
 }
-

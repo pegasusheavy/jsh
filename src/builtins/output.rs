@@ -279,4 +279,3 @@ pub fn builtin_printf(args: &[String], _interp: &mut Interpreter) -> Result<Exit
 
     Ok(ExitStatus::success())
 }
-

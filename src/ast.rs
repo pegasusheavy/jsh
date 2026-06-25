@@ -102,10 +102,7 @@ pub enum CommandKind {
     /// Compound command (if, for, while, etc.)
     Compound(Box<Statement>),
     /// Function call
-    FunctionCall {
-        name: String,
-        args: Vec<Word>,
-    },
+    FunctionCall { name: String, args: Vec<Word> },
     /// Coprocess
     Coproc {
         name: Option<String>,
@@ -247,7 +244,8 @@ impl FlatCommand {
             Word::literal("", span)
         };
 
-        let args = self.args()
+        let args = self
+            .args()
             .iter()
             .map(|a| Word::literal(a.clone(), span))
             .collect();
@@ -301,9 +299,10 @@ impl Word {
     #[inline]
     pub fn as_literal(&self) -> Option<&str> {
         if self.parts.len() == 1
-            && let WordPart::Literal(s) = &self.parts[0] {
-                return Some(s);
-            }
+            && let WordPart::Literal(s) = &self.parts[0]
+        {
+            return Some(s);
+        }
         None
     }
 
@@ -437,15 +436,9 @@ pub enum BraceExpansion {
         all: bool,
     },
     /// Case modification ${var^}, ${var^^}, ${var,}, ${var,,}
-    CaseModify {
-        var: String,
-        mode: CaseModifyMode,
-    },
+    CaseModify { var: String, mode: CaseModifyMode },
     /// Array indexing `${array[index]}`
-    ArrayIndex {
-        var: String,
-        index: Box<Word>,
-    },
+    ArrayIndex { var: String, index: Box<Word> },
     /// Array slice `${array[@]:offset:length}`
     ArraySlice {
         var: String,
@@ -457,10 +450,10 @@ pub enum BraceExpansion {
 /// Case modification modes
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CaseModifyMode {
-    UpperFirst,  // ^
-    UpperAll,    // ^^
-    LowerFirst,  // ,
-    LowerAll,    // ,,
+    UpperFirst, // ^
+    UpperAll,   // ^^
+    LowerFirst, // ,
+    LowerAll,   // ,,
 }
 
 /// Arithmetic expression
@@ -575,16 +568,16 @@ pub struct Redirect {
 /// Types of redirections
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RedirectKind {
-    Input,          // <
-    Output,         // >
-    Append,         // >>
-    InputOutput,    // <>
-    DupInput,       // <&
-    DupOutput,      // >&
-    HereDoc,        // <<
-    HereDocStrip,   // <<-
-    HereString,     // <<<
-    Clobber,        // >|
+    Input,        // <
+    Output,       // >
+    Append,       // >>
+    InputOutput,  // <>
+    DupInput,     // <&
+    DupOutput,    // >&
+    HereDoc,      // <<
+    HereDocStrip, // <<-
+    HereString,   // <<<
+    Clobber,      // >|
 }
 
 /// Target of a redirection
@@ -800,22 +793,22 @@ pub struct FishCase {
 #[derive(Debug, Clone)]
 pub enum TestExpr {
     // File tests
-    FileExists(Word),       // -e
-    IsFile(Word),           // -f
-    IsDir(Word),            // -d
-    IsSymlink(Word),        // -L
-    IsReadable(Word),       // -r
-    IsWritable(Word),       // -w
-    IsExecutable(Word),     // -x
-    IsOwned(Word),          // -O
-    FileSize(Word),         // -s
-    IsNewer(Word, Word),    // -nt
-    IsOlder(Word, Word),    // -ot
-    SameFile(Word, Word),   // -ef
+    FileExists(Word),     // -e
+    IsFile(Word),         // -f
+    IsDir(Word),          // -d
+    IsSymlink(Word),      // -L
+    IsReadable(Word),     // -r
+    IsWritable(Word),     // -w
+    IsExecutable(Word),   // -x
+    IsOwned(Word),        // -O
+    FileSize(Word),       // -s
+    IsNewer(Word, Word),  // -nt
+    IsOlder(Word, Word),  // -ot
+    SameFile(Word, Word), // -ef
 
     // String tests
-    StringEmpty(Word),      // -z
-    StringNotEmpty(Word),   // -n
+    StringEmpty(Word),          // -z
+    StringNotEmpty(Word),       // -n
     StringEqual(Word, Word),    // == or =
     StringNotEqual(Word, Word), // !=
     StringLess(Word, Word),     // <
@@ -823,12 +816,12 @@ pub enum TestExpr {
     StringMatch(Word, Word),    // =~
 
     // Integer tests
-    IntEqual(Word, Word),       // -eq
-    IntNotEqual(Word, Word),    // -ne
-    IntLess(Word, Word),        // -lt
-    IntLessEqual(Word, Word),   // -le
-    IntGreater(Word, Word),     // -gt
-    IntGreaterEqual(Word, Word),// -ge
+    IntEqual(Word, Word),        // -eq
+    IntNotEqual(Word, Word),     // -ne
+    IntLess(Word, Word),         // -lt
+    IntLessEqual(Word, Word),    // -le
+    IntGreater(Word, Word),      // -gt
+    IntGreaterEqual(Word, Word), // -ge
 
     // Logical
     And(Box<TestExpr>, Box<TestExpr>),
@@ -839,7 +832,6 @@ pub enum TestExpr {
     Group(Box<TestExpr>),
 
     // Variable tests
-    VarSet(String),         // -v
-    VarRef(String),         // -R
+    VarSet(String), // -v
+    VarRef(String), // -R
 }
-

@@ -10,7 +10,9 @@ use std::str::FromStr;
 /// kill - send signal to process (POSIX required)
 pub fn builtin_kill(args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
     if args.is_empty() {
-        eprintln!("kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]");
+        eprintln!(
+            "kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]"
+        );
         return Ok(ExitStatus::failure(1));
     }
 
@@ -27,12 +29,18 @@ pub fn builtin_kill(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
             i += 1;
             // If there's a number after -l, show signal name for that number
             if i < args.len()
-                && let Ok(num) = args[i].parse::<i32>() {
-                    if let Ok(sig) = Signal::try_from(num) {
-                        println!("{}", format!("{:?}", sig).strip_prefix("SIG").unwrap_or(&format!("{:?}", sig)));
-                    }
-                    return Ok(ExitStatus::success());
+                && let Ok(num) = args[i].parse::<i32>()
+            {
+                if let Ok(sig) = Signal::try_from(num) {
+                    println!(
+                        "{}",
+                        format!("{:?}", sig)
+                            .strip_prefix("SIG")
+                            .unwrap_or(&format!("{:?}", sig))
+                    );
                 }
+                return Ok(ExitStatus::success());
+            }
         } else if arg == "-s" {
             i += 1;
             if i < args.len() {
@@ -41,11 +49,12 @@ pub fn builtin_kill(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
         } else if arg == "-n" {
             i += 1;
             if i < args.len()
-                && let Ok(num) = args[i].parse::<i32>() {
-                    signal = Signal::try_from(num).map_err(|_| {
-                        crate::error::JshError::InvalidArgument(format!("invalid signal: {}", num))
-                    })?;
-                }
+                && let Ok(num) = args[i].parse::<i32>()
+            {
+                signal = Signal::try_from(num).map_err(|_| {
+                    crate::error::JshError::InvalidArgument(format!("invalid signal: {}", num))
+                })?;
+            }
         } else if arg.starts_with('-') && arg.len() > 1 {
             // -SIGNAME or -signum
             let sig_part = &arg[1..];
@@ -71,11 +80,9 @@ pub fn builtin_kill(args: &[String], _interp: &mut Interpreter) -> Result<ExitSt
     if list_signals {
         // List all signal names
         let signals = [
-            "HUP", "INT", "QUIT", "ILL", "TRAP", "ABRT", "BUS", "FPE",
-            "KILL", "USR1", "SEGV", "USR2", "PIPE", "ALRM", "TERM",
-            "STKFLT", "CHLD", "CONT", "STOP", "TSTP", "TTIN", "TTOU",
-            "URG", "XCPU", "XFSZ", "VTALRM", "PROF", "WINCH", "IO",
-            "PWR", "SYS",
+            "HUP", "INT", "QUIT", "ILL", "TRAP", "ABRT", "BUS", "FPE", "KILL", "USR1", "SEGV",
+            "USR2", "PIPE", "ALRM", "TERM", "STKFLT", "CHLD", "CONT", "STOP", "TSTP", "TTIN",
+            "TTOU", "URG", "XCPU", "XFSZ", "VTALRM", "PROF", "WINCH", "IO", "PWR", "SYS",
         ];
         for (i, name) in signals.iter().enumerate() {
             print!("{:2}) SIG{:<8}", i + 1, name);
@@ -123,9 +130,8 @@ fn parse_signal(s: &str) -> Result<Signal> {
         format!("SIG{}", name)
     };
 
-    Signal::from_str(&name).map_err(|_| {
-        crate::error::JshError::InvalidArgument(format!("invalid signal: {}", s))
-    })
+    Signal::from_str(&name)
+        .map_err(|_| crate::error::JshError::InvalidArgument(format!("invalid signal: {}", s)))
 }
 
 /// fc - process the command history (POSIX required)
@@ -134,7 +140,8 @@ pub fn builtin_fc(args: &[String], interp: &mut Interpreter) -> Result<ExitStatu
     let mut list_mode = false;
     let mut reverse = false;
     let mut suppress_numbers = false;
-    let mut editor = interp.get_var("FCEDIT")
+    let mut editor = interp
+        .get_var("FCEDIT")
         .or_else(|| interp.get_var("EDITOR"))
         .unwrap_or("vi")
         .to_string();
@@ -190,7 +197,10 @@ pub fn builtin_fc(args: &[String], interp: &mut Interpreter) -> Result<ExitStatu
     }
 
     // Edit mode - would normally invoke editor on history
-    eprintln!("fc: edit mode requires history integration (would use {})", editor);
+    eprintln!(
+        "fc: edit mode requires history integration (would use {})",
+        editor
+    );
     let _ = (first, last); // Suppress unused warnings
 
     Ok(ExitStatus::failure(1))
@@ -244,7 +254,10 @@ pub fn builtin_times_posix(_args: &[String], _interp: &mut Interpreter) -> Resul
             let cuser_sec = child_user % 60.0;
             let csys_min = (child_sys / 60.0) as u64;
             let csys_sec = child_sys % 60.0;
-            println!("{}m{:.3}s {}m{:.3}s", cuser_min, cuser_sec, csys_min, csys_sec);
+            println!(
+                "{}m{:.3}s {}m{:.3}s",
+                cuser_min, cuser_sec, csys_min, csys_sec
+            );
         } else {
             println!("0m0.000s 0m0.000s");
             println!("0m0.000s 0m0.000s");
@@ -273,4 +286,3 @@ pub fn builtin_newgrp(args: &[String], _interp: &mut Interpreter) -> Result<Exit
     eprintln!("newgrp: must be run as external command (use /usr/bin/newgrp)");
     Ok(ExitStatus::failure(1))
 }
-

@@ -105,4 +105,3 @@ pub fn builtin_dirs(_args: &[String], interp: &mut Interpreter) -> Result<ExitSt
     println!();
     Ok(ExitStatus::success())
 }
-

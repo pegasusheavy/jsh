@@ -549,23 +549,25 @@ fn evaluate_math_with_depth(expr: &str, depth: usize) -> std::result::Result<f64
     // Handle parentheses first (find matching pair)
     if expr.starts_with('(')
         && let Some(end) = find_matching_paren(&expr)
-            && end == expr.len() - 1 {
-                return evaluate_math_with_depth(&expr[1..end], depth + 1);
-            }
+        && end == expr.len() - 1
+    {
+        return evaluate_math_with_depth(&expr[1..end], depth + 1);
+    }
 
     // Handle addition/subtraction (lowest precedence, process right-to-left)
     // Skip operators inside parentheses
     if let Some(pos) = find_top_level_op(&expr, &['+', '-'])
-        && pos > 0 {
-            let left = evaluate_math_with_depth(&expr[..pos], depth + 1)?;
-            let op = expr.chars().nth(pos).unwrap();
-            let right = evaluate_math_with_depth(&expr[pos + 1..], depth + 1)?;
-            return match op {
-                '+' => Ok(left + right),
-                '-' => Ok(left - right),
-                _ => unreachable!(),
-            };
-        }
+        && pos > 0
+    {
+        let left = evaluate_math_with_depth(&expr[..pos], depth + 1)?;
+        let op = expr.chars().nth(pos).unwrap();
+        let right = evaluate_math_with_depth(&expr[pos + 1..], depth + 1)?;
+        return match op {
+            '+' => Ok(left + right),
+            '-' => Ok(left - right),
+            _ => unreachable!(),
+        };
+    }
 
     // Handle multiplication/division/modulo
     if let Some(pos) = find_top_level_op(&expr, &['*', '/', '%']) {
@@ -638,7 +640,19 @@ fn find_top_level_op(expr: &str, ops: &[char]) -> Option<usize> {
             ')' => depth -= 1,
             c if depth == 0 && ops.contains(&c) => {
                 // Skip if this is part of a number (e.g., -5)
-                if c == '-' && (i == 0 || matches!(chars.get(i - 1), Some(&'(') | Some(&'+') | Some(&'-') | Some(&'*') | Some(&'/') | Some(&'%') | Some(&'^'))) {
+                if c == '-'
+                    && (i == 0
+                        || matches!(
+                            chars.get(i - 1),
+                            Some(&'(')
+                                | Some(&'+')
+                                | Some(&'-')
+                                | Some(&'*')
+                                | Some(&'/')
+                                | Some(&'%')
+                                | Some(&'^')
+                        ))
+                {
                     continue;
                 }
                 return Some(i);
@@ -648,4 +662,3 @@ fn find_top_level_op(expr: &str, ops: &[char]) -> Option<usize> {
     }
     None
 }
-

@@ -208,4 +208,3 @@ fn print_tmux_help() {
     println!("Themes: default, powerline, dracula, nord, gruvbox,");
     println!("        catppuccin-mocha, tokyo-night, one-dark, minimal");
 }
-

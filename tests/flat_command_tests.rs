@@ -1,6 +1,6 @@
 //! Tests for FlatCommand optimized representation
 
-use franken_shell::ast::{FlatCommand, SimpleCommand, Word, Assignment};
+use franken_shell::ast::{Assignment, FlatCommand, SimpleCommand, Word};
 use franken_shell::token::Span;
 
 // =============================================================================
@@ -239,4 +239,3 @@ fn test_flat_command_args_with_special_chars() {
     assert_eq!(cmd.args()[0], "foo\nbar");
     assert_eq!(cmd.args()[1], "tab\there");
 }
-

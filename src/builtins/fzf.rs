@@ -307,10 +307,7 @@ pub fn builtin_fzf_process(args: &[String], interp: &mut Interpreter) -> Result<
 
     if let Some(selected) = run_fzf(&ps_output, &opts) {
         // Extract PID (second column)
-        let pid = selected
-            .split_whitespace()
-            .nth(1)
-            .unwrap_or(&selected);
+        let pid = selected.split_whitespace().nth(1).unwrap_or(&selected);
         println!("{}", pid);
         interp.set_var("FZF_RESULT", pid);
         Ok(ExitStatus::success())
@@ -435,9 +432,7 @@ pub fn builtin_fzf_kill(args: &[String], interp: &mut Interpreter) -> Result<Exi
         let mut killed = Vec::new();
         for line in selected.lines() {
             if let Some(pid) = line.split_whitespace().nth(1) {
-                let status = Command::new("kill")
-                    .args([signal, pid])
-                    .status();
+                let status = Command::new("kill").args([signal, pid]).status();
 
                 if status.map(|s| s.success()).unwrap_or(false) {
                     killed.push(pid.to_string());
@@ -456,4 +451,3 @@ pub fn builtin_fzf_kill(args: &[String], interp: &mut Interpreter) -> Result<Exi
         Ok(ExitStatus::failure(130))
     }
 }
-

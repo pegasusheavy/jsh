@@ -2,7 +2,7 @@
 
 use crate::error::Result;
 use crate::interpreter::{ExitStatus, Interpreter};
-use crate::plugins::{PluginManager, PluginSource, plugins_dir, omz_dir};
+use crate::plugins::{PluginManager, PluginSource, omz_dir, plugins_dir};
 use std::sync::Mutex;
 
 // Global plugin manager - using lazy_static pattern with std::sync
@@ -298,4 +298,3 @@ pub fn builtin_plug_info(args: &[String], _interp: &mut Interpreter) -> Result<E
         Ok(ExitStatus::failure(1))
     }
 }
-

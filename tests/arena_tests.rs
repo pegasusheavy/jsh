@@ -1,8 +1,6 @@
 //! Arena module tests
 
-use franken_shell::arena::{
-    reset_parse_arena, with_parse_arena, StringPool, VecPool,
-};
+use franken_shell::arena::{StringPool, VecPool, reset_parse_arena, with_parse_arena};
 
 // =============================================================================
 // StringPool Tests
@@ -134,7 +132,10 @@ fn test_arena_multiple_allocations() {
     with_parse_arena(|bump| {
         let mut strings = Vec::new();
         for i in 0..1000 {
-            strings.push(bumpalo::collections::String::from_str_in(&format!("item_{}", i), bump));
+            strings.push(bumpalo::collections::String::from_str_in(
+                &format!("item_{}", i),
+                bump,
+            ));
         }
 
         // Verify all strings are valid
@@ -157,4 +158,3 @@ fn test_arena_vec_allocation() {
         assert_eq!(v[99], 99);
     });
 }
-

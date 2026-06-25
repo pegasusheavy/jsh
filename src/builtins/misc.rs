@@ -23,7 +23,7 @@ pub fn builtin_hash(_args: &[String], _interp: &mut Interpreter) -> Result<ExitS
 
 /// umask - set file creation mask
 pub fn builtin_umask(args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
-    use nix::sys::stat::{mode_t, umask, Mode};
+    use nix::sys::stat::{Mode, mode_t, umask};
 
     if args.is_empty() {
         let current = umask(Mode::empty());
@@ -92,8 +92,8 @@ pub fn builtin_history(_args: &[String], _interp: &mut Interpreter) -> Result<Ex
 ///   ssh_agent status  - Show ssh-agent status
 ///   ssh_agent add     - Add default SSH keys to the agent
 pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<ExitStatus> {
-    use std::process::{Command, Stdio};
     use std::path::PathBuf;
+    use std::process::{Command, Stdio};
 
     let subcommand = args.first().map(|s| s.as_str()).unwrap_or("status");
 
@@ -134,12 +134,12 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
                             && let Some(pid) = line
                                 .strip_prefix("SSH_AGENT_PID=")
                                 .and_then(|s| s.strip_suffix("; export SSH_AGENT_PID;"))
-                            {
-                                // SAFETY: Setting env var in user command context
-                                unsafe { std::env::set_var("SSH_AGENT_PID", pid) };
-                                interp.set_var("SSH_AGENT_PID", pid);
-                                interp.export_var("SSH_AGENT_PID", Some(pid));
-                            }
+                        {
+                            // SAFETY: Setting env var in user command context
+                            unsafe { std::env::set_var("SSH_AGENT_PID", pid) };
+                            interp.set_var("SSH_AGENT_PID", pid);
+                            interp.export_var("SSH_AGENT_PID", Some(pid));
+                        }
                     }
 
                     if let Some(pid) = interp.get_var("SSH_AGENT_PID") {
@@ -156,9 +156,7 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
 
         "stop" => {
             if let Some(pid) = interp.get_var("SSH_AGENT_PID").map(|s| s.to_string()) {
-                let _ = Command::new("kill")
-                    .arg(&pid)
-                    .status();
+                let _ = Command::new("kill").arg(&pid).status();
 
                 // SAFETY: Clearing env vars
                 unsafe {
@@ -189,9 +187,7 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
                     }
 
                     // List identities
-                    let output = Command::new("ssh-add")
-                        .arg("-l")
-                        .output();
+                    let output = Command::new("ssh-add").arg("-l").output();
 
                     if let Ok(output) = output {
                         if output.status.success() {
@@ -219,8 +215,7 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
             }
 
             // Add default keys
-            let status = Command::new("ssh-add")
-                .status();
+            let status = Command::new("ssh-add").status();
 
             match status {
                 Ok(s) if s.success() => {
@@ -244,4 +239,3 @@ pub fn builtin_ssh_agent(args: &[String], interp: &mut Interpreter) -> Result<Ex
         }
     }
 }
-

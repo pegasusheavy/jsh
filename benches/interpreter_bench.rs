@@ -2,11 +2,11 @@
 //!
 //! Benchmarks execution performance for various shell constructs.
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use std::hint::black_box;
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use franken_shell::interpreter::Interpreter;
 use franken_shell::lexer::Lexer;
 use franken_shell::parser::Parser;
+use std::hint::black_box;
 
 /// Helper to execute input
 fn execute_input(input: &str) -> franken_shell::interpreter::ExitStatus {
@@ -24,10 +24,7 @@ fn bench_variables(c: &mut Criterion) {
         ("assign_single", "x=hello"),
         ("assign_multiple", "x=1; y=2; z=3; a=4; b=5"),
         ("assign_and_read", "x=hello; y=$x; z=$y"),
-        (
-            "complex_expansion",
-            "x=hello; y=${x:-default}; z=${y:+set}",
-        ),
+        ("complex_expansion", "x=hello; y=${x:-default}; z=${y:+set}"),
     ];
 
     let mut group = c.benchmark_group("interp_variables");
@@ -99,10 +96,7 @@ fn bench_control_flow(c: &mut Criterion) {
 fn bench_functions(c: &mut Criterion) {
     let inputs = [
         ("define_call", "foo() { echo hello; }; foo"),
-        (
-            "with_args",
-            "greet() { echo hello $1; }; greet world",
-        ),
+        ("with_args", "greet() { echo hello $1; }; greet world"),
         (
             "recursive_3",
             "countdown() { if [ $1 -gt 0 ]; then countdown $(($1-1)); fi }; countdown 3",
@@ -179,7 +173,10 @@ fn bench_jsh_features(c: &mut Criterion) {
             "x=2; match $x { 1 => echo one; 2 => echo two; * => echo other }",
         ),
         ("let_binding", "let x = 42; let y = $x"),
-        ("loop_break", "x=0; loop { x=$((x+1)); if [ $x -ge 3 ]; then break; fi }"),
+        (
+            "loop_break",
+            "x=0; loop { x=$((x+1)); if [ $x -ge 3 ]; then break; fi }",
+        ),
     ];
 
     let mut group = c.benchmark_group("interp_jsh");
@@ -252,4 +249,3 @@ criterion_group!(
 );
 
 criterion_main!(benches);
-

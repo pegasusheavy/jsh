@@ -23,7 +23,7 @@ mod instruction;
 mod vm;
 
 pub use compiler::Compiler;
-pub use instruction::{Instruction, OpCode, Chunk};
+pub use instruction::{Chunk, Instruction, OpCode};
 pub use vm::{VM, VMError, VMResult};
 
 /// Bytecode module version
@@ -56,15 +56,18 @@ mod tests {
     #[test]
     fn test_compile_and_run_loop() {
         let mut compiler = Compiler::new();
-        let chunk = compiler.compile_string(r#"
+        let chunk = compiler
+            .compile_string(
+                r#"
             for i in 1 2 3; do
                 echo $i
             done
-        "#).unwrap();
+        "#,
+            )
+            .unwrap();
 
         let mut vm = VM::new();
         let result = vm.run(&chunk);
         assert!(result.is_ok());
     }
 }
-

@@ -281,11 +281,12 @@ impl ScopeStack {
     pub fn merge_into_parent(&mut self) {
         if self.scopes.len() > 1
             && let Some(current) = self.scopes.pop()
-                && let Some(parent) = self.scopes.last_mut() {
-                    for (name, value) in current.iter() {
-                        parent.set(name, value.clone());
-                    }
-                }
+            && let Some(parent) = self.scopes.last_mut()
+        {
+            for (name, value) in current.iter() {
+                parent.set(name, value.clone());
+            }
+        }
     }
 }
 
@@ -410,7 +411,9 @@ mod tests {
         {
             let mut guard = ScopeGuard::new(&mut stack);
             assert_eq!(guard.stack().depth(), 1);
-            guard.stack_mut().set_local("inner", "inner_value".to_string());
+            guard
+                .stack_mut()
+                .set_local("inner", "inner_value".to_string());
             assert_eq!(guard.stack().get("inner"), Some("inner_value"));
         }
 
@@ -433,7 +436,10 @@ mod tests {
 
         // Can see all variables
         for i in 0..10 {
-            assert_eq!(stack.get(&format!("var_{}", i)), Some(format!("value_{}", i).as_str()));
+            assert_eq!(
+                stack.get(&format!("var_{}", i)),
+                Some(format!("value_{}", i).as_str())
+            );
         }
 
         // Pop all scopes
@@ -469,4 +475,3 @@ mod tests {
         assert_eq!(stack.get("global1"), Some("shadowed"));
     }
 }
-

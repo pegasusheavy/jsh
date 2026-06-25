@@ -54,7 +54,11 @@ fn print_help() {
     println!("    {} - Infinite loop", "loop".magenta());
     println!("        loop {{ read x; [[ $x == quit ]] && break }}");
     println!();
-    println!("    {}/{} - Variable bindings", "let".magenta(), "const".magenta());
+    println!(
+        "    {}/{} - Variable bindings",
+        "let".magenta(),
+        "const".magenta()
+    );
     println!("        let name = value");
     println!("        const PI = 3.14159");
     println!();
@@ -69,7 +73,8 @@ fn main() -> ExitCode {
     let args: Vec<String> = env::args().collect();
 
     // Check if invoked as login shell (argv[0] starts with '-' or --login flag)
-    let invoked_as_login = args.first()
+    let invoked_as_login = args
+        .first()
         .map(|s| s.starts_with('-') || s.ends_with("-fsh"))
         .unwrap_or(false);
 
@@ -129,13 +134,18 @@ fn main() -> ExitCode {
     }
 
     // Determine if shell is interactive
-    let is_interactive = interactive || (command.is_none() && script.is_none() && atty::is(atty::Stream::Stdin));
+    let is_interactive =
+        interactive || (command.is_none() && script.is_none() && atty::is(atty::Stream::Stdin));
 
     // Create shell with appropriate options
     let mut shell = match Shell::with_options(login_shell, is_interactive) {
         Ok(s) => s,
         Err(e) => {
-            eprintln!("{}: failed to initialize shell: {}", "error".red().bold(), e);
+            eprintln!(
+                "{}: failed to initialize shell: {}",
+                "error".red().bold(),
+                e
+            );
             return ExitCode::FAILURE;
         }
     };

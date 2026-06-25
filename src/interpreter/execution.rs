@@ -36,7 +36,8 @@ impl Interpreter {
             Statement::Case(case_stmt) => self.execute_case(case_stmt),
             Statement::Select(select_stmt) => self.execute_select(select_stmt),
             Statement::Function(func_def) => {
-                self.functions.insert(func_def.name.clone(), func_def.clone());
+                self.functions
+                    .insert(func_def.name.clone(), func_def.clone());
                 Ok(ExitStatus::success())
             }
             Statement::Match(match_expr) => self.execute_match(match_expr),
@@ -263,9 +264,10 @@ impl Interpreter {
         }
 
         if assign.readonly
-            && let Some(val) = self.vars.remove(&assign.name) {
-                self.consts.insert(assign.name.clone(), val);
-            }
+            && let Some(val) = self.vars.remove(&assign.name)
+        {
+            self.consts.insert(assign.name.clone(), val);
+        }
 
         Ok(ExitStatus::success())
     }
@@ -330,9 +332,10 @@ impl Interpreter {
                 Ok(status) => Ok(status),
                 Err(JshError::Return(val)) => {
                     if let Some(v) = val
-                        && let Ok(code) = v.parse::<i32>() {
-                            return Ok(ExitStatus::failure(code));
-                        }
+                        && let Ok(code) = v.parse::<i32>()
+                    {
+                        return Ok(ExitStatus::failure(code));
+                    }
                     Ok(ExitStatus::success())
                 }
                 Err(e) => Err(e),
@@ -352,4 +355,3 @@ impl Interpreter {
         result
     }
 }
-
