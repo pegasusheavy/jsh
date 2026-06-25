@@ -441,12 +441,12 @@ pub enum BraceExpansion {
         var: String,
         mode: CaseModifyMode,
     },
-    /// Array indexing ${array[index]}
+    /// Array indexing `${array[index]}`
     ArrayIndex {
         var: String,
         index: Box<Word>,
     },
-    /// Array slice ${array[@]:offset:length}
+    /// Array slice `${array[@]:offset:length}`
     ArraySlice {
         var: String,
         offset: ArithExpr,
