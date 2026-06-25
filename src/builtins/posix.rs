@@ -222,7 +222,12 @@ pub fn builtin_times_posix(_args: &[String], _interp: &mut Interpreter) -> Resul
         let mut tms = MaybeUninit::<libc::tms>::uninit();
         let clock_tick = unsafe { libc::sysconf(libc::_SC_CLK_TCK) } as f64;
 
-        if unsafe { libc::times(tms.as_mut_ptr()) } != -1 {
+        // `times()` returns `(clock_t)-1` on error. `clock_t` is signed on
+        // Linux but unsigned on macOS/BSD, so build the sentinel by casting
+        // -1 into the platform's `clock_t` (all-ones bit pattern) rather than
+        // comparing against the literal `-1`, which is invalid for unsigned.
+        let times_err = -1_i64 as libc::clock_t;
+        if unsafe { libc::times(tms.as_mut_ptr()) } != times_err {
             let tms = unsafe { tms.assume_init() };
             let user_time = tms.tms_utime as f64 / clock_tick;
             let sys_time = tms.tms_stime as f64 / clock_tick;

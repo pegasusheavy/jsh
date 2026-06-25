@@ -23,14 +23,16 @@ pub fn builtin_hash(_args: &[String], _interp: &mut Interpreter) -> Result<ExitS
 
 /// umask - set file creation mask
 pub fn builtin_umask(args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
-    use nix::sys::stat::{umask, Mode};
+    use nix::sys::stat::{mode_t, umask, Mode};
 
     if args.is_empty() {
         let current = umask(Mode::empty());
         umask(current);
         println!("{:04o}", current.bits());
     } else if let Ok(mask) = u32::from_str_radix(&args[0], 8) {
-        umask(Mode::from_bits_truncate(mask));
+        // `nix::Mode` is backed by `mode_t`, which is `u32` on Linux but
+        // `u16` on macOS/BSD; cast so the call compiles on every platform.
+        umask(Mode::from_bits_truncate(mask as mode_t));
     }
 
     Ok(ExitStatus::success())
