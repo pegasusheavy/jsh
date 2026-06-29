@@ -88,7 +88,7 @@ cranelift-codegen = { version = "0.132", optional = true }
 cranelift-frontend = { version = "0.132", optional = true }
 cranelift-module = { version = "0.132", optional = true }
 cranelift-jit = { version = "0.132", optional = true }
-cranelift-native = { version = "0.132", optional = true }
+cranelift-native = { version = "0.133", optional = true }
 
 # Target triple for JIT
 target-lexicon = { version = "0.13", optional = true }
