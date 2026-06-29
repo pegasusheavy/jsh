@@ -71,7 +71,7 @@ once_cell = "1.20"
 bumpalo = { version = "3.16", features = ["collections"] }
 
 # Perfect hash function for keyword lookup (compile-time generated)
-phf = { version = "0.13", features = ["macros"] }
+phf = { version = "0.14", features = ["macros"] }
 
 # Parallel execution for glob expansion and independent pipeline stages
 rayon = "1.10"
