@@ -28,7 +28,7 @@ links:
   documentation: "https://quinnjr.github.io/jsh/"
   issues: "https://github.com/quinnjr/jsh/issues"
   releases: "https://github.com/quinnjr/jsh/releases"
-  
+
 ---
 description: |
   jsh is a Unix shell that serves as a drop-in replacement for Bash and ZSH.
@@ -501,4 +501,4 @@ related_projects:
 ---
 contact:
   issues: "https://github.com/quinnjr/jsh/issues"
-    security: "https://github.com/quinnjr/jsh/security"
+  security: "https://github.com/quinnjr/jsh/security"
