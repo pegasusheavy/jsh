@@ -8,14 +8,14 @@
 //! - Key bindings
 //! - Copy mode
 
-pub mod config;
-pub mod session;
-pub mod window;
-pub mod pane;
-pub mod keybind;
-pub mod theme;
-pub mod plugin;
 pub mod commands;
+pub mod config;
+pub mod keybind;
+pub mod pane;
+pub mod plugin;
+pub mod session;
+pub mod theme;
+pub mod window;
 
 use crate::error::{JshError, Result};
 use crate::shell::fsh_config_dir;
@@ -24,12 +24,12 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 pub use config::TmuxConfig;
-pub use session::Session;
-pub use window::Window;
-pub use pane::Pane;
 pub use keybind::{KeyBinding, KeyTable};
-pub use theme::StatusBarTheme;
+pub use pane::Pane;
 pub use plugin::TmuxPluginManager;
+pub use session::Session;
+pub use theme::StatusBarTheme;
+pub use window::Window;
 
 /// Global tmux server state
 pub struct TmuxServer {
@@ -77,7 +77,10 @@ impl TmuxServer {
     /// Create a new session
     pub fn new_session(&mut self, name: &str) -> Result<Arc<Mutex<Session>>> {
         if self.sessions.contains_key(name) {
-            return Err(JshError::runtime(format!("Session '{}' already exists", name)));
+            return Err(JshError::runtime(format!(
+                "Session '{}' already exists",
+                name
+            )));
         }
 
         let session = Arc::new(Mutex::new(Session::new(name)));
@@ -97,7 +100,9 @@ impl TmuxServer {
 
     /// Get current session
     pub fn current(&self) -> Option<Arc<Mutex<Session>>> {
-        self.current_session.as_ref().and_then(|n| self.sessions.get(n).cloned())
+        self.current_session
+            .as_ref()
+            .and_then(|n| self.sessions.get(n).cloned())
     }
 
     /// List all sessions
@@ -143,7 +148,10 @@ impl TmuxServer {
             }
             Ok(())
         } else {
-            Err(JshError::runtime(format!("Session '{}' not found", old_name)))
+            Err(JshError::runtime(format!(
+                "Session '{}' not found",
+                old_name
+            )))
         }
     }
 
@@ -246,7 +254,9 @@ impl TmuxColor {
             "terminal" => TmuxColor::Terminal,
             s if s.starts_with("colour") || s.starts_with("color") => {
                 let num = s.trim_start_matches("colour").trim_start_matches("color");
-                num.parse().map(TmuxColor::Color256).unwrap_or(TmuxColor::Default)
+                num.parse()
+                    .map(TmuxColor::Color256)
+                    .unwrap_or(TmuxColor::Default)
             }
             s if s.starts_with('#') && s.len() == 7 => {
                 let r = u8::from_str_radix(&s[1..3], 16).unwrap_or(0);
@@ -261,7 +271,13 @@ impl TmuxColor {
     pub fn to_ansi(&self, fg: bool) -> String {
         let base = if fg { 30 } else { 40 };
         match self {
-            TmuxColor::Default => if fg { "\x1b[39m".to_string() } else { "\x1b[49m".to_string() },
+            TmuxColor::Default => {
+                if fg {
+                    "\x1b[39m".to_string()
+                } else {
+                    "\x1b[49m".to_string()
+                }
+            }
             TmuxColor::Black => format!("\x1b[{}m", base),
             TmuxColor::Red => format!("\x1b[{}m", base + 1),
             TmuxColor::Green => format!("\x1b[{}m", base + 2),
@@ -352,14 +368,30 @@ impl TmuxStyle {
         if let Some(ref bg) = self.bg {
             codes.push(bg.to_ansi(false));
         }
-        if self.bold { codes.push("\x1b[1m".to_string()); }
-        if self.dim { codes.push("\x1b[2m".to_string()); }
-        if self.italics { codes.push("\x1b[3m".to_string()); }
-        if self.underscore { codes.push("\x1b[4m".to_string()); }
-        if self.blink { codes.push("\x1b[5m".to_string()); }
-        if self.reverse { codes.push("\x1b[7m".to_string()); }
-        if self.hidden { codes.push("\x1b[8m".to_string()); }
-        if self.strikethrough { codes.push("\x1b[9m".to_string()); }
+        if self.bold {
+            codes.push("\x1b[1m".to_string());
+        }
+        if self.dim {
+            codes.push("\x1b[2m".to_string());
+        }
+        if self.italics {
+            codes.push("\x1b[3m".to_string());
+        }
+        if self.underscore {
+            codes.push("\x1b[4m".to_string());
+        }
+        if self.blink {
+            codes.push("\x1b[5m".to_string());
+        }
+        if self.reverse {
+            codes.push("\x1b[7m".to_string());
+        }
+        if self.hidden {
+            codes.push("\x1b[8m".to_string());
+        }
+        if self.strikethrough {
+            codes.push("\x1b[9m".to_string());
+        }
 
         codes.join("")
     }
@@ -368,4 +400,3 @@ impl TmuxStyle {
         "\x1b[0m"
     }
 }
-

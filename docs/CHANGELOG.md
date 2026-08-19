@@ -82,11 +82,11 @@ This is the initial release. No migration required.
 
 ## Links
 
-- [jsh Repository](https://github.com/pegasusheavy/jsh)
-- [Report Issues](https://github.com/pegasusheavy/jsh/issues)
-- [Pegasus Heavy Industries](https://github.com/pegasusheavy)
+- [jsh Repository](https://github.com/quinnjr/jsh)
+- [Report Issues](https://github.com/quinnjr/jsh/issues)
+- [Joseph R. Quinn](https://github.com/quinnjr)
 
 ---
 
-*Maintained by Pegasus Heavy Industries LLC*
+*Maintained by Joseph R. Quinn*
 

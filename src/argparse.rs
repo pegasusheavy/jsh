@@ -83,7 +83,9 @@ impl ParsedArgs {
 
     /// Get an option value
     pub fn get(&self, name: &str) -> Option<&str> {
-        self.options.get(name).and_then(|v| v.first().map(|s| s.as_str()))
+        self.options
+            .get(name)
+            .and_then(|v| v.first().map(|s| s.as_str()))
     }
 
     /// Get all values for a repeated option
@@ -118,7 +120,9 @@ impl ParsedArgs {
 
     /// Get option with default
     pub fn get_or(&self, name: &str, default: &str) -> String {
-        self.get(name).map(|s| s.to_string()).unwrap_or_else(|| default.to_string())
+        self.get(name)
+            .map(|s| s.to_string())
+            .unwrap_or_else(|| default.to_string())
     }
 
     /// Get int with default
@@ -236,8 +240,16 @@ impl ArgParser {
             short.trim_start_matches('-').to_string()
         };
         self.args.push(ArgDef {
-            short: if short.is_empty() { None } else { Some(short.to_string()) },
-            long: if long.is_empty() { None } else { Some(long.to_string()) },
+            short: if short.is_empty() {
+                None
+            } else {
+                Some(short.to_string())
+            },
+            long: if long.is_empty() {
+                None
+            } else {
+                Some(long.to_string())
+            },
             name,
             help: help.to_string(),
             arg_type: ArgType::Flag,
@@ -256,8 +268,16 @@ impl ArgParser {
             short.trim_start_matches('-').to_string()
         };
         self.args.push(ArgDef {
-            short: if short.is_empty() { None } else { Some(short.to_string()) },
-            long: if long.is_empty() { None } else { Some(long.to_string()) },
+            short: if short.is_empty() {
+                None
+            } else {
+                Some(short.to_string())
+            },
+            long: if long.is_empty() {
+                None
+            } else {
+                Some(long.to_string())
+            },
             name,
             help: format!("{} ({})", help, metavar),
             arg_type: ArgType::Option,
@@ -276,8 +296,16 @@ impl ArgParser {
             short.trim_start_matches('-').to_string()
         };
         self.args.push(ArgDef {
-            short: if short.is_empty() { None } else { Some(short.to_string()) },
-            long: if long.is_empty() { None } else { Some(long.to_string()) },
+            short: if short.is_empty() {
+                None
+            } else {
+                Some(short.to_string())
+            },
+            long: if long.is_empty() {
+                None
+            } else {
+                Some(long.to_string())
+            },
             name,
             help: format!("{} ({})", help, metavar),
             arg_type: ArgType::Option,
@@ -289,15 +317,30 @@ impl ArgParser {
     }
 
     /// Add an option with a default value
-    pub fn option_default(mut self, short: &str, long: &str, metavar: &str, help: &str, default: &str) -> Self {
+    pub fn option_default(
+        mut self,
+        short: &str,
+        long: &str,
+        metavar: &str,
+        help: &str,
+        default: &str,
+    ) -> Self {
         let name = if !long.is_empty() {
             long.trim_start_matches('-').to_string()
         } else {
             short.trim_start_matches('-').to_string()
         };
         self.args.push(ArgDef {
-            short: if short.is_empty() { None } else { Some(short.to_string()) },
-            long: if long.is_empty() { None } else { Some(long.to_string()) },
+            short: if short.is_empty() {
+                None
+            } else {
+                Some(short.to_string())
+            },
+            long: if long.is_empty() {
+                None
+            } else {
+                Some(long.to_string())
+            },
             name,
             help: format!("{} ({}, default: {})", help, metavar, default),
             arg_type: ArgType::Option,
@@ -316,8 +359,16 @@ impl ArgParser {
             short.trim_start_matches('-').to_string()
         };
         self.args.push(ArgDef {
-            short: if short.is_empty() { None } else { Some(short.to_string()) },
-            long: if long.is_empty() { None } else { Some(long.to_string()) },
+            short: if short.is_empty() {
+                None
+            } else {
+                Some(short.to_string())
+            },
+            long: if long.is_empty() {
+                None
+            } else {
+                Some(long.to_string())
+            },
             name,
             help: format!("{} ({}, can be repeated)", help, metavar),
             arg_type: ArgType::Option,
@@ -393,7 +444,7 @@ impl ArgParser {
         let mut help = String::new();
 
         // Usage line
-        help.push_str(&format!("{}", self.name));
+        help.push_str(&self.name.to_string());
         if !self.description.is_empty() {
             help.push_str(&format!(" - {}", self.description));
         }
@@ -421,13 +472,19 @@ impl ArgParser {
         help.push('\n');
 
         // Options
-        let flags: Vec<_> = self.args.iter()
+        let flags: Vec<_> = self
+            .args
+            .iter()
             .filter(|a| a.arg_type == ArgType::Flag)
             .collect();
-        let options: Vec<_> = self.args.iter()
+        let options: Vec<_> = self
+            .args
+            .iter()
             .filter(|a| a.arg_type == ArgType::Option)
             .collect();
-        let positionals: Vec<_> = self.args.iter()
+        let positionals: Vec<_> = self
+            .args
+            .iter()
             .filter(|a| a.arg_type == ArgType::Positional)
             .collect();
 
@@ -442,8 +499,12 @@ impl ArgParser {
             }
 
             for arg in flags {
-                let short = arg.short.as_ref().map(|s| format!("{}, ", s)).unwrap_or_default();
-                let long = arg.long.as_ref().map(|s| s.as_str()).unwrap_or("");
+                let short = arg
+                    .short
+                    .as_ref()
+                    .map(|s| format!("{}, ", s))
+                    .unwrap_or_default();
+                let long = arg.long.as_deref().unwrap_or("");
                 help.push_str(&format!("  {}{:<12}  {}\n", short, long, arg.help));
             }
             help.push('\n');
@@ -452,10 +513,17 @@ impl ArgParser {
         if !options.is_empty() {
             help.push_str("Options:\n");
             for arg in options {
-                let short = arg.short.as_ref().map(|s| format!("{}, ", s)).unwrap_or_default();
-                let long = arg.long.as_ref().map(|s| s.as_str()).unwrap_or("");
+                let short = arg
+                    .short
+                    .as_ref()
+                    .map(|s| format!("{}, ", s))
+                    .unwrap_or_default();
+                let long = arg.long.as_deref().unwrap_or("");
                 let required = if arg.required { " (required)" } else { "" };
-                help.push_str(&format!("  {}{:<12}  {}{}\n", short, long, arg.help, required));
+                help.push_str(&format!(
+                    "  {}{:<12}  {}{}\n",
+                    short, long, arg.help, required
+                ));
             }
             help.push('\n');
         }
@@ -506,22 +574,26 @@ impl ArgParser {
     /// Find argument definition by short or long form
     fn find_arg(&self, key: &str) -> Option<&ArgDef> {
         self.args.iter().find(|a| {
-            a.short.as_ref().map(|s| s == key).unwrap_or(false) ||
-            a.long.as_ref().map(|s| s == key).unwrap_or(false)
+            a.short.as_ref().map(|s| s == key).unwrap_or(false)
+                || a.long.as_ref().map(|s| s == key).unwrap_or(false)
         })
     }
 
     /// Parse arguments
     pub fn parse(&self, args: &[impl AsRef<str>]) -> Result<ParsedArgs, ParseError> {
         let mut result = ParsedArgs::default();
-        let positional_defs: Vec<_> = self.args.iter()
+        let positional_defs: Vec<_> = self
+            .args
+            .iter()
             .filter(|a| a.arg_type == ArgType::Positional)
             .collect();
 
         // Apply defaults
         for arg in &self.args {
             if let Some(default) = &arg.default {
-                result.options.insert(arg.name.clone(), vec![default.clone()]);
+                result
+                    .options
+                    .insert(arg.name.clone(), vec![default.clone()]);
             }
         }
 
@@ -561,14 +633,20 @@ impl ArgParser {
                 if let Some(def) = self.find_arg(key) {
                     if def.arg_type == ArgType::Flag {
                         // Flags don't take values
-                        result.flags.insert(def.name.clone(), value == "true" || value == "1");
+                        result
+                            .flags
+                            .insert(def.name.clone(), value == "true" || value == "1");
                     } else {
                         if def.multiple {
-                            result.options.entry(def.name.clone())
+                            result
+                                .options
+                                .entry(def.name.clone())
                                 .or_default()
                                 .push(value.to_string());
                         } else {
-                            result.options.insert(def.name.clone(), vec![value.to_string()]);
+                            result
+                                .options
+                                .insert(def.name.clone(), vec![value.to_string()]);
                         }
                     }
                 } else if !self.allow_unknown {
@@ -591,7 +669,9 @@ impl ArgParser {
                         }
                         let value = &args[i];
                         if def.multiple {
-                            result.options.entry(def.name.clone())
+                            result
+                                .options
+                                .entry(def.name.clone())
                                 .or_default()
                                 .push(value.clone());
                         } else {
@@ -623,7 +703,9 @@ impl ArgParser {
                             if j + 1 < chars.len() {
                                 let value: String = chars[j + 1..].iter().collect();
                                 if def.multiple {
-                                    result.options.entry(def.name.clone())
+                                    result
+                                        .options
+                                        .entry(def.name.clone())
                                         .or_default()
                                         .push(value);
                                 } else {
@@ -638,7 +720,9 @@ impl ArgParser {
                                 }
                                 let value = &args[i];
                                 if def.multiple {
-                                    result.options.entry(def.name.clone())
+                                    result
+                                        .options
+                                        .entry(def.name.clone())
                                         .or_default()
                                         .push(value.clone());
                                 } else {
@@ -678,7 +762,8 @@ impl ArgParser {
                         }
                     }
                     ArgType::Positional => {
-                        let idx = positional_defs.iter()
+                        let idx = positional_defs
+                            .iter()
                             .position(|a| a.name == arg.name)
                             .unwrap_or(0);
                         if idx >= result.positionals.len() {
@@ -718,7 +803,9 @@ impl ArgParser {
 }
 
 /// Quick parser for simple cases - parses flags and collects positionals
-pub fn quick_parse(args: &[String]) -> (HashMap<String, bool>, HashMap<String, String>, Vec<String>) {
+pub fn quick_parse(
+    args: &[String],
+) -> (HashMap<String, bool>, HashMap<String, String>, Vec<String>) {
     let mut flags = HashMap::new();
     let mut options = HashMap::new();
     let mut positionals = Vec::new();
@@ -737,8 +824,8 @@ pub fn quick_parse(args: &[String]) -> (HashMap<String, bool>, HashMap<String, S
             let key = parts[0][2..].to_string();
             let value = parts[1].to_string();
             options.insert(key, value);
-        } else if arg.starts_with("--") {
-            let key = arg[2..].to_string();
+        } else if let Some(stripped) = arg.strip_prefix("--") {
+            let key = stripped.to_string();
             // Check if next arg is a value
             if i + 1 < args.len() && !args[i + 1].starts_with('-') {
                 options.insert(key, args[i + 1].clone());
@@ -782,7 +869,9 @@ mod tests {
             .option("-o", "--output", "FILE", "Output file")
             .option("-n", "--count", "NUM", "Count");
 
-        let result = parser.parse(&["test", "-o", "out.txt", "--count=10"]).unwrap();
+        let result = parser
+            .parse(&["test", "-o", "out.txt", "--count=10"])
+            .unwrap();
         assert_eq!(result.get("output"), Some("out.txt"));
         assert_eq!(result.get_int("count"), Some(10));
     }
@@ -815,8 +904,7 @@ mod tests {
 
     #[test]
     fn test_default_value() {
-        let parser = ArgParser::new("test")
-            .option_default("-n", "--count", "NUM", "Count", "5");
+        let parser = ArgParser::new("test").option_default("-n", "--count", "NUM", "Count", "5");
 
         let result = parser.parse(&["test"]).unwrap();
         assert_eq!(result.get("count"), Some("5"));
@@ -827,18 +915,19 @@ mod tests {
 
     #[test]
     fn test_multi_option() {
-        let parser = ArgParser::new("test")
-            .multi_option("-f", "--file", "FILE", "Input files");
+        let parser = ArgParser::new("test").multi_option("-f", "--file", "FILE", "Input files");
 
-        let result = parser.parse(&["test", "-f", "a.txt", "-f", "b.txt", "--file", "c.txt"]).unwrap();
+        let result = parser
+            .parse(&["test", "-f", "a.txt", "-f", "b.txt", "--file", "c.txt"])
+            .unwrap();
         let files = result.get_all("file").unwrap();
         assert_eq!(files, &["a.txt", "b.txt", "c.txt"]);
     }
 
     #[test]
     fn test_required_missing() {
-        let parser = ArgParser::new("test")
-            .required_option("-o", "--output", "FILE", "Output file");
+        let parser =
+            ArgParser::new("test").required_option("-o", "--output", "FILE", "Output file");
 
         let result = parser.parse(&["test"]);
         assert!(matches!(result, Err(ParseError::MissingRequired(_))));
@@ -846,8 +935,7 @@ mod tests {
 
     #[test]
     fn test_unknown_option() {
-        let parser = ArgParser::new("test")
-            .flag("-v", "--verbose", "Verbose");
+        let parser = ArgParser::new("test").flag("-v", "--verbose", "Verbose");
 
         let result = parser.parse(&["test", "--unknown"]);
         assert!(matches!(result, Err(ParseError::UnknownOption(_))));
@@ -859,7 +947,9 @@ mod tests {
             .flag("-v", "--verbose", "Verbose")
             .positional("cmd", "Command", true);
 
-        let result = parser.parse(&["test", "-v", "run", "--", "-a", "-b", "extra"]).unwrap();
+        let result = parser
+            .parse(&["test", "-v", "run", "--", "-a", "-b", "extra"])
+            .unwrap();
         assert!(result.has("verbose"));
         assert_eq!(result.positional(0), Some("run"));
         assert_eq!(result.rest(), &["-a", "-b", "extra"]);
@@ -883,4 +973,3 @@ mod tests {
         assert!(help.contains("input"));
     }
 }
-

@@ -8,9 +8,9 @@
 - **Version**: 0.1.0
 - **Language**: Rust (Edition 2024)
 - **License**: MIT OR Apache-2.0
-- **Author**: Pegasus Heavy Industries LLC
-- **Repository**: https://github.com/pegasusheavy/jsh
-- **Documentation**: https://pegasusheavy.github.io/jsh/
+- **Author**: Joseph R. Quinn
+- **Repository**: https://github.com/quinnjr/jsh
+- **Documentation**: https://quinnjr.github.io/jsh/
 - **Minimum Rust Version**: 1.85
 
 ## Core Features
@@ -421,7 +421,7 @@ export LANG="en_US.UTF-8"
 
 ### From Source
 ```bash
-git clone https://github.com/pegasusheavy/jsh.git
+git clone https://github.com/quinnjr/jsh.git
 cd jsh
 cargo build --release
 cargo install --path .
@@ -520,13 +520,12 @@ A: New syntax works alongside traditional: `match $x { 1 => echo "one"; * => ech
 
 ## Links
 
-- **GitHub**: https://github.com/pegasusheavy/jsh
-- **Documentation**: https://pegasusheavy.github.io/jsh/
-- **Issues**: https://github.com/pegasusheavy/jsh/issues
-- **Releases**: https://github.com/pegasusheavy/jsh/releases
-- **Sponsor**: https://www.patreon.com/c/PegasusHeavyIndustries
+- **GitHub**: https://github.com/quinnjr/jsh
+- **Documentation**: https://quinnjr.github.io/jsh/
+- **Issues**: https://github.com/quinnjr/jsh/issues
+- **Releases**: https://github.com/quinnjr/jsh/releases
 
 ## License
 
 Dual-licensed under MIT and Apache 2.0.
-Copyright 2025 Pegasus Heavy Industries LLC.
+Copyright 2025 Joseph R. Quinn.

@@ -1,9 +1,8 @@
 //! Compound statement execution for Franken Shell interpreter
 
 use crate::ast::{
-    CaseStatement, ConstBinding, FishSwitchStatement, ForLoop, IfStatement,
-    LetBinding, LoopStatement, MatchExpr, MatchPattern, SelectStatement,
-    TryStatement, UntilLoop, WhileLoop,
+    CaseStatement, ConstBinding, FishSwitchStatement, ForLoop, IfStatement, LetBinding,
+    LoopStatement, MatchExpr, MatchPattern, SelectStatement, TryStatement, UntilLoop, WhileLoop,
 };
 use crate::error::{JshError, Result};
 use crate::interpreter::{ExitStatus, Interpreter};
@@ -171,19 +170,20 @@ impl Interpreter {
                 continue;
             }
 
-            if let Ok(num) = input.parse::<usize>() {
-                if num > 0 && num <= items.len() {
-                    self.set_var(&select_stmt.var, &items[num - 1]);
-                    self.set_var("REPLY", input);
+            if let Ok(num) = input.parse::<usize>()
+                && num > 0
+                && num <= items.len()
+            {
+                self.set_var(&select_stmt.var, &items[num - 1]);
+                self.set_var("REPLY", input);
 
-                    match self.execute_statements(&select_stmt.body) {
-                        Ok(_) => {}
-                        Err(JshError::Break) => break,
-                        Err(JshError::Continue) => continue,
-                        Err(e) => {
-                            self.loop_depth -= 1;
-                            return Err(e);
-                        }
+                match self.execute_statements(&select_stmt.body) {
+                    Ok(_) => {}
+                    Err(JshError::Break) => break,
+                    Err(JshError::Continue) => continue,
+                    Err(e) => {
+                        self.loop_depth -= 1;
+                        return Err(e);
                     }
                 }
             }
@@ -204,7 +204,9 @@ impl Interpreter {
             for pattern in &case.patterns {
                 let pattern_str = self.expand_word(pattern)?;
                 // Fish uses glob matching
-                if self.glob_match(&pattern_str, &value) || pattern_str == "*" || pattern_str == value
+                if self.glob_match(&pattern_str, &value)
+                    || pattern_str == "*"
+                    || pattern_str == value
                 {
                     return self.execute_statements(&case.body);
                 }
@@ -338,4 +340,3 @@ impl Interpreter {
         Ok(status)
     }
 }
-

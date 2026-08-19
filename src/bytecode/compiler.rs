@@ -15,6 +15,7 @@ pub struct Compiler {
     /// Current line number
     current_line: u32,
     /// Local variable names in current scope
+    #[allow(dead_code)]
     locals: Vec<String>,
     /// Loop break targets (for patching)
     break_targets: Vec<Vec<usize>>,
@@ -227,13 +228,15 @@ impl Compiler {
                     // Jump over next command if false
                     let jump = self.emit_op(OpCode::JumpIfFalse, 0);
                     self.compile_pipeline(pipeline)?;
-                    self.chunk.patch_jump(jump, self.chunk.current_offset() as i32);
+                    self.chunk
+                        .patch_jump(jump, self.chunk.current_offset() as i32);
                 }
                 ListOp::Or => {
                     // Jump over next command if true
                     let jump = self.emit_op(OpCode::JumpIfTrue, 0);
                     self.compile_pipeline(pipeline)?;
-                    self.chunk.patch_jump(jump, self.chunk.current_offset() as i32);
+                    self.chunk
+                        .patch_jump(jump, self.chunk.current_offset() as i32);
                 }
             }
         }
@@ -270,7 +273,8 @@ impl Compiler {
                 let skip_jump = self.emit_op(OpCode::JumpIfNonZero, 0);
                 self.emit_simple(OpCode::Pop);
                 self.emit_op(OpCode::SetVar, name_idx as i32);
-                self.chunk.patch_jump(skip_jump, self.chunk.current_offset() as i32);
+                self.chunk
+                    .patch_jump(skip_jump, self.chunk.current_offset() as i32);
             }
         }
 
@@ -296,7 +300,8 @@ impl Compiler {
         let end_jump = self.emit_op(OpCode::Jump, 0);
 
         // Patch else jump
-        self.chunk.patch_jump(else_jump, self.chunk.current_offset() as i32);
+        self.chunk
+            .patch_jump(else_jump, self.chunk.current_offset() as i32);
 
         // Compile elif branches
         let mut elif_end_jumps = Vec::new();
@@ -309,7 +314,8 @@ impl Compiler {
                 self.compile_statement(stmt)?;
             }
             elif_end_jumps.push(self.emit_op(OpCode::Jump, 0));
-            self.chunk.patch_jump(next_elif_jump, self.chunk.current_offset() as i32);
+            self.chunk
+                .patch_jump(next_elif_jump, self.chunk.current_offset() as i32);
         }
 
         // Compile else branch
@@ -333,7 +339,10 @@ impl Compiler {
     fn compile_for(&mut self, for_loop: &ForLoop) -> Result<()> {
         // Get items to iterate
         let items = if let Some(item_words) = &for_loop.items {
-            item_words.iter().map(|w| self.word_to_string(w)).collect::<Vec<_>>()
+            item_words
+                .iter()
+                .map(|w| self.word_to_string(w))
+                .collect::<Vec<_>>()
         } else {
             vec!["$@".to_string()] // Use positional params
         };
@@ -396,7 +405,8 @@ impl Compiler {
         self.emit_op(OpCode::Jump, loop_start as i32);
 
         // Patch exit jump
-        self.chunk.patch_jump(exit_jump, self.chunk.current_offset() as i32);
+        self.chunk
+            .patch_jump(exit_jump, self.chunk.current_offset() as i32);
 
         // Patch breaks
         let end_offset = self.chunk.current_offset() as i32;
@@ -434,7 +444,8 @@ impl Compiler {
         self.emit_op(OpCode::Jump, loop_start as i32);
 
         // Patch jumps
-        self.chunk.patch_jump(exit_jump, self.chunk.current_offset() as i32);
+        self.chunk
+            .patch_jump(exit_jump, self.chunk.current_offset() as i32);
 
         let end_offset = self.chunk.current_offset() as i32;
         self.continue_targets.pop();
@@ -472,7 +483,8 @@ impl Compiler {
 
             // Patch pattern jumps to here
             for jump in pattern_jumps {
-                self.chunk.patch_jump(jump, self.chunk.current_offset() as i32);
+                self.chunk
+                    .patch_jump(jump, self.chunk.current_offset() as i32);
             }
 
             // Compile arm body
@@ -484,7 +496,8 @@ impl Compiler {
             end_jumps.push(self.emit_op(OpCode::Jump, 0));
 
             // Patch next arm jump
-            self.chunk.patch_jump(next_arm_jump, self.chunk.current_offset() as i32);
+            self.chunk
+                .patch_jump(next_arm_jump, self.chunk.current_offset() as i32);
         }
 
         // Patch end jumps
@@ -508,7 +521,9 @@ impl Compiler {
         let skip_jump = self.emit_op(OpCode::Jump, 0);
 
         // Record function
-        self.chunk.functions.push((func_def.name.clone(), start + 1));
+        self.chunk
+            .functions
+            .push((func_def.name.clone(), start + 1));
 
         // Compile function body
         for stmt in &func_def.body {
@@ -517,7 +532,8 @@ impl Compiler {
         self.emit_simple(OpCode::Return);
 
         // Patch skip jump
-        self.chunk.patch_jump(skip_jump, self.chunk.current_offset() as i32);
+        self.chunk
+            .patch_jump(skip_jump, self.chunk.current_offset() as i32);
 
         Ok(())
     }
@@ -632,19 +648,27 @@ mod tests {
     #[test]
     fn test_compile_if() {
         let mut compiler = Compiler::new();
-        let chunk = compiler.compile_string("if true; then echo yes; fi").unwrap();
+        let chunk = compiler
+            .compile_string("if true; then echo yes; fi")
+            .unwrap();
 
         // Should have conditional jumps
-        assert!(chunk.code.iter().any(|i| matches!(i.op, OpCode::JumpIfFalse | OpCode::Jump)));
+        assert!(
+            chunk
+                .code
+                .iter()
+                .any(|i| matches!(i.op, OpCode::JumpIfFalse | OpCode::Jump))
+        );
     }
 
     #[test]
     fn test_compile_while() {
         let mut compiler = Compiler::new();
-        let chunk = compiler.compile_string("while true; do echo loop; done").unwrap();
+        let chunk = compiler
+            .compile_string("while true; do echo loop; done")
+            .unwrap();
 
         // Should have backward jump
         assert!(chunk.code.iter().any(|i| i.op == OpCode::Jump));
     }
 }
-

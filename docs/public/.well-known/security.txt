@@ -1,12 +1,11 @@
 # Security Policy for jsh
 # https://securitytxt.org/
 
-Contact: https://github.com/pegasusheavy/jsh/security/advisories/new
-Contact: mailto:security@pegasusheavy.com
+Contact: https://github.com/quinnjr/jsh/security/advisories/new
+Contact: mailto:quinn.josephr@protonmail.com
 Expires: 2026-12-31T23:59:59.000Z
-Encryption: https://github.com/pegasusheavy.gpg
+Encryption: https://github.com/quinnjr.gpg
 Preferred-Languages: en
-Canonical: https://pegasusheavy.github.io/jsh/.well-known/security.txt
-Policy: https://github.com/pegasusheavy/jsh/blob/main/.github/SECURITY.md
-Hiring: https://pegasusheavy.com/careers
+Canonical: https://quinnjr.github.io/jsh/.well-known/security.txt
+Policy: https://github.com/quinnjr/jsh/blob/main/.github/SECURITY.md
 

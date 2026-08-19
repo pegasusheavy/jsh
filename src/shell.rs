@@ -139,10 +139,18 @@ pub fn fsh_cache_dir() -> PathBuf {
 }
 
 // Backward compatibility aliases
-pub fn jsh_config_dir() -> PathBuf { fsh_config_dir() }
-pub fn jsh_data_dir() -> PathBuf { fsh_data_dir() }
-pub fn jsh_state_dir() -> PathBuf { fsh_state_dir() }
-pub fn jsh_cache_dir() -> PathBuf { fsh_cache_dir() }
+pub fn jsh_config_dir() -> PathBuf {
+    fsh_config_dir()
+}
+pub fn jsh_data_dir() -> PathBuf {
+    fsh_data_dir()
+}
+pub fn jsh_state_dir() -> PathBuf {
+    fsh_state_dir()
+}
+pub fn jsh_cache_dir() -> PathBuf {
+    fsh_cache_dir()
+}
 
 /// Get default history file path (XDG-compliant)
 /// Uses $XDG_STATE_HOME/fsh/history, falls back to legacy paths if they exist
@@ -223,9 +231,8 @@ impl Completer for FrankenHelper {
 
         let mut completions = Vec::new();
 
-        if word.starts_with('$') {
+        if let Some(var_prefix) = word.strip_prefix('$') {
             // Variable completion
-            let var_prefix = &word[1..];
             for (key, _) in std::env::vars() {
                 if key.starts_with(var_prefix) {
                     completions.push(Pair {
@@ -459,7 +466,8 @@ fn highlight_word(word: &str) -> String {
         "cd", "pwd", "echo", "printf", "test", "[", "true", "false", ":", "exit", "return",
         "source", ".", "eval", "exec", "set", "unset", "export", "alias", "unalias", "type",
         "which", "command", "builtin", "help", "read", "jobs", "fg", "bg", "wait", "kill", "trap",
-        "umask", "ulimit", "pushd", "popd", "dirs", "history", "hash", "getopts", "enable", "shopt",
+        "umask", "ulimit", "pushd", "popd", "dirs", "history", "hash", "getopts", "enable",
+        "shopt",
     ];
 
     if KEYWORDS.contains(&word) {
@@ -489,9 +497,11 @@ impl Shell {
 
     /// Create a new shell with specific options
     pub fn with_options(is_login: bool, is_interactive: bool) -> Result<Self> {
-        let mut config = ShellConfig::default();
-        config.is_login_shell = is_login;
-        config.is_interactive = is_interactive;
+        let config = ShellConfig {
+            is_login_shell: is_login,
+            is_interactive,
+            ..Default::default()
+        };
 
         let interpreter = Interpreter::new();
         let theme_manager = ThemeManager::new();
@@ -580,14 +590,15 @@ impl Shell {
     fn check_ssh_agent_config(&mut self) {
         // Check if user enabled ssh-agent via environment variable
         if let Some(val) = self.interpreter.get_var("FSH_SSH_AGENT_AUTO_START") {
-            self.config.ssh_agent_auto_start = matches!(val.to_lowercase().as_str(), "1" | "true" | "yes" | "on");
+            self.config.ssh_agent_auto_start =
+                matches!(val.to_lowercase().as_str(), "1" | "true" | "yes" | "on");
         }
 
         // Check for custom socket path
-        if let Some(socket) = self.interpreter.get_var("FSH_SSH_AGENT_SOCKET") {
-            if !socket.is_empty() {
-                self.config.ssh_agent_socket = Some(PathBuf::from(socket));
-            }
+        if let Some(socket) = self.interpreter.get_var("FSH_SSH_AGENT_SOCKET")
+            && !socket.is_empty()
+        {
+            self.config.ssh_agent_socket = Some(PathBuf::from(socket));
         }
     }
 
@@ -605,14 +616,16 @@ impl Shell {
         }
 
         // Check if custom socket is specified and exists
-        if let Some(ref custom_sock) = self.config.ssh_agent_socket {
-            if custom_sock.exists() {
-                // SAFETY: We're setting environment variables in a single-threaded initialization context
-                unsafe { std::env::set_var("SSH_AUTH_SOCK", custom_sock) };
-                self.interpreter.set_var("SSH_AUTH_SOCK", &custom_sock.to_string_lossy());
-                self.interpreter.export_var("SSH_AUTH_SOCK", Some(&custom_sock.to_string_lossy()));
-                return;
-            }
+        if let Some(ref custom_sock) = self.config.ssh_agent_socket
+            && custom_sock.exists()
+        {
+            // SAFETY: We're setting environment variables in a single-threaded initialization context
+            unsafe { std::env::set_var("SSH_AUTH_SOCK", custom_sock) };
+            self.interpreter
+                .set_var("SSH_AUTH_SOCK", &custom_sock.to_string_lossy());
+            self.interpreter
+                .export_var("SSH_AUTH_SOCK", Some(&custom_sock.to_string_lossy()));
+            return;
         }
 
         // Try to start ssh-agent
@@ -638,24 +651,23 @@ impl Shell {
                             self.interpreter.set_var("SSH_AUTH_SOCK", sock);
                             self.interpreter.export_var("SSH_AUTH_SOCK", Some(sock));
                         }
-                    } else if line.starts_with("SSH_AGENT_PID=") {
-                        if let Some(pid) = line
+                    } else if line.starts_with("SSH_AGENT_PID=")
+                        && let Some(pid) = line
                             .strip_prefix("SSH_AGENT_PID=")
                             .and_then(|s| s.strip_suffix("; export SSH_AGENT_PID;"))
-                        {
-                            // SAFETY: We're in single-threaded shell initialization
-                            unsafe { std::env::set_var("SSH_AGENT_PID", pid) };
-                            self.interpreter.set_var("SSH_AGENT_PID", pid);
-                            self.interpreter.export_var("SSH_AGENT_PID", Some(pid));
-                        }
+                    {
+                        // SAFETY: We're in single-threaded shell initialization
+                        unsafe { std::env::set_var("SSH_AGENT_PID", pid) };
+                        self.interpreter.set_var("SSH_AGENT_PID", pid);
+                        self.interpreter.export_var("SSH_AGENT_PID", Some(pid));
                     }
                 }
 
                 // Optionally notify the user
-                if self.config.is_interactive {
-                    if let Some(pid) = self.interpreter.get_var("SSH_AGENT_PID") {
-                        eprintln!("franken: ssh-agent started (pid {})", pid);
-                    }
+                if self.config.is_interactive
+                    && let Some(pid) = self.interpreter.get_var("SSH_AGENT_PID")
+                {
+                    eprintln!("franken: ssh-agent started (pid {})", pid);
                 }
             }
             Ok(_) => {
@@ -776,7 +788,9 @@ impl Shell {
                     }
 
                     // Set the environment variable
-                    self.interpreter.env.insert(key.to_string(), value.to_string());
+                    self.interpreter
+                        .env
+                        .insert(key.to_string(), value.to_string());
                     // SAFETY: Single-threaded shell environment setup
                     unsafe { std::env::set_var(key, value) };
                 }
@@ -794,12 +808,7 @@ impl Shell {
         if let Ok(entries) = std::fs::read_dir(&path) {
             let mut files: Vec<_> = entries
                 .filter_map(|e| e.ok())
-                .filter(|e| {
-                    e.path()
-                        .extension()
-                        .map(|ext| ext == "sh")
-                        .unwrap_or(false)
-                })
+                .filter(|e| e.path().extension().map(|ext| ext == "sh").unwrap_or(false))
                 .collect();
 
             // Sort for consistent ordering
@@ -854,8 +863,11 @@ impl Shell {
         let path = PathBuf::from(path);
         if path.exists() && path.is_file() {
             // Check if file is readable
-            if std::fs::metadata(&path).map(|m| !m.permissions().readonly()).unwrap_or(false) ||
-               std::fs::read_to_string(&path).is_ok() {
+            if std::fs::metadata(&path)
+                .map(|m| !m.permissions().readonly())
+                .unwrap_or(false)
+                || std::fs::read_to_string(&path).is_ok()
+            {
                 let _ = self.interpreter.run_script(&path.to_string_lossy());
             }
         }
@@ -870,7 +882,11 @@ impl Shell {
     /// Generate the prompt string using the theme system
     fn generate_prompt(&self) -> String {
         let home = self.interpreter.get_var("HOME").unwrap_or("").to_string();
-        let user = self.interpreter.get_var("USER").unwrap_or("user").to_string();
+        let user = self
+            .interpreter
+            .get_var("USER")
+            .unwrap_or("user")
+            .to_string();
         let host = hostname::get()
             .map(|h| h.to_string_lossy().to_string())
             .unwrap_or_else(|_| "localhost".to_string());
@@ -896,7 +912,11 @@ impl Shell {
     #[allow(dead_code)]
     fn generate_rprompt(&self) -> Option<String> {
         let home = self.interpreter.get_var("HOME").unwrap_or("").to_string();
-        let user = self.interpreter.get_var("USER").unwrap_or("user").to_string();
+        let user = self
+            .interpreter
+            .get_var("USER")
+            .unwrap_or("user")
+            .to_string();
         let host = hostname::get()
             .map(|h| h.to_string_lossy().to_string())
             .unwrap_or_else(|_| "localhost".to_string());
@@ -949,7 +969,8 @@ impl Shell {
             env!("CARGO_PKG_VERSION")
         );
         println!("Type {} for available commands", "help".yellow());
-        println!("Current theme: {} (use {} to list themes)\n",
+        println!(
+            "Current theme: {} (use {} to list themes)\n",
             self.config.theme_name.cyan(),
             "theme list".yellow()
         );
@@ -1011,43 +1032,45 @@ impl Shell {
     /// Apply theme settings from environment (called once at startup)
     fn apply_theme_from_env(&mut self) {
         // Check for FSH_THEME environment variable
-        if let Some(theme) = self.interpreter.get_var("FSH_THEME").map(|s| s.to_string()) {
-            if !theme.is_empty() {
-                let _ = self.set_theme(&theme);
-            }
+        if let Some(theme) = self.interpreter.get_var("FSH_THEME").map(|s| s.to_string())
+            && !theme.is_empty()
+        {
+            let _ = self.set_theme(&theme);
         }
 
         // Check for custom PROMPT
-        if let Some(prompt) = self.interpreter.get_var("PROMPT").map(|s| s.to_string()) {
-            if !prompt.is_empty() {
-                self.set_prompt(&prompt);
-            }
+        if let Some(prompt) = self.interpreter.get_var("PROMPT").map(|s| s.to_string())
+            && !prompt.is_empty()
+        {
+            self.set_prompt(&prompt);
         }
 
         // Check for custom RPROMPT
-        if let Some(rprompt) = self.interpreter.get_var("RPROMPT").map(|s| s.to_string()) {
-            if !rprompt.is_empty() {
-                self.set_rprompt(Some(&rprompt));
-            }
+        if let Some(rprompt) = self.interpreter.get_var("RPROMPT").map(|s| s.to_string())
+            && !rprompt.is_empty()
+        {
+            self.set_rprompt(Some(&rprompt));
         }
     }
 
     fn sync_theme_from_env(&mut self) {
         // Check if FSH_THEME changed
         let theme = self.interpreter.get_var("FSH_THEME").map(|s| s.to_string());
-        if let Some(theme) = theme {
-            if !theme.is_empty() && theme != self.config.theme_name {
-                let _ = self.set_theme(&theme);
-            }
+        if let Some(theme) = theme
+            && !theme.is_empty()
+            && theme != self.config.theme_name
+        {
+            let _ = self.set_theme(&theme);
         }
 
         // Dynamic PROMPT changes
         let prompt = self.interpreter.get_var("PROMPT").map(|s| s.to_string());
         let current_prompt = self.theme_manager.current_theme.prompt.clone();
-        if let Some(prompt) = prompt {
-            if !prompt.is_empty() && prompt != current_prompt {
-                self.set_prompt(&prompt);
-            }
+        if let Some(prompt) = prompt
+            && !prompt.is_empty()
+            && prompt != current_prompt
+        {
+            self.set_prompt(&prompt);
         }
     }
 
@@ -1055,11 +1078,15 @@ impl Shell {
     fn handle_theme_command(&mut self, line: &str) {
         let parts: Vec<&str> = line.split_whitespace().collect();
 
-        match parts.get(1).map(|s| *s) {
+        match parts.get(1).copied() {
             Some("list") | Some("ls") => {
                 println!("{}", "Available themes:".cyan().bold());
                 for theme in self.list_themes() {
-                    let marker = if theme == self.config.theme_name { "* " } else { "  " };
+                    let marker = if theme == self.config.theme_name {
+                        "* "
+                    } else {
+                        "  "
+                    };
                     println!("{}{}", marker.green(), theme);
                 }
             }

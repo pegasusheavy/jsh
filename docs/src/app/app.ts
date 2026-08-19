@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faGithub, faPatreon } from '@fortawesome/free-brands-svg-icons';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faBook, faTerminal, faFish, faCode, faCog, faRocket, faBug, faHeart } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -49,7 +49,7 @@ import { faBook, faTerminal, faFish, faCode, faCog, faRocket, faBug, faHeart } f
               </div>
             </div>
             <div class="flex items-center gap-4">
-              <a href="https://github.com/pegasusheavy/jsh" target="_blank" rel="noopener"
+              <a href="https://github.com/quinnjr/jsh" target="_blank" rel="noopener"
                  class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                  title="View on GitHub">
                 <fa-icon [icon]="faGithub" class="text-xl"></fa-icon>
@@ -69,20 +69,16 @@ import { faBook, faTerminal, faFish, faCode, faCog, faRocket, faBug, faHeart } f
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="text-[var(--color-text-muted)] text-sm">
-              © 2025 Pegasus Heavy Industries LLC. Dual-licensed under MIT and Apache 2.0.
+              © 2025 Joseph R. Quinn. Dual-licensed under MIT and Apache 2.0.
             </div>
             <div class="flex items-center gap-6 text-sm">
-              <a href="https://github.com/pegasusheavy/jsh" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
+              <a href="https://github.com/quinnjr/jsh" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
                 <fa-icon [icon]="faGithub"></fa-icon>
                 GitHub
               </a>
-              <a href="https://github.com/pegasusheavy/jsh/issues" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
+              <a href="https://github.com/quinnjr/jsh/issues" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
                 <fa-icon [icon]="faBug"></fa-icon>
                 Issues
-              </a>
-              <a href="https://patreon.com/c/PegasusHeavyIndustries" target="_blank" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-1.5">
-                <fa-icon [icon]="faHeart"></fa-icon>
-                Support
               </a>
             </div>
           </div>
@@ -95,7 +91,6 @@ import { faBook, faTerminal, faFish, faCode, faCog, faRocket, faBug, faHeart } f
 export class App {
   // FontAwesome icons
   faGithub = faGithub;
-  faPatreon = faPatreon;
   faBook = faBook;
   faTerminal = faTerminal;
   faCode = faCode;
@@ -106,6 +101,6 @@ export class App {
 
   constructor(library: FaIconLibrary) {
     // Add icons to the library for use throughout the app
-    library.addIcons(faGithub, faPatreon, faBook, faTerminal, faCode, faCog, faRocket, faBug, faHeart);
+    library.addIcons(faGithub, faBook, faTerminal, faCode, faCog, faRocket, faBug, faHeart);
   }
 }

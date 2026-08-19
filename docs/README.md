@@ -161,4 +161,4 @@ npx gh-pages -d dist/docs
 
 This documentation site is part of the jsh project, dual-licensed under MIT and Apache 2.0.
 
-© 2025 Pegasus Heavy Industries LLC
+© 2025 Joseph R. Quinn

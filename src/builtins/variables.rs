@@ -366,4 +366,3 @@ pub fn print_shell_options(interp: &Interpreter) {
     );
     println!("posix           {}", if opts.posix { "on" } else { "off" });
 }
-

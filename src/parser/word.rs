@@ -116,9 +116,9 @@ impl Parser {
         let content = content.trim();
 
         // Length ${#var}
-        if content.starts_with('#') {
+        if let Some(stripped) = content.strip_prefix('#') {
             return Ok(WordPart::BraceExpansion(BraceExpansion::Length(
-                content[1..].to_string(),
+                stripped.to_string(),
             )));
         }
 
@@ -197,42 +197,42 @@ impl Parser {
         }
 
         // Default without null check (must check after :-)
-        if let Some(idx) = content.find('-') {
-            if !content[..idx].contains(':') {
-                let var = &content[..idx];
-                let rest = &content[idx + 1..];
-                return Ok(WordPart::BraceExpansion(BraceExpansion::Default {
-                    var: var.to_string(),
-                    default: Box::new(Word::literal(rest, Span::default())),
-                    null_or_unset: false,
-                }));
-            }
+        if let Some(idx) = content.find('-')
+            && !content[..idx].contains(':')
+        {
+            let var = &content[..idx];
+            let rest = &content[idx + 1..];
+            return Ok(WordPart::BraceExpansion(BraceExpansion::Default {
+                var: var.to_string(),
+                default: Box::new(Word::literal(rest, Span::default())),
+                null_or_unset: false,
+            }));
         }
 
         // Assign default without null check
-        if let Some(idx) = content.find('=') {
-            if !content[..idx].contains(':') {
-                let var = &content[..idx];
-                let rest = &content[idx + 1..];
-                return Ok(WordPart::BraceExpansion(BraceExpansion::AssignDefault {
-                    var: var.to_string(),
-                    default: Box::new(Word::literal(rest, Span::default())),
-                    null_or_unset: false,
-                }));
-            }
+        if let Some(idx) = content.find('=')
+            && !content[..idx].contains(':')
+        {
+            let var = &content[..idx];
+            let rest = &content[idx + 1..];
+            return Ok(WordPart::BraceExpansion(BraceExpansion::AssignDefault {
+                var: var.to_string(),
+                default: Box::new(Word::literal(rest, Span::default())),
+                null_or_unset: false,
+            }));
         }
 
         // Alternative without null check
-        if let Some(idx) = content.find('+') {
-            if !content[..idx].contains(':') {
-                let var = &content[..idx];
-                let rest = &content[idx + 1..];
-                return Ok(WordPart::BraceExpansion(BraceExpansion::Alternative {
-                    var: var.to_string(),
-                    alternative: Box::new(Word::literal(rest, Span::default())),
-                    null_or_unset: false,
-                }));
-            }
+        if let Some(idx) = content.find('+')
+            && !content[..idx].contains(':')
+        {
+            let var = &content[..idx];
+            let rest = &content[idx + 1..];
+            return Ok(WordPart::BraceExpansion(BraceExpansion::Alternative {
+                var: var.to_string(),
+                alternative: Box::new(Word::literal(rest, Span::default())),
+                null_or_unset: false,
+            }));
         }
 
         // Non-greedy prefix removal
@@ -281,4 +281,3 @@ impl Parser {
         )))
     }
 }
-

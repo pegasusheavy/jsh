@@ -94,8 +94,7 @@ impl Parser {
                 | TokenKind::DoubleSemi
                 | TokenKind::When
                 // Fish-compatible
-                | TokenKind::End
-                // Note: Case is NOT a terminator - it starts a new case statement
+                | TokenKind::End // Note: Case is NOT a terminator - it starts a new case statement
         ) {
             return true;
         }
@@ -550,4 +549,3 @@ impl Parser {
         Ok(Statement::Subshell(body))
     }
 }
-

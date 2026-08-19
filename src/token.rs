@@ -63,74 +63,74 @@ pub fn as_str(s: &TokenStr) -> &str {
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenKind {
     // Literals
-    Word(TokenStr),         // Regular word/identifier
-    String(TokenStr),       // "double quoted" or 'single quoted'
-    RawString(TokenStr),    // $'...' ANSI-C style
-    Number(i64),            // Integer literal
-    Float(f64),             // Float literal
+    Word(TokenStr),      // Regular word/identifier
+    String(TokenStr),    // "double quoted" or 'single quoted'
+    RawString(TokenStr), // $'...' ANSI-C style
+    Number(i64),         // Integer literal
+    Float(f64),          // Float literal
 
     // Variables
-    Variable(TokenStr),     // $var
-    VariableBrace(TokenStr),// ${var}
-    SpecialVar(char),       // $?, $!, $$, $#, $@, $*, $0-$9
+    Variable(TokenStr),      // $var
+    VariableBrace(TokenStr), // ${var}
+    SpecialVar(char),        // $?, $!, $$, $#, $@, $*, $0-$9
 
     // Operators
-    Pipe,                   // |
-    PipeErr,                // |&
-    And,                    // &&
-    Or,                     // ||
-    Not,                    // !
-    Semi,                   // ;
-    DoubleSemi,             // ;;
-    Amp,                    // &
-    Comma,                  // ,
-    Newline,                // \n
+    Pipe,       // |
+    PipeErr,    // |&
+    And,        // &&
+    Or,         // ||
+    Not,        // !
+    Semi,       // ;
+    DoubleSemi, // ;;
+    Amp,        // &
+    Comma,      // ,
+    Newline,    // \n
 
     // Redirections
-    RedirectIn,             // <
-    RedirectOut,            // >
-    RedirectAppend,         // >>
-    RedirectErr,            // 2>
-    RedirectErrAppend,      // 2>>
-    RedirectBoth,           // &>
-    RedirectBothAppend,     // &>>
-    HereDoc,                // <<
-    HereString,             // <<<
-    RedirectFd(i32, i32),   // n>&m or n<&m
+    RedirectIn,           // <
+    RedirectOut,          // >
+    RedirectAppend,       // >>
+    RedirectErr,          // 2>
+    RedirectErrAppend,    // 2>>
+    RedirectBoth,         // &>
+    RedirectBothAppend,   // &>>
+    HereDoc,              // <<
+    HereString,           // <<<
+    RedirectFd(i32, i32), // n>&m or n<&m
 
     // Grouping
-    LParen,                 // (
-    RParen,                 // )
-    LBrace,                 // {
-    RBrace,                 // }
-    LBracket,               // [
-    RBracket,               // ]
-    DoubleLBracket,         // [[
-    DoubleRBracket,         // ]]
+    LParen,         // (
+    RParen,         // )
+    LBrace,         // {
+    RBrace,         // }
+    LBracket,       // [
+    RBracket,       // ]
+    DoubleLBracket, // [[
+    DoubleRBracket, // ]]
 
     // Assignment
-    Assign,                 // =
-    PlusAssign,             // +=
-    MinusAssign,            // -=
+    Assign,      // =
+    PlusAssign,  // +=
+    MinusAssign, // -=
 
     // Arithmetic
-    Plus,                   // +
-    Minus,                  // -
-    Star,                   // *
-    Slash,                  // /
-    Percent,                // %
-    DoubleStar,             // **
-    PlusPlus,               // ++
-    MinusMinus,             // --
+    Plus,       // +
+    Minus,      // -
+    Star,       // *
+    Slash,      // /
+    Percent,    // %
+    DoubleStar, // **
+    PlusPlus,   // ++
+    MinusMinus, // --
 
     // Comparison
-    Eq,                     // ==
-    Ne,                     // !=
-    Lt,                     // <
-    Le,                     // <=
-    Gt,                     // >
-    Ge,                     // >=
-    Match,                  // =~
+    Eq,    // ==
+    Ne,    // !=
+    Lt,    // <
+    Le,    // <=
+    Gt,    // >
+    Ge,    // >=
+    Match, // =~
 
     // Keywords
     If,
@@ -156,30 +156,30 @@ pub enum TokenKind {
     // Note: local, export, readonly, declare, typeset, unset, shift are builtins, not keywords
 
     // franken-specific keywords (enhanced syntax)
-    Match_,                 // match keyword (different from =~ operator)
-    When,                   // when (for match arms)
-    Loop,                   // loop (infinite loop)
-    Fn,                     // fn (function shorthand)
-    Let,                    // let (variable binding)
-    Const,                  // const (immutable binding)
-    Try,                    // try
-    Catch,                  // catch
-    Finally,                // finally
-    Throw,                  // throw
+    Match_,  // match keyword (different from =~ operator)
+    When,    // when (for match arms)
+    Loop,    // loop (infinite loop)
+    Fn,      // fn (function shorthand)
+    Let,     // let (variable binding)
+    Const,   // const (immutable binding)
+    Try,     // try
+    Catch,   // catch
+    Finally, // finally
+    Throw,   // throw
 
     // Fish-compatible keywords
-    End,                    // end (Fish-style block terminator)
-    Begin,                  // begin (Fish-style block start)
-    Switch,                 // switch (Fish-style switch)
-    And_,                   // and (Fish-style logical and)
-    Or_,                    // or (Fish-style logical or)
-    Not_,                   // not (Fish-style logical not)
-    Set,                    // set (Fish-style variable assignment)
-    Contains,               // contains (Fish-style list contains)
+    End,      // end (Fish-style block terminator)
+    Begin,    // begin (Fish-style block start)
+    Switch,   // switch (Fish-style switch)
+    And_,     // and (Fish-style logical and)
+    Or_,      // or (Fish-style logical or)
+    Not_,     // not (Fish-style logical not)
+    Set,      // set (Fish-style variable assignment)
+    Contains, // contains (Fish-style list contains)
 
     // Special
-    Glob(TokenStr),         // *, ?, [...]
-    Comment(TokenStr),      // # comment
+    Glob(TokenStr),    // *, ?, [...]
+    Comment(TokenStr), // # comment
     Eof,
 }
 
@@ -340,19 +340,45 @@ impl Token {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 enum KeywordId {
-    If, Then, Else, Elif, Fi,
-    Case, Esac,
-    For, In, Do, Done,
-    While, Until, Select,
-    Function, Return, Break, Continue,
-    Time, Coproc,
+    If,
+    Then,
+    Else,
+    Elif,
+    Fi,
+    Case,
+    Esac,
+    For,
+    In,
+    Do,
+    Done,
+    While,
+    Until,
+    Select,
+    Function,
+    Return,
+    Break,
+    Continue,
+    Time,
+    Coproc,
     // Franken-specific
-    Match, When, Loop, Fn,
-    Let, Const,
-    Try, Catch, Finally, Throw,
+    Match,
+    When,
+    Loop,
+    Fn,
+    Let,
+    Const,
+    Try,
+    Catch,
+    Finally,
+    Throw,
     // Fish-compatible
-    End, Begin, Switch,
-    And, Or, Not,
+    End,
+    Begin,
+    Switch,
+    And,
+    Or,
+    Not,
+    #[allow(dead_code)]
     Contains,
 }
 
@@ -452,4 +478,3 @@ pub fn keyword_from_str(s: &str) -> Option<TokenKind> {
 pub fn is_keyword(s: &str) -> bool {
     KEYWORDS.contains_key(s)
 }
-

@@ -1,6 +1,6 @@
 //! Token module tests
 
-use franken_shell::token::{keyword_from_str, owned_str, Span, Token, TokenKind};
+use franken_shell::token::{Span, Token, TokenKind, keyword_from_str, owned_str};
 
 // =============================================================================
 // Span Tests
@@ -32,7 +32,7 @@ fn test_span_len() {
 #[test]
 fn test_span_clone() {
     let span1 = Span::new(5, 10, 3, 7);
-    let span2 = span1.clone();
+    let span2 = span1;
     assert_eq!(span1, span2);
 }
 

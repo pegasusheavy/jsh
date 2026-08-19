@@ -9,10 +9,10 @@
 //! Plugins are stored in $XDG_DATA_HOME/fsh/plugins/
 
 use crate::error::{JshError, Result};
-use crate::shell::{fsh_data_dir, fsh_cache_dir};
+use crate::shell::{fsh_cache_dir, fsh_data_dir};
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 /// Plugin source type
@@ -97,7 +97,8 @@ impl Plugin {
 
         // If specific files are requested, use those
         if !self.use_files.is_empty() {
-            return self.use_files
+            return self
+                .use_files
                 .iter()
                 .flat_map(|pattern| {
                     glob::glob(&dir.join(pattern).to_string_lossy())
@@ -117,9 +118,7 @@ impl Plugin {
                 "init.zsh".to_string(),
                 "init.sh".to_string(),
             ],
-            PluginSource::OhMyZshTheme(_) => vec![
-                format!("{}.zsh-theme", self.name),
-            ],
+            PluginSource::OhMyZshTheme(_) => vec![format!("{}.zsh-theme", self.name)],
             PluginSource::Fish(_) => vec![
                 format!("conf.d/{}.fish", self.name),
                 format!("functions/{}.fish", self.name),
@@ -242,12 +241,11 @@ impl PluginManager {
                     "use" => plugin.use_files.push(value.to_string()),
                     "hook" => plugin.hook = Some(value.to_string()),
                     "name" | "rename-to" => plugin.name = value.to_string(),
-                    "if" => {
+                    "if"
                         // Conditional loading - simple check
-                        if value != "true" && value != "1" {
+                        if value != "true" && value != "1" => {
                             plugin.enabled = false;
                         }
-                    }
                     _ => {}
                 }
             } else {
@@ -298,7 +296,10 @@ impl PluginManager {
         let install_dir = plugin.install_dir();
 
         // Check if oh-my-zsh is needed and install it first
-        if matches!(plugin.source, PluginSource::OhMyZsh(_) | PluginSource::OhMyZshTheme(_)) {
+        if matches!(
+            plugin.source,
+            PluginSource::OhMyZsh(_) | PluginSource::OhMyZshTheme(_)
+        ) {
             self.ensure_oh_my_zsh()?;
         }
 
@@ -389,7 +390,7 @@ impl PluginManager {
     }
 
     /// Clone a git repository
-    fn git_clone(&self, url: &str, dest: &PathBuf, plugin: &Plugin) -> Result<()> {
+    fn git_clone(&self, url: &str, dest: &Path, plugin: &Plugin) -> Result<()> {
         let mut args = vec!["clone"];
 
         if let Some(depth) = plugin.depth {
@@ -405,7 +406,9 @@ impl PluginManager {
         }
 
         args.push(url);
-        args.push(Box::leak(dest.to_string_lossy().into_owned().into_boxed_str()));
+        args.push(Box::leak(
+            dest.to_string_lossy().into_owned().into_boxed_str(),
+        ));
 
         let status = Command::new("git")
             .args(&args)
@@ -595,30 +598,43 @@ fn parse_plugin_source(source: &str) -> Result<(PluginSource, String)> {
     }
 
     if let Some(path) = source.strip_prefix("oh-my-zsh:plugins/") {
-        return Ok((PluginSource::OhMyZsh(format!("plugins/{}", path)), path.to_string()));
+        return Ok((
+            PluginSource::OhMyZsh(format!("plugins/{}", path)),
+            path.to_string(),
+        ));
     }
 
     if let Some(theme) = source.strip_prefix("oh-my-zsh:themes/") {
-        return Ok((PluginSource::OhMyZshTheme(theme.to_string()), theme.to_string()));
+        return Ok((
+            PluginSource::OhMyZshTheme(theme.to_string()),
+            theme.to_string(),
+        ));
     }
 
     if let Some(path) = source.strip_prefix("omz:plugins/") {
-        return Ok((PluginSource::OhMyZsh(format!("plugins/{}", path)), path.to_string()));
+        return Ok((
+            PluginSource::OhMyZsh(format!("plugins/{}", path)),
+            path.to_string(),
+        ));
     }
 
     if let Some(theme) = source.strip_prefix("omz:themes/") {
-        return Ok((PluginSource::OhMyZshTheme(theme.to_string()), theme.to_string()));
+        return Ok((
+            PluginSource::OhMyZshTheme(theme.to_string()),
+            theme.to_string(),
+        ));
     }
 
     if let Some(repo) = source.strip_prefix("fish:") {
-        let name = repo.split('/').last().unwrap_or(repo).to_string();
+        let name = repo.split('/').next_back().unwrap_or(repo).to_string();
         return Ok((PluginSource::Fish(repo.to_string()), name));
     }
 
-    if source.starts_with("https://") || source.starts_with("git@") || source.starts_with("git://") {
+    if source.starts_with("https://") || source.starts_with("git@") || source.starts_with("git://")
+    {
         let name = source
             .split('/')
-            .last()
+            .next_back()
             .unwrap_or("plugin")
             .trim_end_matches(".git")
             .to_string();
@@ -627,11 +643,14 @@ fn parse_plugin_source(source: &str) -> Result<(PluginSource, String)> {
 
     // Default: GitHub user/repo
     if source.contains('/') {
-        let name = source.split('/').last().unwrap_or(source).to_string();
+        let name = source.split('/').next_back().unwrap_or(source).to_string();
         return Ok((PluginSource::GitHub(source.to_string()), name));
     }
 
-    Err(JshError::runtime(format!("Invalid plugin source: {}", source)))
+    Err(JshError::runtime(format!(
+        "Invalid plugin source: {}",
+        source
+    )))
 }
 
 #[cfg(windows)]
@@ -648,4 +667,3 @@ fn copy_dir_all(src: &PathBuf, dst: &PathBuf) -> Result<()> {
     }
     Ok(())
 }
-

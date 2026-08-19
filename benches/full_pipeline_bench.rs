@@ -2,11 +2,11 @@
 //!
 //! Benchmarks the complete lex -> parse -> execute pipeline.
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use std::hint::black_box;
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use franken_shell::interpreter::Interpreter;
 use franken_shell::lexer::Lexer;
 use franken_shell::parser::Parser;
+use std::hint::black_box;
 
 /// Full pipeline: lex -> parse -> execute
 fn full_pipeline(input: &str) -> franken_shell::interpreter::ExitStatus {
@@ -375,10 +375,7 @@ echo $x
 /// Benchmark with varying loop iterations
 fn bench_loop_scaling(c: &mut Criterion) {
     fn make_loop(n: usize) -> String {
-        format!(
-            "x=0; while [ $x -lt {} ]; do x=$((x+1)); done",
-            n
-        )
+        format!("x=0; while [ $x -lt {} ]; do x=$((x+1)); done", n)
     }
 
     let inputs = [
@@ -411,4 +408,3 @@ criterion_group!(
 );
 
 criterion_main!(benches);
-

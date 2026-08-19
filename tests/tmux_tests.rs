@@ -1,10 +1,9 @@
 //! Tmux module tests
 
 use franken_shell::tmux::{
-    TmuxServer, TmuxConfig, Session, Window, Pane,
-    KeyBinding, KeyTable, StatusBarTheme, TmuxPluginManager,
+    KeyBinding, KeyTable, Pane, Session, StatusBarTheme, TmuxConfig, TmuxPluginManager, TmuxServer,
+    Window,
 };
-use std::path::PathBuf;
 
 // =============================================================================
 // TmuxServer Tests
@@ -142,7 +141,7 @@ fn test_session_new() {
 fn test_session_new_window() {
     let mut session = Session::new("test");
     let _window = session.new_window(Some("win1"));
-    assert!(session.windows.len() >= 1);
+    assert!(!session.windows.is_empty());
 }
 
 #[test]
@@ -249,7 +248,7 @@ fn test_window_list_panes() {
     window.split_horizontal(None);
 
     let panes = window.list_panes();
-    assert!(panes.len() >= 1);
+    assert!(!panes.is_empty());
 }
 
 #[test]

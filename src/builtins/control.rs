@@ -27,4 +27,3 @@ pub fn builtin_true(_args: &[String], _interp: &mut Interpreter) -> Result<ExitS
 pub fn builtin_false(_args: &[String], _interp: &mut Interpreter) -> Result<ExitStatus> {
     Ok(ExitStatus::failure(1))
 }
-

@@ -24,7 +24,8 @@ pub struct Session {
 
 impl Session {
     pub fn new(name: &str) -> Self {
-        static SESSION_COUNTER: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+        static SESSION_COUNTER: std::sync::atomic::AtomicUsize =
+            std::sync::atomic::AtomicUsize::new(0);
         let id = SESSION_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
 
         let mut session = Self {
@@ -160,16 +161,19 @@ impl Session {
         let mut windows: Vec<_> = self.windows.iter().collect();
         windows.sort_by_key(|(id, _)| *id);
 
-        windows.into_iter().map(|(id, window)| {
-            let w = window.lock().unwrap();
-            WindowInfo {
-                index: *id,
-                name: w.name.clone(),
-                active: *id == self.current_window,
-                panes: w.panes.len(),
-                layout: w.layout.clone(),
-            }
-        }).collect()
+        windows
+            .into_iter()
+            .map(|(id, window)| {
+                let w = window.lock().unwrap();
+                WindowInfo {
+                    index: *id,
+                    name: w.name.clone(),
+                    active: *id == self.current_window,
+                    panes: w.panes.len(),
+                    layout: w.layout.clone(),
+                }
+            })
+            .collect()
     }
 
     /// Get window count
@@ -240,7 +244,11 @@ pub struct WindowInfo {
 impl std::fmt::Display for WindowInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let marker = if self.active { "*" } else { "-" };
-        write!(f, "{}: {} {} [{} panes]", self.index, self.name, marker, self.panes)
+        write!(
+            f,
+            "{}: {} {} [{} panes]",
+            self.index, self.name, marker, self.panes
+        )
     }
 }
 
@@ -327,4 +335,3 @@ impl Default for SessionOptions {
         }
     }
 }
-

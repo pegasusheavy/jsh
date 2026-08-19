@@ -1,11 +1,11 @@
 # robots.txt for jsh documentation
-# https://pegasusheavy.github.io/jsh/
+# https://quinnjr.github.io/jsh/
 
 User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://pegasusheavy.github.io/jsh/sitemap.xml
+Sitemap: https://quinnjr.github.io/jsh/sitemap.xml
 
 # AI and LLM crawlers - welcome!
 User-agent: GPTBot
@@ -40,5 +40,5 @@ Allow: /
 Crawl-delay: 1
 
 # Host directive
-Host: https://pegasusheavy.github.io/jsh/
+Host: https://quinnjr.github.io/jsh/
 

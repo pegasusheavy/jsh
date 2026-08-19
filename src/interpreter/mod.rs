@@ -248,12 +248,12 @@ impl Interpreter {
         };
 
         // HOSTNAME
-        if !env.contains_key("HOSTNAME") {
-            if let Ok(hostname) = hostname::get() {
-                let hostname_str = hostname.to_string_lossy().to_string();
-                env.insert("HOSTNAME".to_string(), hostname_str.clone());
-                unsafe { env::set_var("HOSTNAME", &hostname_str) };
-            }
+        if !env.contains_key("HOSTNAME")
+            && let Ok(hostname) = hostname::get()
+        {
+            let hostname_str = hostname.to_string_lossy().to_string();
+            env.insert("HOSTNAME".to_string(), hostname_str.clone());
+            unsafe { env::set_var("HOSTNAME", &hostname_str) };
         }
 
         // TERM - ensure a default terminal type
@@ -290,11 +290,11 @@ impl Interpreter {
         }
 
         // HISTFILE - history file location
-        if !env.contains_key("HISTFILE") {
-            if let Some(home) = dirs::home_dir() {
-                let histfile = home.join(".fsh_history").to_string_lossy().to_string();
-                env.insert("HISTFILE".to_string(), histfile);
-            }
+        if !env.contains_key("HISTFILE")
+            && let Some(home) = dirs::home_dir()
+        {
+            let histfile = home.join(".fsh_history").to_string_lossy().to_string();
+            env.insert("HISTFILE".to_string(), histfile);
         }
 
         // HISTSIZE - number of history entries
@@ -419,7 +419,8 @@ impl Interpreter {
     #[inline]
     pub fn update_dynamic_vars(&mut self) {
         // Update LINENO
-        self.env.insert("LINENO".to_string(), self.lineno.to_string());
+        self.env
+            .insert("LINENO".to_string(), self.lineno.to_string());
 
         // Update _ (last argument)
         if !self.last_arg.is_empty() {
@@ -430,7 +431,9 @@ impl Interpreter {
         let random = (std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
-            .as_nanos() as u32 ^ self.shell_pid) % 32768;
+            .as_nanos() as u32
+            ^ self.shell_pid)
+            % 32768;
         self.env.insert("RANDOM".to_string(), random.to_string());
     }
 
@@ -564,4 +567,3 @@ impl Interpreter {
         self.execute_string(&contents)
     }
 }
-

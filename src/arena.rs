@@ -142,9 +142,7 @@ pub fn arena_str(s: &str) -> String {
 /// Get the current allocated bytes in the parse arena
 #[inline]
 pub fn arena_allocated_bytes() -> usize {
-    PARSE_ARENA.with(|arena| {
-        arena.borrow().allocated_bytes()
-    })
+    PARSE_ARENA.with(|arena| arena.borrow().allocated_bytes())
 }
 
 /// A pool for reusing String allocations
@@ -168,7 +166,7 @@ impl StringPool {
     /// Get a string from the pool or create a new one
     #[inline]
     pub fn get(&mut self) -> String {
-        self.pool.pop().unwrap_or_else(String::new)
+        self.pool.pop().unwrap_or_default()
     }
 
     /// Get a string with pre-allocated capacity
@@ -226,7 +224,7 @@ impl<T> VecPool<T> {
     /// Get a vec from the pool or create a new one
     #[inline]
     pub fn get(&mut self) -> Vec<T> {
-        self.pool.pop().unwrap_or_else(Vec::new)
+        self.pool.pop().unwrap_or_default()
     }
 
     /// Get a vec with pre-allocated capacity
@@ -322,4 +320,3 @@ mod tests {
         // Note: Bump arena keeps its capacity, so we just verify reset doesn't panic
     }
 }
-

@@ -1,9 +1,9 @@
 //! Tmux command implementation
 
-use crate::error::{JshError, Result};
 use super::TmuxServer;
-use super::window::ResizeDirection;
 use super::theme::StatusBarTheme;
+use super::window::ResizeDirection;
+use crate::error::{JshError, Result};
 
 /// Execute a tmux command
 pub fn execute_command(server: &mut TmuxServer, cmd: &str, args: &[&str]) -> Result<String> {
@@ -186,11 +186,15 @@ fn cmd_kill_session(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
 
 fn cmd_rename_session(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
     if args.len() < 2 {
-        return Err(JshError::runtime("Usage: rename-session [-t target] new-name"));
+        return Err(JshError::runtime(
+            "Usage: rename-session [-t target] new-name",
+        ));
     }
 
     let new_name = args.last().unwrap();
-    let target = server.current_session.clone()
+    let target = server
+        .current_session
+        .clone()
         .ok_or_else(|| JshError::runtime("No session"))?;
 
     server.rename_session(&target, new_name)?;
@@ -206,7 +210,12 @@ fn cmd_list_sessions(server: &TmuxServer) -> Result<String> {
     for (name, session) in &server.sessions {
         let s = session.lock().unwrap();
         let attached = if s.is_attached() { "(attached)" } else { "" };
-        output.push_str(&format!("{}: {} windows {}\n", name, s.window_count(), attached));
+        output.push_str(&format!(
+            "{}: {} windows {}\n",
+            name,
+            s.window_count(),
+            attached
+        ));
     }
     Ok(output.trim().to_string())
 }
@@ -278,7 +287,8 @@ fn cmd_switch_client(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_has_session(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let target = args.iter()
+    let target = args
+        .iter()
         .skip_while(|a| *a != &"-t")
         .nth(1)
         .map(|s| s.to_string());
@@ -297,7 +307,8 @@ fn cmd_has_session(server: &TmuxServer, args: &[&str]) -> Result<String> {
 // Window commands
 
 fn cmd_new_window(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let mut name = None;
@@ -315,17 +326,19 @@ fn cmd_new_window(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_kill_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let mut s = session.lock().unwrap();
     let mut target = s.current_window;
 
     for (i, arg) in args.iter().enumerate() {
-        if *arg == "-t" && i + 1 < args.len() {
-            if let Ok(idx) = args[i + 1].parse() {
-                target = idx;
-            }
+        if *arg == "-t"
+            && i + 1 < args.len()
+            && let Ok(idx) = args[i + 1].parse()
+        {
+            target = idx;
         }
     }
 
@@ -337,10 +350,12 @@ fn cmd_kill_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_rename_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
-    let new_name = args.last()
+    let new_name = args
+        .last()
         .ok_or_else(|| JshError::runtime("No name specified"))?;
 
     let mut s = session.lock().unwrap();
@@ -350,21 +365,21 @@ fn cmd_rename_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_list_windows(server: &TmuxServer, _args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
     let windows = s.list_windows();
 
-    let output: Vec<String> = windows.iter()
-        .map(|w| w.to_string())
-        .collect();
+    let output: Vec<String> = windows.iter().map(|w| w.to_string()).collect();
 
     Ok(output.join("\n"))
 }
 
 fn cmd_select_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let mut target = None;
@@ -389,7 +404,8 @@ fn cmd_select_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_next_window(server: &TmuxServer) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let mut s = session.lock().unwrap();
@@ -398,7 +414,8 @@ fn cmd_next_window(server: &TmuxServer) -> Result<String> {
 }
 
 fn cmd_previous_window(server: &TmuxServer) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let mut s = session.lock().unwrap();
@@ -407,7 +424,8 @@ fn cmd_previous_window(server: &TmuxServer) -> Result<String> {
 }
 
 fn cmd_last_window(server: &TmuxServer) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let mut s = session.lock().unwrap();
@@ -419,7 +437,8 @@ fn cmd_last_window(server: &TmuxServer) -> Result<String> {
 }
 
 fn cmd_rotate_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let clockwise = !args.contains(&"-U");
@@ -461,7 +480,8 @@ fn cmd_find_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
 // Pane commands
 
 fn cmd_split_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let horizontal = args.contains(&"-h");
@@ -481,7 +501,8 @@ fn cmd_split_window(server: &TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_kill_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
@@ -490,10 +511,11 @@ fn cmd_kill_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
 
         let mut target = w.active_pane;
         for (i, arg) in args.iter().enumerate() {
-            if *arg == "-t" && i + 1 < args.len() {
-                if let Ok(idx) = args[i + 1].parse() {
-                    target = idx;
-                }
+            if *arg == "-t"
+                && i + 1 < args.len()
+                && let Ok(idx) = args[i + 1].parse()
+            {
+                target = idx;
             }
         }
 
@@ -508,7 +530,8 @@ fn cmd_kill_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_select_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
@@ -529,10 +552,11 @@ fn cmd_select_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
         } else {
             // Target pane number
             for (i, arg) in args.iter().enumerate() {
-                if *arg == "-t" && i + 1 < args.len() {
-                    if let Ok(idx) = args[i + 1].parse() {
-                        w.select_pane(idx);
-                    }
+                if *arg == "-t"
+                    && i + 1 < args.len()
+                    && let Ok(idx) = args[i + 1].parse()
+                {
+                    w.select_pane(idx);
                 }
             }
         }
@@ -544,7 +568,8 @@ fn cmd_select_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_last_pane(server: &TmuxServer) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
@@ -558,7 +583,8 @@ fn cmd_last_pane(server: &TmuxServer) -> Result<String> {
 }
 
 fn cmd_resize_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
@@ -620,7 +646,8 @@ fn cmd_join_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_capture_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
@@ -651,7 +678,8 @@ fn cmd_capture_pane(server: &TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_display_panes(server: &TmuxServer) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
@@ -659,9 +687,7 @@ fn cmd_display_panes(server: &TmuxServer) -> Result<String> {
         let w = window.lock().unwrap();
         let panes = w.list_panes();
 
-        let output: Vec<String> = panes.iter()
-            .map(|p| p.to_string())
-            .collect();
+        let output: Vec<String> = panes.iter().map(|p| p.to_string()).collect();
 
         Ok(output.join("\n"))
     } else {
@@ -686,14 +712,16 @@ fn cmd_list_panes(server: &TmuxServer, _args: &[&str]) -> Result<String> {
 // Layout commands
 
 fn cmd_select_layout(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
     if let Some(window) = s.current_window() {
         let mut w = window.lock().unwrap();
 
-        let layout = args.iter()
+        let layout = args
+            .iter()
             .find(|a| !a.starts_with('-'))
             .unwrap_or(&"even-horizontal");
 
@@ -705,7 +733,8 @@ fn cmd_select_layout(server: &TmuxServer, args: &[&str]) -> Result<String> {
 }
 
 fn cmd_next_layout(server: &TmuxServer) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
@@ -728,8 +757,10 @@ fn cmd_set_option(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
         args.next();
     }
 
-    let option = args.next().ok_or_else(|| JshError::runtime("No option specified"))?;
-    let value = args.next().map(|s| *s).unwrap_or("");
+    let option = args
+        .next()
+        .ok_or_else(|| JshError::runtime("No option specified"))?;
+    let value = args.next().copied().unwrap_or("");
 
     server.config.set_option(option, value)?;
     Ok(format!("Set {} = {}", option, value))
@@ -752,14 +783,18 @@ fn cmd_show_options(server: &TmuxServer, args: &[&str]) -> Result<String> {
         output.push_str(&format!("prefix {}\n", server.config.prefix));
         output.push_str(&format!("base-index {}\n", server.config.base_index));
         output.push_str(&format!("history-limit {}\n", server.config.history_limit));
-        output.push_str(&format!("mouse {}\n", if server.config.mouse { "on" } else { "off" }));
+        output.push_str(&format!(
+            "mouse {}\n",
+            if server.config.mouse { "on" } else { "off" }
+        ));
         output.push_str(&format!("status {}\n", server.config.status));
         Ok(output)
     }
 }
 
 fn cmd_source_file(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
-    let path_str = args.iter()
+    let path_str = args
+        .iter()
         .find(|a| !a.starts_with('-'))
         .ok_or_else(|| JshError::runtime("No file specified"))?;
 
@@ -783,38 +818,50 @@ fn cmd_source_file(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
 // Key binding commands
 
 fn cmd_bind_key(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
-    server.config.parse_command(&format!("bind {}", args.join(" ")))
+    server
+        .config
+        .parse_command(&format!("bind {}", args.join(" ")))
         .map(|_| "Key bound".to_string())
 }
 
 fn cmd_unbind_key(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
-    server.config.parse_command(&format!("unbind {}", args.join(" ")))
+    server
+        .config
+        .parse_command(&format!("unbind {}", args.join(" ")))
         .map(|_| "Key unbound".to_string())
 }
 
 fn cmd_list_keys(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let table_name = args.iter()
+    let table_name = args
+        .iter()
         .skip_while(|a| *a != &"-T")
         .nth(1)
-        .map(|s| *s)
+        .copied()
         .unwrap_or("prefix");
 
     if let Some(table) = server.config.key_tables.get(table_name) {
         let mut output = String::new();
         for binding in table.list() {
             let repeat = if binding.repeat { "-r " } else { "" };
-            output.push_str(&format!("bind-key {}{} {}\n", repeat, binding.key, binding.command));
+            output.push_str(&format!(
+                "bind-key {}{} {}\n",
+                repeat, binding.key, binding.command
+            ));
         }
         Ok(output)
     } else {
-        Err(JshError::runtime(format!("Unknown key table: {}", table_name)))
+        Err(JshError::runtime(format!(
+            "Unknown key table: {}",
+            table_name
+        )))
     }
 }
 
 // Copy/paste commands
 
 fn cmd_copy_mode(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let vi_mode = args.contains(&"-e");
@@ -856,7 +903,8 @@ fn cmd_delete_buffer(_server: &TmuxServer, _args: &[&str]) -> Result<String> {
 // Input commands
 
 fn cmd_send_keys(server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
@@ -864,9 +912,10 @@ fn cmd_send_keys(server: &TmuxServer, args: &[&str]) -> Result<String> {
         let w = window.lock().unwrap();
         if let Some(pane) = w.active_pane() {
             let literal = args.contains(&"-l");
-            let keys = args.iter()
+            let keys = args
+                .iter()
                 .filter(|a| !a.starts_with('-'))
-                .map(|s| *s)
+                .copied()
                 .collect::<Vec<_>>()
                 .join(" ");
 
@@ -887,9 +936,10 @@ fn cmd_send_prefix(server: &TmuxServer) -> Result<String> {
 // Display commands
 
 fn cmd_display_message(_server: &TmuxServer, args: &[&str]) -> Result<String> {
-    let message = args.iter()
+    let message = args
+        .iter()
         .filter(|a| !a.starts_with('-'))
-        .map(|s| *s)
+        .copied()
         .collect::<Vec<_>>()
         .join(" ");
 
@@ -917,9 +967,10 @@ fn cmd_show_messages(_server: &TmuxServer) -> Result<String> {
 // Misc commands
 
 fn cmd_run_shell(args: &[&str]) -> Result<String> {
-    let command = args.iter()
+    let command = args
+        .iter()
         .filter(|a| !a.starts_with('-'))
-        .map(|s| *s)
+        .copied()
         .collect::<Vec<_>>()
         .join(" ");
 
@@ -977,7 +1028,8 @@ fn cmd_suspend_client(_server: &TmuxServer) -> Result<String> {
 }
 
 fn cmd_clear_history(server: &TmuxServer, _args: &[&str]) -> Result<String> {
-    let session = server.current()
+    let session = server
+        .current()
         .ok_or_else(|| JshError::runtime("No current session"))?;
 
     let s = session.lock().unwrap();
@@ -1044,7 +1096,8 @@ fn cmd_tpm_list(server: &TmuxServer) -> Result<String> {
 // Theme commands
 
 fn cmd_set_theme(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
-    let theme_name = args.first()
+    let theme_name = args
+        .first()
         .ok_or_else(|| JshError::runtime("No theme specified"))?;
 
     if let Some(theme) = StatusBarTheme::from_name(theme_name) {
@@ -1063,8 +1116,11 @@ fn cmd_set_theme(server: &mut TmuxServer, args: &[&str]) -> Result<String> {
 
         Ok(format!("Applied theme: {}", theme_name))
     } else {
-        Err(JshError::runtime(format!("Unknown theme: {}. Available: {}",
-            theme_name, StatusBarTheme::list_themes().join(", "))))
+        Err(JshError::runtime(format!(
+            "Unknown theme: {}. Available: {}",
+            theme_name,
+            StatusBarTheme::list_themes().join(", ")
+        )))
     }
 }
 
@@ -1077,4 +1133,3 @@ impl From<String> for super::FormatSpec {
         super::FormatSpec::new(&s)
     }
 }
-

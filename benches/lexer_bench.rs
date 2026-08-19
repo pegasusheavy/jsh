@@ -2,16 +2,19 @@
 //!
 //! Benchmarks tokenization performance across various input types.
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use std::hint::black_box;
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use franken_shell::lexer::Lexer;
+use std::hint::black_box;
 
 /// Simple command tokenization
 fn bench_simple_command(c: &mut Criterion) {
     let inputs = [
         ("tiny", "echo hello"),
         ("small", "echo hello world foo bar"),
-        ("medium", "ls -la /home/user/documents --color=auto | grep pattern"),
+        (
+            "medium",
+            "ls -la /home/user/documents --color=auto | grep pattern",
+        ),
         (
             "large",
             r#"for i in 1 2 3 4 5 6 7 8 9 10; do echo "Number: $i"; done"#,
@@ -40,10 +43,7 @@ fn bench_variable_expansion(c: &mut Criterion) {
         ("brace_var", "${HOME}"),
         ("default_var", "${HOME:-/home/default}"),
         ("special_vars", "$? $$ $! $# $@ $* $0 $1"),
-        (
-            "mixed",
-            r#"echo "User: $USER, Home: ${HOME}, Status: $?""#,
-        ),
+        ("mixed", r#"echo "User: $USER, Home: ${HOME}, Status: $?""#),
     ];
 
     let mut group = c.benchmark_group("lexer_variables");
@@ -67,10 +67,7 @@ fn bench_strings(c: &mut Criterion) {
         ("single_quoted", "'hello world'"),
         ("double_quoted", "\"hello world\""),
         ("with_escapes", r#""hello\nworld\ttab""#),
-        (
-            "with_variables",
-            r#""Hello $USER, your home is $HOME""#,
-        ),
+        ("with_variables", r#""Hello $USER, your home is $HOME""#),
         (
             "long_string",
             r#""This is a much longer string that contains various characters and might be used in real scripts for documentation or output purposes.""#,
@@ -96,9 +93,15 @@ fn bench_strings(c: &mut Criterion) {
 fn bench_pipelines(c: &mut Criterion) {
     let inputs = [
         ("simple_pipe", "ls | grep foo"),
-        ("multi_pipe", "cat file | grep pattern | sort | uniq | wc -l"),
+        (
+            "multi_pipe",
+            "cat file | grep pattern | sort | uniq | wc -l",
+        ),
         ("redirects", "echo hello > output.txt 2>&1"),
-        ("complex", "cat < input.txt | grep -v '^#' | sort > output.txt 2> errors.log"),
+        (
+            "complex",
+            "cat < input.txt | grep -v '^#' | sort > output.txt 2> errors.log",
+        ),
         ("heredoc", "cat <<EOF\nhello\nworld\nEOF"),
     ];
 
@@ -126,7 +129,10 @@ fn bench_control_flow(c: &mut Criterion) {
             "if [ $x -eq 1 ]; then echo one; elif [ $x -eq 2 ]; then echo two; else echo other; fi",
         ),
         ("for_loop", "for i in 1 2 3 4 5; do echo $i; done"),
-        ("while_loop", "while [ $x -lt 10 ]; do echo $x; x=$((x+1)); done"),
+        (
+            "while_loop",
+            "while [ $x -lt 10 ]; do echo $x; x=$((x+1)); done",
+        ),
         (
             "case_stmt",
             "case $x in 1) echo one;; 2|3) echo two;; *) echo other;; esac",
@@ -152,14 +158,20 @@ fn bench_control_flow(c: &mut Criterion) {
 /// franken-specific syntax tokenization
 fn bench_jsh_syntax(c: &mut Criterion) {
     let inputs = [
-        ("match_simple", "match $x { 1 => echo one; * => echo other }"),
+        (
+            "match_simple",
+            "match $x { 1 => echo one; * => echo other }",
+        ),
         (
             "match_complex",
             "match $x { 1 => echo one; 2 | 3 => echo two; 4..10 => echo range; /^hello/ => echo regex; * => echo default }",
         ),
         ("loop", "loop { echo iteration; break }"),
         ("let_const", "let name = \"world\"; const PI = 3.14"),
-        ("try_catch", "try { risky_cmd } catch e { echo $e } finally { cleanup }"),
+        (
+            "try_catch",
+            "try { risky_cmd } catch e { echo $e } finally { cleanup }",
+        ),
         ("fn_def", "fn greet { echo \"Hello, $1!\" }"),
     ];
 
@@ -305,4 +317,3 @@ criterion_group!(
 );
 
 criterion_main!(benches);
-

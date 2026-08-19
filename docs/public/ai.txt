@@ -21,14 +21,13 @@ technical:
 
 legal:
   license: "MIT OR Apache-2.0"
-  copyright: "2025 Pegasus Heavy Industries LLC"
+  copyright: "2025 Joseph R. Quinn"
 
 links:
-  repository: "https://github.com/pegasusheavy/jsh"
-  documentation: "https://pegasusheavy.github.io/jsh/"
-  issues: "https://github.com/pegasusheavy/jsh/issues"
-  releases: "https://github.com/pegasusheavy/jsh/releases"
-  sponsor: "https://www.patreon.com/c/PegasusHeavyIndustries"
+  repository: "https://github.com/quinnjr/jsh"
+  documentation: "https://quinnjr.github.io/jsh/"
+  issues: "https://github.com/quinnjr/jsh/issues"
+  releases: "https://github.com/quinnjr/jsh/releases"
 
 ---
 description: |
@@ -318,7 +317,7 @@ shell_options:
 installation:
   from_source:
     commands: |
-      git clone https://github.com/pegasusheavy/jsh.git
+      git clone https://github.com/quinnjr/jsh.git
       cd jsh
       cargo build --release
       cargo install --path .
@@ -501,6 +500,5 @@ related_projects:
 
 ---
 contact:
-  issues: "https://github.com/pegasusheavy/jsh/issues"
-  sponsor: "https://www.patreon.com/c/PegasusHeavyIndustries"
-  security: "https://github.com/pegasusheavy/jsh/security"
+  issues: "https://github.com/quinnjr/jsh/issues"
+  security: "https://github.com/quinnjr/jsh/security"

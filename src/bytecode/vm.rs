@@ -63,7 +63,7 @@ impl std::error::Error for VMError {}
 pub type VMResult<T> = std::result::Result<T, VMError>;
 
 /// Value on the VM stack
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub enum Value {
     /// String value
     String(String),
@@ -72,15 +72,10 @@ pub enum Value {
     /// Boolean value
     Bool(bool),
     /// Null/empty
+    #[default]
     Null,
     /// Array value
     Array(Vec<Value>),
-}
-
-impl Default for Value {
-    fn default() -> Self {
-        Value::Null
-    }
 }
 
 impl Value {
@@ -91,7 +86,8 @@ impl Value {
             Value::Int(n) => n.to_string(),
             Value::Bool(b) => if *b { "1" } else { "0" }.to_string(),
             Value::Null => String::new(),
-            Value::Array(arr) => arr.iter()
+            Value::Array(arr) => arr
+                .iter()
                 .map(|v| v.to_string_value())
                 .collect::<Vec<_>>()
                 .join(" "),
@@ -103,7 +99,13 @@ impl Value {
         match self {
             Value::String(s) => s.parse().unwrap_or(0),
             Value::Int(n) => *n,
-            Value::Bool(b) => if *b { 1 } else { 0 },
+            Value::Bool(b) => {
+                if *b {
+                    1
+                } else {
+                    0
+                }
+            }
             Value::Null => 0,
             Value::Array(arr) => arr.len() as i64,
         }
@@ -140,6 +142,7 @@ struct CallFrame {
     /// Stack base pointer
     base_ptr: usize,
     /// Local variables
+    #[allow(dead_code)]
     locals: Vec<Value>,
 }
 
@@ -194,7 +197,9 @@ impl VM {
                 // Stack operations
                 OpCode::Const => {
                     let idx = inst.operand as usize;
-                    let value = chunk.constants.get(idx)
+                    let value = chunk
+                        .constants
+                        .get(idx)
                         .map(|s| Value::String(s.clone()))
                         .unwrap_or(Value::Null);
                     self.push(value)?;
@@ -202,7 +207,9 @@ impl VM {
 
                 OpCode::ConstInt => {
                     let idx = inst.operand as usize;
-                    let value = chunk.int_constants.get(idx)
+                    let value = chunk
+                        .int_constants
+                        .get(idx)
                         .map(|&n| Value::Int(n))
                         .unwrap_or(Value::Int(0));
                     self.push(value)?;
@@ -231,17 +238,19 @@ impl VM {
                 // Variable operations
                 OpCode::GetVar => {
                     let idx = inst.operand as usize;
-                    let name = chunk.constants.get(idx)
+                    let name = chunk
+                        .constants
+                        .get(idx)
                         .ok_or_else(|| VMError::InvalidOperand("invalid constant index".into()))?;
-                    let value = self.vars.get(name)
-                        .cloned()
-                        .unwrap_or(Value::Null);
+                    let value = self.vars.get(name).cloned().unwrap_or(Value::Null);
                     self.push(value)?;
                 }
 
                 OpCode::SetVar => {
                     let idx = inst.operand as usize;
-                    let name = chunk.constants.get(idx)
+                    let name = chunk
+                        .constants
+                        .get(idx)
                         .ok_or_else(|| VMError::InvalidOperand("invalid constant index".into()))?
                         .clone();
                     let value = self.pop()?;
@@ -392,7 +401,9 @@ impl VM {
 
                 OpCode::Call => {
                     let idx = inst.operand as usize;
-                    let name = chunk.constants.get(idx)
+                    let name = chunk
+                        .constants
+                        .get(idx)
                         .ok_or_else(|| VMError::InvalidOperand("invalid function".into()))?;
 
                     // Find function
@@ -431,7 +442,9 @@ impl VM {
                 OpCode::Print => {
                     let value = self.pop()?.to_string_value();
                     print!("{}", value);
-                    io::stdout().flush().map_err(|e| VMError::IoError(e.to_string()))?;
+                    io::stdout()
+                        .flush()
+                        .map_err(|e| VMError::IoError(e.to_string()))?;
                 }
 
                 OpCode::PrintLn => {
@@ -454,16 +467,17 @@ impl VM {
                 // Builtin execution (simplified)
                 OpCode::Builtin => {
                     let idx = inst.operand as usize;
-                    let name = chunk.constants.get(idx)
+                    let name = chunk
+                        .constants
+                        .get(idx)
                         .ok_or_else(|| VMError::InvalidOperand("invalid builtin".into()))?;
 
                     // Simple builtin handling
                     match name.as_str() {
                         "echo" => {
                             // Pop all args and print
-                            let args: Vec<String> = self.stack.drain(..)
-                                .map(|v| v.to_string_value())
-                                .collect();
+                            let args: Vec<String> =
+                                self.stack.drain(..).map(|v| v.to_string_value()).collect();
                             println!("{}", args.join(" "));
                             self.last_status = 0;
                         }
@@ -563,8 +577,8 @@ impl VM {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::compiler::Compiler;
+    use super::*;
 
     #[test]
     fn test_vm_stack_operations() {
@@ -607,4 +621,3 @@ mod tests {
         assert_eq!(b.to_int(), 1);
     }
 }
-

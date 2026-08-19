@@ -1,6 +1,6 @@
 //! Tmux status bar theming
 
-use super::{TmuxStyle, TmuxColor};
+use super::{TmuxColor, TmuxStyle};
 use std::collections::HashMap;
 
 /// Status bar theme
@@ -305,13 +305,36 @@ pub fn format_status(format: &str, vars: &HashMap<String, String>) -> String {
     let mut result = format.to_string();
 
     // Replace simple variables like #S, #I, #W, #H, etc.
-    result = result.replace("#S", vars.get("session_name").map(|s| s.as_str()).unwrap_or(""));
-    result = result.replace("#I", vars.get("window_index").map(|s| s.as_str()).unwrap_or(""));
-    result = result.replace("#W", vars.get("window_name").map(|s| s.as_str()).unwrap_or(""));
-    result = result.replace("#P", vars.get("pane_index").map(|s| s.as_str()).unwrap_or(""));
-    result = result.replace("#T", vars.get("pane_title").map(|s| s.as_str()).unwrap_or(""));
-    result = result.replace("#H", vars.get("host").map(|s| s.as_str()).unwrap_or(&hostname()));
-    result = result.replace("#h", vars.get("host_short").map(|s| s.as_str()).unwrap_or(&hostname_short()));
+    result = result.replace(
+        "#S",
+        vars.get("session_name").map(|s| s.as_str()).unwrap_or(""),
+    );
+    result = result.replace(
+        "#I",
+        vars.get("window_index").map(|s| s.as_str()).unwrap_or(""),
+    );
+    result = result.replace(
+        "#W",
+        vars.get("window_name").map(|s| s.as_str()).unwrap_or(""),
+    );
+    result = result.replace(
+        "#P",
+        vars.get("pane_index").map(|s| s.as_str()).unwrap_or(""),
+    );
+    result = result.replace(
+        "#T",
+        vars.get("pane_title").map(|s| s.as_str()).unwrap_or(""),
+    );
+    result = result.replace(
+        "#H",
+        vars.get("host").map(|s| s.as_str()).unwrap_or(&hostname()),
+    );
+    result = result.replace(
+        "#h",
+        vars.get("host_short")
+            .map(|s| s.as_str())
+            .unwrap_or(&hostname_short()),
+    );
 
     // Handle #{variable} syntax - simple implementation without regex
     while let Some(start) = result.find("#{") {
@@ -320,7 +343,12 @@ pub fn format_status(format: &str, vars: &HashMap<String, String>) -> String {
             // Skip conditional syntax
             if !var_name.starts_with('?') {
                 let replacement = vars.get(var_name).cloned().unwrap_or_default();
-                result = format!("{}{}{}", &result[..start], replacement, &result[start + end + 1..]);
+                result = format!(
+                    "{}{}{}",
+                    &result[..start],
+                    replacement,
+                    &result[start + end + 1..]
+                );
             } else {
                 break;
             }
@@ -339,12 +367,18 @@ pub fn format_status(format: &str, vars: &HashMap<String, String>) -> String {
                 let true_val = parts[1];
                 let false_val = parts[2];
 
-                let cond_result = vars.get(condition)
+                let cond_result = vars
+                    .get(condition)
                     .map(|v| !v.is_empty() && v != "0" && v != "false")
                     .unwrap_or(false);
 
                 let replacement = if cond_result { true_val } else { false_val };
-                result = format!("{}{}{}", &result[..start], replacement, &result[start + end + 1..]);
+                result = format!(
+                    "{}{}{}",
+                    &result[..start],
+                    replacement,
+                    &result[start + end + 1..]
+                );
             } else {
                 break;
             }
@@ -363,6 +397,9 @@ fn hostname() -> String {
 }
 
 fn hostname_short() -> String {
-    hostname().split('.').next().unwrap_or("localhost").to_string()
+    hostname()
+        .split('.')
+        .next()
+        .unwrap_or("localhost")
+        .to_string()
 }
-

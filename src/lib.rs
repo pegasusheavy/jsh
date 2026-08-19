@@ -101,7 +101,7 @@ pub mod theme;
 pub mod tmux;
 pub mod token;
 
-pub use argparse::{ArgParser, ParsedArgs, ParseError};
+pub use argparse::{ArgParser, ParseError, ParsedArgs};
 pub use error::{FrankenError, Result};
 pub use interpreter::{ExitStatus, Interpreter};
 pub use shell::Shell;

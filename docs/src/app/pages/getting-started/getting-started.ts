@@ -22,7 +22,7 @@ import { RouterLink } from '@angular/router';
 
         <h3 class="text-xl font-medium mb-3 mt-6">From Source</h3>
         <pre class="bg-[var(--color-code-bg)] rounded-lg p-4 mb-4 overflow-x-auto"><code># Clone the repository
-git clone https://github.com/pegasusheavy/jsh.git
+git clone https://github.com/quinnjr/jsh.git
 cd jsh
 
 # Build release binary

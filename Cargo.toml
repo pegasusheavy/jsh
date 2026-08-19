@@ -3,9 +3,9 @@ name = "franken-shell"
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-authors = ["Pegasus Heavy Industries LLC"]
+authors = ["Joseph R. Quinn"]
 description = "The vibe-coded shell that does everything stupidly™"
-repository = "https://github.com/pegasusheavy/franken-shell"
+repository = "https://github.com/quinnjr/franken-shell"
 keywords = ["shell", "bash", "zsh", "terminal", "franken"]
 categories = ["command-line-utilities"]
 
@@ -137,8 +137,8 @@ codegen-units = 1
 
 # cargo-deb configuration for Debian packaging
 [package.metadata.deb]
-maintainer = "Pegasus Heavy Industries LLC <support@pegasusheavy.com>"
-copyright = "2025, Pegasus Heavy Industries LLC"
+maintainer = "Joseph R. Quinn <quinn.josephr@protonmail.com>"
+copyright = "2025, Joseph R. Quinn"
 license-file = ["LICENSE-MIT", "0"]
 extended-description = """\
 Franken Shell - The vibe-coded shell that does everything stupidly™ \

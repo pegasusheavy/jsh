@@ -2,9 +2,9 @@
 //!
 //! Parses .tmux.conf files with full compatibility
 
-use crate::error::{JshError, Result};
-use super::{TmuxColor, TmuxStyle, FormatSpec};
 use super::keybind::{KeyBinding, KeyTable};
+use super::{FormatSpec, TmuxColor, TmuxStyle};
+use crate::error::{JshError, Result};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
@@ -126,7 +126,8 @@ impl Default for TmuxConfig {
             pane_base_index: 0,
             renumber_windows: false,
             automatic_rename: true,
-            automatic_rename_format: "#{?pane_in_mode,[tmux],#{pane_current_command}}#{?pane_dead,[dead],}".to_string(),
+            automatic_rename_format:
+                "#{?pane_in_mode,[tmux],#{pane_current_command}}#{?pane_dead,[dead],}".to_string(),
             allow_rename: true,
             set_titles: false,
             set_titles_string: "#S:#I:#W - \"#T\" #{session_alerts}".to_string(),
@@ -155,7 +156,8 @@ impl Default for TmuxConfig {
 
             pane_border_style: TmuxStyle::parse("fg=default"),
             pane_active_border_style: TmuxStyle::parse("fg=green"),
-            pane_border_format: "#{?pane_active,#[reverse],}#{pane_index}#[default] \"#{pane_title}\"".to_string(),
+            pane_border_format:
+                "#{?pane_active,#[reverse],}#{pane_index}#[default] \"#{pane_title}\"".to_string(),
             pane_border_status: PaneBorderStatus::Off,
             pane_border_lines: PaneBorderLines::Single,
 
@@ -216,9 +218,9 @@ impl TmuxConfig {
             }
 
             // Handle line continuations
-            let line = if line.ends_with('\\') {
+            let line = if let Some(stripped) = line.strip_suffix('\\') {
                 // TODO: Handle multi-line commands
-                &line[..line.len() - 1]
+                stripped
             } else {
                 line
             };
@@ -269,11 +271,24 @@ impl TmuxConfig {
         // Parse flags
         while let Some(arg) = args.peek() {
             match **arg {
-                "-g" => { _global = true; args.next(); }
-                "-a" => { _append = true; args.next(); }
-                "-q" => { _quiet = true; args.next(); }
-                "-s" | "-w" | "-u" | "-o" | "-F" | "-U" => { args.next(); }
-                _ if arg.starts_with('-') => { args.next(); }
+                "-g" => {
+                    _global = true;
+                    args.next();
+                }
+                "-a" => {
+                    _append = true;
+                    args.next();
+                }
+                "-q" => {
+                    _quiet = true;
+                    args.next();
+                }
+                "-s" | "-w" | "-u" | "-o" | "-F" | "-U" => {
+                    args.next();
+                }
+                _ if arg.starts_with('-') => {
+                    args.next();
+                }
                 _ => break,
             }
         }
@@ -283,7 +298,7 @@ impl TmuxConfig {
             None => return Ok(()),
         };
 
-        let value = args.map(|s| *s).collect::<Vec<_>>().join(" ");
+        let value = args.copied().collect::<Vec<_>>().join(" ");
         let value = value.trim_matches(|c| c == '"' || c == '\'');
 
         self.set_option(option, value)
@@ -316,7 +331,9 @@ impl TmuxConfig {
                     args.next();
                     repeat = true;
                 }
-                _ if arg.starts_with('-') => { args.next(); }
+                _ if arg.starts_with('-') => {
+                    args.next();
+                }
                 _ => break,
             }
         }
@@ -326,7 +343,7 @@ impl TmuxConfig {
             None => return Ok(()),
         };
 
-        let command: String = args.map(|s| *s).collect::<Vec<_>>().join(" ");
+        let command: String = args.copied().collect::<Vec<_>>().join(" ");
 
         let binding = KeyBinding {
             key: key.clone(),
@@ -336,7 +353,7 @@ impl TmuxConfig {
 
         self.key_tables
             .entry(table)
-            .or_insert_with(KeyTable::new)
+            .or_default()
             .bindings
             .insert(key, binding);
 
@@ -367,15 +384,17 @@ impl TmuxConfig {
                     }
                     return Ok(());
                 }
-                _ if arg.starts_with('-') => { args.next(); }
+                _ if arg.starts_with('-') => {
+                    args.next();
+                }
                 _ => break,
             }
         }
 
-        if let Some(key) = args.next() {
-            if let Some(kt) = self.key_tables.get_mut(&table) {
-                kt.bindings.remove(*key);
-            }
+        if let Some(key) = args.next()
+            && let Some(kt) = self.key_tables.get_mut(&table)
+        {
+            kt.bindings.remove(*key);
         }
 
         Ok(())
@@ -387,9 +406,16 @@ impl TmuxConfig {
 
         while let Some(arg) = args.peek() {
             match **arg {
-                "-a" => { _append = true; args.next(); }
-                "-g" | "-R" | "-u" => { args.next(); }
-                _ if arg.starts_with('-') => { args.next(); }
+                "-a" => {
+                    _append = true;
+                    args.next();
+                }
+                "-g" | "-R" | "-u" => {
+                    args.next();
+                }
+                _ if arg.starts_with('-') => {
+                    args.next();
+                }
                 _ => break,
             }
         }
@@ -399,12 +425,9 @@ impl TmuxConfig {
             None => return Ok(()),
         };
 
-        let command: String = args.map(|s| *s).collect::<Vec<_>>().join(" ");
+        let command: String = args.copied().collect::<Vec<_>>().join(" ");
 
-        self.hooks
-            .entry(hook_name)
-            .or_insert_with(Vec::new)
-            .push(command);
+        self.hooks.entry(hook_name).or_default().push(command);
 
         Ok(())
     }
@@ -418,8 +441,12 @@ impl TmuxConfig {
             "history-limit" => self.history_limit = value.parse().unwrap_or(2000),
             "escape-time" => self.escape_time = Duration::from_millis(value.parse().unwrap_or(500)),
             "repeat-time" => self.repeat_time = Duration::from_millis(value.parse().unwrap_or(500)),
-            "display-time" => self.display_time = Duration::from_millis(value.parse().unwrap_or(750)),
-            "display-panes-time" => self.display_panes_time = Duration::from_millis(value.parse().unwrap_or(1000)),
+            "display-time" => {
+                self.display_time = Duration::from_millis(value.parse().unwrap_or(750))
+            }
+            "display-panes-time" => {
+                self.display_panes_time = Duration::from_millis(value.parse().unwrap_or(1000))
+            }
             "focus-events" => self.focus_events = parse_bool(value),
             "mouse" => self.mouse = parse_bool(value),
             "set-clipboard" => self.set_clipboard = ClipboardMode::parse(value),
@@ -436,7 +463,9 @@ impl TmuxConfig {
             "prefix2" => self.prefix2 = Some(value.to_string()),
 
             "status" => self.status = StatusPosition::parse(value),
-            "status-interval" => self.status_interval = Duration::from_secs(value.parse().unwrap_or(15)),
+            "status-interval" => {
+                self.status_interval = Duration::from_secs(value.parse().unwrap_or(15))
+            }
             "status-justify" => self.status_justify = StatusJustify::parse(value),
             "status-left" => self.status_left = FormatSpec::new(value),
             "status-left-length" => self.status_left_length = value.parse().unwrap_or(10),
@@ -450,8 +479,12 @@ impl TmuxConfig {
             "window-status-current-format" => self.window_status_current_format = value.to_string(),
             "window-status-separator" => self.window_status_separator = value.to_string(),
             "window-status-style" => self.window_status_style = TmuxStyle::parse(value),
-            "window-status-current-style" => self.window_status_current_style = TmuxStyle::parse(value),
-            "window-status-activity-style" => self.window_status_activity_style = TmuxStyle::parse(value),
+            "window-status-current-style" => {
+                self.window_status_current_style = TmuxStyle::parse(value)
+            }
+            "window-status-activity-style" => {
+                self.window_status_activity_style = TmuxStyle::parse(value)
+            }
             "window-status-bell-style" => self.window_status_bell_style = TmuxStyle::parse(value),
 
             "pane-border-style" => self.pane_border_style = TmuxStyle::parse(value),
@@ -464,7 +497,9 @@ impl TmuxConfig {
             "message-command-style" => self.message_command_style = TmuxStyle::parse(value),
             "mode-style" => self.mode_style = TmuxStyle::parse(value),
 
-            "clock-mode-colour" | "clock-mode-color" => self.clock_mode_colour = TmuxColor::parse(value),
+            "clock-mode-colour" | "clock-mode-color" => {
+                self.clock_mode_colour = TmuxColor::parse(value)
+            }
             "clock-mode-style" => self.clock_mode_style = ClockStyle::parse(value),
 
             "activity-action" => self.activity_action = ActivityAction::parse(value),
@@ -475,7 +510,9 @@ impl TmuxConfig {
             "visual-silence" => self.visual_silence = VisualMode::parse(value),
             "monitor-activity" => self.monitor_activity = parse_bool(value),
             "monitor-bell" => self.monitor_bell = parse_bool(value),
-            "monitor-silence" => self.monitor_silence = Duration::from_secs(value.parse().unwrap_or(0)),
+            "monitor-silence" => {
+                self.monitor_silence = Duration::from_secs(value.parse().unwrap_or(0))
+            }
 
             // User options (start with @)
             opt if opt.starts_with('@') => {
@@ -489,7 +526,8 @@ impl TmuxConfig {
 
             _ => {
                 // Store unknown options for compatibility
-                self.user_options.insert(option.to_string(), value.to_string());
+                self.user_options
+                    .insert(option.to_string(), value.to_string());
             }
         }
 
@@ -694,10 +732,10 @@ fn parse_bool(s: &str) -> bool {
 }
 
 fn expand_path(path: &str) -> String {
-    if path.starts_with('~') {
-        if let Ok(home) = std::env::var("HOME") {
-            return path.replacen('~', &home, 1);
-        }
+    if path.starts_with('~')
+        && let Ok(home) = std::env::var("HOME")
+    {
+        return path.replacen('~', &home, 1);
     }
     path.to_string()
 }
@@ -746,4 +784,3 @@ fn shell_split(s: &str) -> Vec<&str> {
 
     result
 }
-

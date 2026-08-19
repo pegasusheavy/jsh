@@ -113,7 +113,7 @@ pub fn builtin_read(args: &[String], interp: &mut Interpreter) -> Result<ExitSta
     } else {
         // Read until delimiter
         let stdin = io::stdin();
-        for byte in stdin.bytes() {
+        for byte in io::BufReader::new(stdin).bytes() {
             match byte {
                 Ok(b) if b as char == delimiter => break,
                 Ok(b) => input.push(b as char),
@@ -158,4 +158,3 @@ pub fn builtin_getopts(_args: &[String], _interp: &mut Interpreter) -> Result<Ex
     // TODO: Implement getopts
     Ok(ExitStatus::failure(1))
 }
-

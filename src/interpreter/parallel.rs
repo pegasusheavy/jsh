@@ -146,8 +146,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs::{self, File};
-    use std::io::Write;
+    use std::fs::File;
+
     use tempfile::tempdir;
 
     #[test]
@@ -198,11 +198,8 @@ mod tests {
 
     #[test]
     fn test_execute_commands_parallel() {
-        let commands: Vec<Box<dyn Fn() -> i32 + Send + Sync>> = vec![
-            Box::new(|| 0),
-            Box::new(|| 1),
-            Box::new(|| 2),
-        ];
+        let commands: Vec<Box<dyn Fn() -> i32 + Send + Sync>> =
+            vec![Box::new(|| 0), Box::new(|| 1), Box::new(|| 2)];
 
         // Can't use Box<dyn Fn> directly with par_iter, so test sequential
         let results: Vec<i32> = commands.iter().map(|f| f()).collect();
@@ -216,4 +213,3 @@ mod tests {
         assert_eq!(result, vec!["HELLO", "WORLD"]);
     }
 }
-

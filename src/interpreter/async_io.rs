@@ -2,9 +2,9 @@
 //!
 //! Provides non-blocking I/O for pipeline stages and background jobs.
 
-use crossbeam_channel::{bounded, Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, bounded};
 use std::io::{BufRead, BufReader, Read, Write};
-use std::process::{Child, ChildStderr, ChildStdout, Stdio};
+use std::process::Child;
 use std::thread::{self, JoinHandle};
 
 /// Size of the I/O buffer
@@ -37,6 +37,7 @@ pub struct AsyncCommand {
     /// Receiver for output
     pub output_rx: Receiver<CommandOutput>,
     /// Child process handle (for killing)
+    #[allow(dead_code)]
     child: Option<Child>,
 }
 
@@ -68,17 +69,15 @@ impl AsyncCommand {
         // Spawn process waiter thread
         let wait_thread = {
             let tx_wait = tx;
-            Some(thread::spawn(move || {
-                match child.wait() {
-                    Ok(status) => {
-                        let code = status.code().unwrap_or(-1);
-                        let _ = tx_wait.send(CommandOutput::Done(code));
-                        code
-                    }
-                    Err(e) => {
-                        let _ = tx_wait.send(CommandOutput::Error(e.to_string()));
-                        -1
-                    }
+            Some(thread::spawn(move || match child.wait() {
+                Ok(status) => {
+                    let code = status.code().unwrap_or(-1);
+                    let _ = tx_wait.send(CommandOutput::Done(code));
+                    code
+                }
+                Err(e) => {
+                    let _ = tx_wait.send(CommandOutput::Error(e.to_string()));
+                    -1
                 }
             }))
         };
@@ -227,9 +226,9 @@ impl Write for ChannelWriter {
     fn flush(&mut self) -> std::io::Result<()> {
         if !self.buffer.is_empty() {
             let data = std::mem::take(&mut self.buffer);
-            self.tx
-                .send(data)
-                .map_err(|_| std::io::Error::new(std::io::ErrorKind::BrokenPipe, "channel closed"))?;
+            self.tx.send(data).map_err(|_| {
+                std::io::Error::new(std::io::ErrorKind::BrokenPipe, "channel closed")
+            })?;
         }
         Ok(())
     }
@@ -284,7 +283,7 @@ impl Read for ChannelReader {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::process::Command;
+    use std::process::{Command, Stdio};
 
     #[test]
     fn test_pipe_buffer() {
@@ -337,4 +336,3 @@ mod tests {
         assert!(stderr.is_empty());
     }
 }
-

@@ -26,12 +26,15 @@ fn is_constant_expr(expr: &str) -> bool {
             b'$' => return false,
             b'a'..=b'z' | b'A'..=b'Z' | b'_' => {
                 // Allow 0x, 0X, 0b, 0B prefixes
-                if i > 0 && bytes[i - 1] == b'0' {
-                    if bytes[i] == b'x' || bytes[i] == b'X' || bytes[i] == b'b' || bytes[i] == b'B'
-                    {
-                        i += 1;
-                        continue;
-                    }
+                if i > 0
+                    && bytes[i - 1] == b'0'
+                    && (bytes[i] == b'x'
+                        || bytes[i] == b'X'
+                        || bytes[i] == b'b'
+                        || bytes[i] == b'B')
+                {
+                    i += 1;
+                    continue;
                 }
                 // Allow hex digits a-f, A-F if preceded by 0x
                 if bytes[i] >= b'a' && bytes[i] <= b'f' || bytes[i] >= b'A' && bytes[i] <= b'F' {
@@ -39,11 +42,9 @@ fn is_constant_expr(expr: &str) -> bool {
                     let mut j = i;
                     while j > 0 {
                         j -= 1;
-                        if bytes[j] == b'x' || bytes[j] == b'X' {
-                            if j > 0 && bytes[j - 1] == b'0' {
-                                i += 1;
-                                break;
-                            }
+                        if (bytes[j] == b'x' || bytes[j] == b'X') && j > 0 && bytes[j - 1] == b'0' {
+                            i += 1;
+                            break;
                         }
                         if !bytes[j].is_ascii_hexdigit() {
                             return false;
@@ -75,10 +76,10 @@ impl Interpreter {
 
         // Fast path: check cache for constant expressions
         if is_constant_expr(expr) {
-            if let Ok(cache) = ARITH_CACHE.lock() {
-                if let Some(&result) = cache.get(expr) {
-                    return Ok(result);
-                }
+            if let Ok(cache) = ARITH_CACHE.lock()
+                && let Some(&result) = cache.get(expr)
+            {
+                return Ok(result);
             }
             // Evaluate and cache
             let result = self.eval_arithmetic_uncached(expr)?;
@@ -108,17 +109,17 @@ impl Interpreter {
         }
 
         // Handle ternary operator
-        if let Some(q_pos) = find_top_level_char(expr, '?') {
-            if let Some(c_pos) = find_top_level_char(&expr[q_pos + 1..], ':') {
-                let condition = self.eval_arithmetic_uncached(&expr[..q_pos])?;
-                let then_part = &expr[q_pos + 1..q_pos + 1 + c_pos];
-                let else_part = &expr[q_pos + 1 + c_pos + 1..];
-                return if condition != 0 {
-                    self.eval_arithmetic_uncached(then_part)
-                } else {
-                    self.eval_arithmetic_uncached(else_part)
-                };
-            }
+        if let Some(q_pos) = find_top_level_char(expr, '?')
+            && let Some(c_pos) = find_top_level_char(&expr[q_pos + 1..], ':')
+        {
+            let condition = self.eval_arithmetic_uncached(&expr[..q_pos])?;
+            let then_part = &expr[q_pos + 1..q_pos + 1 + c_pos];
+            let else_part = &expr[q_pos + 1 + c_pos + 1..];
+            return if condition != 0 {
+                self.eval_arithmetic_uncached(then_part)
+            } else {
+                self.eval_arithmetic_uncached(else_part)
+            };
         }
 
         // Handle assignment operators
@@ -148,7 +149,8 @@ impl Interpreter {
             } else if let Some(pos) = expr.find(op_str) {
                 let var = expr[..pos].trim();
                 if is_valid_var_name(var) {
-                    let current = self.get_var(var)
+                    let current = self
+                        .get_var(var)
                         .and_then(|v| v.parse::<i64>().ok())
                         .unwrap_or(0);
                     let value = self.eval_arithmetic_uncached(&expr[pos + op_str.len()..])?;
@@ -260,7 +262,11 @@ impl Interpreter {
             let left = self.eval_arithmetic_uncached(&expr[..pos])?;
             let op = expr.as_bytes()[pos] as char;
             let right = self.eval_arithmetic_uncached(&expr[pos + 1..])?;
-            return Ok(if op == '+' { left + right } else { left - right });
+            return Ok(if op == '+' {
+                left + right
+            } else {
+                left - right
+            });
         }
 
         // Handle multiplication, division, modulo
@@ -297,12 +303,12 @@ impl Interpreter {
 
         // Handle unary operators
         let expr = expr.trim();
-        if expr.starts_with('!') {
-            let operand = self.eval_arithmetic_uncached(&expr[1..])?;
+        if let Some(stripped) = expr.strip_prefix('!') {
+            let operand = self.eval_arithmetic_uncached(stripped)?;
             return Ok(if operand == 0 { 1 } else { 0 });
         }
-        if expr.starts_with('~') {
-            let operand = self.eval_arithmetic_uncached(&expr[1..])?;
+        if let Some(stripped) = expr.strip_prefix('~') {
+            let operand = self.eval_arithmetic_uncached(stripped)?;
             return Ok(!operand);
         }
         if expr.starts_with('-') && !expr[1..].starts_with(|c: char| c.is_ascii_digit()) {
@@ -314,42 +320,48 @@ impl Interpreter {
         }
 
         // Handle pre-increment/decrement
-        if expr.starts_with("++") {
-            let var = expr[2..].trim();
+        if let Some(stripped) = expr.strip_prefix("++") {
+            let var = stripped.trim();
             if is_valid_var_name(var) {
-                let value = self.get_var(var)
+                let value = self
+                    .get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
-                    .unwrap_or(0) + 1;
+                    .unwrap_or(0)
+                    + 1;
                 self.set_var(var, &value.to_string());
                 return Ok(value);
             }
         }
-        if expr.starts_with("--") {
-            let var = expr[2..].trim();
+        if let Some(stripped) = expr.strip_prefix("--") {
+            let var = stripped.trim();
             if is_valid_var_name(var) {
-                let value = self.get_var(var)
+                let value = self
+                    .get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
-                    .unwrap_or(0) - 1;
+                    .unwrap_or(0)
+                    - 1;
                 self.set_var(var, &value.to_string());
                 return Ok(value);
             }
         }
 
         // Handle post-increment/decrement
-        if expr.ends_with("++") {
-            let var = expr[..expr.len() - 2].trim();
+        if let Some(stripped) = expr.strip_suffix("++") {
+            let var = stripped.trim();
             if is_valid_var_name(var) {
-                let value = self.get_var(var)
+                let value = self
+                    .get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
                     .unwrap_or(0);
                 self.set_var(var, &(value + 1).to_string());
                 return Ok(value);
             }
         }
-        if expr.ends_with("--") {
-            let var = expr[..expr.len() - 2].trim();
+        if let Some(stripped) = expr.strip_suffix("--") {
+            let var = stripped.trim();
             if is_valid_var_name(var) {
-                let value = self.get_var(var)
+                let value = self
+                    .get_var(var)
                     .and_then(|v| v.parse::<i64>().ok())
                     .unwrap_or(0);
                 self.set_var(var, &(value - 1).to_string());
@@ -363,16 +375,17 @@ impl Interpreter {
         }
 
         // Handle variables
-        if expr.starts_with('$') {
-            let var = &expr[1..];
-            return Ok(self.get_var(var)
+        if let Some(var) = expr.strip_prefix('$') {
+            return Ok(self
+                .get_var(var)
                 .and_then(|v| v.parse::<i64>().ok())
                 .unwrap_or(0));
         }
 
         // Handle bare variable names
         if is_valid_var_name(expr) {
-            return Ok(self.get_var(expr)
+            return Ok(self
+                .get_var(expr)
                 .and_then(|v| v.parse::<i64>().ok())
                 .unwrap_or(0));
         }
@@ -469,7 +482,22 @@ fn find_assignment_equals(expr: &str) -> Option<usize> {
                 // Check it's not ==, !=, <=, >=, +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=
                 let prev = if i > 0 { bytes[i - 1] } else { 0 };
                 let next = if i + 1 < bytes.len() { bytes[i + 1] } else { 0 };
-                if next != b'=' && !matches!(prev, b'=' | b'!' | b'<' | b'>' | b'+' | b'-' | b'*' | b'/' | b'%' | b'&' | b'|' | b'^') {
+                if next != b'='
+                    && !matches!(
+                        prev,
+                        b'=' | b'!'
+                            | b'<'
+                            | b'>'
+                            | b'+'
+                            | b'-'
+                            | b'*'
+                            | b'/'
+                            | b'%'
+                            | b'&'
+                            | b'|'
+                            | b'^'
+                    )
+                {
                     return Some(i);
                 }
             }
@@ -504,7 +532,25 @@ fn find_top_level_additive(expr: &str) -> Option<usize> {
                     continue;
                 }
                 // Skip if previous char indicates unary (operator or start)
-                if matches!(prev, b'(' | b',' | b'?' | b':' | b'<' | b'>' | b'=' | b'!' | b'&' | b'|' | b'^' | b'~' | b'+' | b'-' | b'*' | b'/' | b'%') {
+                if matches!(
+                    prev,
+                    b'(' | b','
+                        | b'?'
+                        | b':'
+                        | b'<'
+                        | b'>'
+                        | b'='
+                        | b'!'
+                        | b'&'
+                        | b'|'
+                        | b'^'
+                        | b'~'
+                        | b'+'
+                        | b'-'
+                        | b'*'
+                        | b'/'
+                        | b'%'
+                ) {
                     continue;
                 }
                 return Some(i);
@@ -544,4 +590,3 @@ fn find_top_level_multiplicative(expr: &str) -> Option<usize> {
     }
     None
 }
-

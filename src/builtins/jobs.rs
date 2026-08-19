@@ -26,4 +26,3 @@ pub fn builtin_wait(_args: &[String], _interp: &mut Interpreter) -> Result<ExitS
     // TODO: Wait for background processes
     Ok(ExitStatus::success())
 }
-

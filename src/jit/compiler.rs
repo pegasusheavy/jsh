@@ -5,11 +5,11 @@
 use super::{LoopId, MAX_COMPILED_LOOPS};
 use rustc_hash::FxHashMap;
 
+use cranelift_codegen::Context;
 use cranelift_codegen::entity::EntityRef;
-use cranelift_codegen::ir::{types, AbiParam, InstBuilder, Signature, UserFuncName};
+use cranelift_codegen::ir::{AbiParam, InstBuilder, Signature, UserFuncName, types};
 use cranelift_codegen::isa::CallConv;
 use cranelift_codegen::settings::{self, Configurable};
-use cranelift_codegen::Context;
 use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext, Variable};
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::{DataDescription, Linkage, Module};
@@ -42,11 +42,15 @@ impl JitCompiler {
     pub fn new() -> Result<Self, String> {
         // Create ISA (Instruction Set Architecture) for the host
         let mut flag_builder = settings::builder();
-        flag_builder.set("opt_level", "speed").map_err(|e| e.to_string())?;
-        flag_builder.set("is_pic", "true").map_err(|e| e.to_string())?;
+        flag_builder
+            .set("opt_level", "speed")
+            .map_err(|e| e.to_string())?;
+        flag_builder
+            .set("is_pic", "true")
+            .map_err(|e| e.to_string())?;
 
-        let isa_builder = cranelift_native::builder()
-            .map_err(|e| format!("Failed to get native ISA: {}", e))?;
+        let isa_builder =
+            cranelift_native::builder().map_err(|e| format!("Failed to get native ISA: {}", e))?;
 
         let flags = settings::Flags::new(flag_builder);
         let isa = isa_builder.finish(flags).map_err(|e| e.to_string())?;
@@ -84,7 +88,11 @@ impl JitCompiler {
     /// done
     /// echo $sum
     /// ```
-    pub fn compile_counting_loop(&mut self, loop_id: LoopId, count: i64) -> Result<CompiledLoopFn, String> {
+    pub fn compile_counting_loop(
+        &mut self,
+        loop_id: LoopId,
+        count: i64,
+    ) -> Result<CompiledLoopFn, String> {
         // Check cache
         if let Some(func) = self.compiled.get(&loop_id) {
             return Ok(*func);
@@ -101,7 +109,8 @@ impl JitCompiler {
 
         // Create function
         let func_name = format!("loop_{}", loop_id.0);
-        let func_id = self.module
+        let func_id = self
+            .module
             .declare_function(&func_name, Linkage::Local, &sig)
             .map_err(|e| e.to_string())?;
 
@@ -176,7 +185,9 @@ impl JitCompiler {
             .map_err(|e| e.to_string())?;
 
         self.module.clear_context(&mut self.ctx);
-        self.module.finalize_definitions().map_err(|e| e.to_string())?;
+        self.module
+            .finalize_definitions()
+            .map_err(|e| e.to_string())?;
 
         // Get function pointer
         let code_ptr = self.module.get_finalized_function(func_id);
@@ -212,7 +223,8 @@ impl JitCompiler {
         sig.returns.push(AbiParam::new(types::I64));
 
         let func_name = format!("arith_loop_{}", loop_id.0);
-        let func_id = self.module
+        let func_id = self
+            .module
             .declare_function(&func_name, Linkage::Local, &sig)
             .map_err(|e| e.to_string())?;
 
@@ -280,7 +292,9 @@ impl JitCompiler {
             .map_err(|e| e.to_string())?;
 
         self.module.clear_context(&mut self.ctx);
-        self.module.finalize_definitions().map_err(|e| e.to_string())?;
+        self.module
+            .finalize_definitions()
+            .map_err(|e| e.to_string())?;
 
         let code_ptr = self.module.get_finalized_function(func_id);
         let func: CompiledLoopFn = unsafe { std::mem::transmute(code_ptr) };
@@ -371,4 +385,3 @@ mod tests {
         assert_eq!(compiler.compiled_count(), 1);
     }
 }
-

@@ -116,7 +116,10 @@ impl KeyTable {
         table.bind("t", "clock-mode");
         table.bind("~", "show-messages");
         table.bind("i", "display-message");
-        table.bind("r", "source-file ~/.tmux.conf \\; display-message \"Reloaded tmux.conf\"");
+        table.bind(
+            "r",
+            "source-file ~/.tmux.conf \\; display-message \"Reloaded tmux.conf\"",
+        );
         table.bind("C-z", "suspend-client");
         table.bind("f", "command-prompt \"find-window -Z -- '%%'\"");
 
@@ -132,7 +135,10 @@ impl KeyTable {
 
         // Mouse bindings would go here
         table.bind("MouseDown1Pane", "select-pane -t = ; send-keys -M");
-        table.bind("MouseDrag1Pane", "if-shell -F \"#{mouse_any_flag}\" \"send-keys -M\" \"copy-mode -M\"");
+        table.bind(
+            "MouseDrag1Pane",
+            "if-shell -F \"#{mouse_any_flag}\" \"send-keys -M\" \"copy-mode -M\"",
+        );
         table.bind("WheelUpPane", "if-shell -F \"#{mouse_any_flag}\" \"send-keys -M\" \"if -Ft= '#{alternate_on}' 'send-keys -M' 'copy-mode -e'\"");
 
         table
@@ -223,8 +229,14 @@ impl KeyTable {
         table.bind("Escape", "send-keys -X clear-selection");
 
         // Search
-        table.bind("/", "command-prompt -p \"(search down)\" \"send-keys -X search-forward \\\"%%%\\\"\"");
-        table.bind("?", "command-prompt -p \"(search up)\" \"send-keys -X search-backward \\\"%%%\\\"\"");
+        table.bind(
+            "/",
+            "command-prompt -p \"(search down)\" \"send-keys -X search-forward \\\"%%%\\\"\"",
+        );
+        table.bind(
+            "?",
+            "command-prompt -p \"(search up)\" \"send-keys -X search-backward \\\"%%%\\\"\"",
+        );
         table.bind("n", "send-keys -X search-again");
         table.bind("N", "send-keys -X search-reverse");
 
@@ -236,18 +248,14 @@ impl KeyTable {
 
     /// Bind a key
     pub fn bind(&mut self, key: &str, command: &str) {
-        self.bindings.insert(
-            key.to_string(),
-            KeyBinding::new(key, command),
-        );
+        self.bindings
+            .insert(key.to_string(), KeyBinding::new(key, command));
     }
 
     /// Bind a key with repeat
     pub fn bind_repeat(&mut self, key: &str, command: &str) {
-        self.bindings.insert(
-            key.to_string(),
-            KeyBinding::new(key, command).with_repeat(),
-        );
+        self.bindings
+            .insert(key.to_string(), KeyBinding::new(key, command).with_repeat());
     }
 
     /// Unbind a key
@@ -285,7 +293,7 @@ pub fn parse_key(key: &str) -> Option<KeyCode> {
 
     let parts: Vec<&str> = key.split('-').collect();
     let base_key = if parts.len() > 1 {
-        for part in &parts[..parts.len()-1] {
+        for part in &parts[..parts.len() - 1] {
             match *part {
                 "C" | "Ctrl" | "Control" => ctrl = true,
                 "M" | "Alt" | "Meta" => alt = true,
@@ -372,9 +380,15 @@ pub enum BaseKey {
 impl std::fmt::Display for KeyCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut parts = vec![];
-        if self.ctrl { parts.push("C"); }
-        if self.alt { parts.push("M"); }
-        if self.shift { parts.push("S"); }
+        if self.ctrl {
+            parts.push("C");
+        }
+        if self.alt {
+            parts.push("M");
+        }
+        if self.shift {
+            parts.push("S");
+        }
 
         let base = match &self.base {
             BaseKey::Char(c) => c.to_string(),
@@ -400,4 +414,3 @@ impl std::fmt::Display for KeyCode {
         write!(f, "{}", parts.join("-"))
     }
 }
-

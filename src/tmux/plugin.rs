@@ -4,7 +4,7 @@ use crate::error::{JshError, Result};
 use crate::shell::fsh_data_dir;
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 /// TPM-compatible plugin manager
@@ -80,7 +80,10 @@ impl TmuxPluginManager {
             .map_err(|e| JshError::runtime(format!("git clone failed: {}", e)))?;
 
         if !status.success() {
-            return Err(JshError::runtime(format!("Failed to clone {}", plugin.name)));
+            return Err(JshError::runtime(format!(
+                "Failed to clone {}",
+                plugin.name
+            )));
         }
 
         // Run plugin's install script if it exists
@@ -341,11 +344,7 @@ impl TmuxPlugin {
             let repo = parts[0];
             let branch = parts.get(1).map(|s| s.to_string());
 
-            let name = repo
-                .split('/')
-                .last()
-                .unwrap_or("plugin")
-                .to_string();
+            let name = repo.split('/').next_back().unwrap_or("plugin").to_string();
 
             let git_url = format!("https://github.com/{}.git", repo);
 
@@ -361,7 +360,7 @@ impl TmuxPlugin {
     }
 
     /// Check if plugin is installed
-    pub fn is_installed(&self, plugins_dir: &PathBuf) -> bool {
+    pub fn is_installed(&self, plugins_dir: &Path) -> bool {
         plugins_dir.join(&self.name).exists()
     }
 }
@@ -390,7 +389,10 @@ pub fn popular_plugins() -> Vec<(&'static str, &'static str)> {
     vec![
         ("tmux-plugins/tpm", "Tmux Plugin Manager"),
         ("tmux-plugins/tmux-sensible", "Basic tmux settings"),
-        ("tmux-plugins/tmux-resurrect", "Persist sessions across restarts"),
+        (
+            "tmux-plugins/tmux-resurrect",
+            "Persist sessions across restarts",
+        ),
         ("tmux-plugins/tmux-continuum", "Continuous saving/restoring"),
         ("tmux-plugins/tmux-yank", "Copy to system clipboard"),
         ("tmux-plugins/tmux-pain-control", "Better pane navigation"),
@@ -418,4 +420,3 @@ pub fn popular_plugins() -> Vec<(&'static str, &'static str)> {
         ("tmux-plugins/tmux-online-status", "Online status indicator"),
     ]
 }
-

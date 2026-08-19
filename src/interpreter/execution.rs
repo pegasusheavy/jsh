@@ -36,7 +36,8 @@ impl Interpreter {
             Statement::Case(case_stmt) => self.execute_case(case_stmt),
             Statement::Select(select_stmt) => self.execute_select(select_stmt),
             Statement::Function(func_def) => {
-                self.functions.insert(func_def.name.clone(), func_def.clone());
+                self.functions
+                    .insert(func_def.name.clone(), func_def.clone());
                 Ok(ExitStatus::success())
             }
             Statement::Match(match_expr) => self.execute_match(match_expr),
@@ -183,7 +184,7 @@ impl Interpreter {
 
         // Check for builtins (fast path - most commands are builtins or external)
         let builtins = Builtins::new();
-        let args_vec: Vec<String> = args.iter().cloned().collect();
+        let args_vec: Vec<String> = args.to_vec();
         if let Some(status) = builtins.execute(name, &args_vec, self)? {
             self.last_status = status;
             return Ok(status);
@@ -262,10 +263,10 @@ impl Interpreter {
             }
         }
 
-        if assign.readonly {
-            if let Some(val) = self.vars.remove(&assign.name) {
-                self.consts.insert(assign.name.clone(), val);
-            }
+        if assign.readonly
+            && let Some(val) = self.vars.remove(&assign.name)
+        {
+            self.consts.insert(assign.name.clone(), val);
         }
 
         Ok(ExitStatus::success())
@@ -330,10 +331,10 @@ impl Interpreter {
             match result {
                 Ok(status) => Ok(status),
                 Err(JshError::Return(val)) => {
-                    if let Some(v) = val {
-                        if let Ok(code) = v.parse::<i32>() {
-                            return Ok(ExitStatus::failure(code));
-                        }
+                    if let Some(v) = val
+                        && let Ok(code) = v.parse::<i32>()
+                    {
+                        return Ok(ExitStatus::failure(code));
                     }
                     Ok(ExitStatus::success())
                 }
@@ -354,4 +355,3 @@ impl Interpreter {
         result
     }
 }
-

@@ -85,11 +85,11 @@ impl Parser {
         }
 
         // Check for _ wildcard
-        if let TokenKind::Word(s) = &self.peek().kind {
-            if s == "_" {
-                self.advance();
-                return Ok(MatchPattern::Wildcard);
-            }
+        if let TokenKind::Word(s) = &self.peek().kind
+            && s == "_"
+        {
+            self.advance();
+            return Ok(MatchPattern::Wildcard);
         }
 
         // Parse first pattern
@@ -112,31 +112,33 @@ impl Parser {
     /// Parse a single match pattern
     fn parse_single_match_pattern(&mut self) -> Result<MatchPattern> {
         // Check for regex pattern /.../
-        if let TokenKind::Word(s) = &self.peek().kind {
-            if s.starts_with('/') && s.ends_with('/') && s.len() > 2 {
-                let regex = s[1..s.len() - 1].to_string();
-                self.advance();
-                return Ok(MatchPattern::Regex(regex));
-            }
+        if let TokenKind::Word(s) = &self.peek().kind
+            && s.starts_with('/')
+            && s.ends_with('/')
+            && s.len() > 2
+        {
+            let regex = s[1..s.len() - 1].to_string();
+            self.advance();
+            return Ok(MatchPattern::Regex(regex));
         }
 
         // Check for range: start..end or start..=end
         if let TokenKind::Number(start) = self.peek().kind {
             let next = self.peek_nth(1);
-            if let TokenKind::Word(s) = &next.kind {
-                if s.starts_with("..") {
-                    self.advance(); // consume start
-                    let inclusive = s.starts_with("..=");
-                    self.advance(); // consume ..
+            if let TokenKind::Word(s) = &next.kind
+                && s.starts_with("..")
+            {
+                self.advance(); // consume start
+                let inclusive = s.starts_with("..=");
+                self.advance(); // consume ..
 
-                    if let TokenKind::Number(end) = self.peek().kind {
-                        self.advance();
-                        return Ok(MatchPattern::Range {
-                            start,
-                            end,
-                            inclusive,
-                        });
-                    }
+                if let TokenKind::Number(end) = self.peek().kind {
+                    self.advance();
+                    return Ok(MatchPattern::Range {
+                        start,
+                        end,
+                        inclusive,
+                    });
                 }
             }
         }
@@ -149,10 +151,10 @@ impl Parser {
             if let WordPart::Glob(pattern) = part {
                 return Ok(MatchPattern::Glob(pattern.clone()));
             }
-            if let WordPart::Literal(s) = part {
-                if s.contains('*') || s.contains('?') || s.contains('[') {
-                    return Ok(MatchPattern::Glob(s.clone()));
-                }
+            if let WordPart::Literal(s) = part
+                && (s.contains('*') || s.contains('?') || s.contains('['))
+            {
+                return Ok(MatchPattern::Glob(s.clone()));
             }
         }
 
@@ -181,7 +183,11 @@ impl Parser {
             stmts
         };
 
-        Ok(Statement::Loop(LoopStatement { body, span, loop_id: crate::jit::LoopId::new() }))
+        Ok(Statement::Loop(LoopStatement {
+            body,
+            span,
+            loop_id: crate::jit::LoopId::new(),
+        }))
     }
 
     /// Parse franken let binding
@@ -498,4 +504,3 @@ mod tests {
         assert!(matches!(program.statements[0], Statement::Match(_)));
     }
 }
-

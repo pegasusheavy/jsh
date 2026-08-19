@@ -11,7 +11,6 @@ pub enum OpCode {
     // ========================================================================
     // Stack Operations
     // ========================================================================
-
     /// No operation
     Nop = 0,
     /// Push a constant onto the stack (index in constant pool)
@@ -30,7 +29,6 @@ pub enum OpCode {
     // ========================================================================
     // Variable Operations
     // ========================================================================
-
     /// Get variable value (name index in constant pool)
     GetVar = 10,
     /// Set variable value (name index in constant pool)
@@ -49,7 +47,6 @@ pub enum OpCode {
     // ========================================================================
     // Arithmetic Operations
     // ========================================================================
-
     /// Add two integers
     Add = 20,
     /// Subtract
@@ -82,7 +79,6 @@ pub enum OpCode {
     // ========================================================================
     // Comparison Operations
     // ========================================================================
-
     /// Equal
     Eq = 40,
     /// Not equal
@@ -107,7 +103,6 @@ pub enum OpCode {
     // ========================================================================
     // Logical Operations
     // ========================================================================
-
     /// Logical AND
     And = 50,
     /// Logical OR
@@ -118,7 +113,6 @@ pub enum OpCode {
     // ========================================================================
     // Control Flow
     // ========================================================================
-
     /// Unconditional jump (offset)
     Jump = 60,
     /// Jump if top of stack is true
@@ -141,7 +135,6 @@ pub enum OpCode {
     // ========================================================================
     // Command Execution
     // ========================================================================
-
     /// Execute builtin command (builtin index, argc)
     Builtin = 70,
     /// Execute external command
@@ -160,7 +153,6 @@ pub enum OpCode {
     // ========================================================================
     // I/O Operations
     // ========================================================================
-
     /// Print string (no newline)
     Print = 80,
     /// Print string with newline
@@ -179,7 +171,6 @@ pub enum OpCode {
     // ========================================================================
     // String Operations
     // ========================================================================
-
     /// Concatenate two strings
     Concat = 90,
     /// Get string length
@@ -194,7 +185,6 @@ pub enum OpCode {
     // ========================================================================
     // Array/List Operations
     // ========================================================================
-
     /// Create array
     ArrayNew = 100,
     /// Push element to array
@@ -209,7 +199,6 @@ pub enum OpCode {
     // ========================================================================
     // Test Operations (for [ and [[ )
     // ========================================================================
-
     /// File exists (-e)
     TestExists = 110,
     /// File is regular (-f)
@@ -230,7 +219,6 @@ pub enum OpCode {
     // ========================================================================
     // Special
     // ========================================================================
-
     /// Halt execution
     Halt = 255,
 }
@@ -356,7 +344,11 @@ impl Instruction {
 
     /// Create instruction with no operand
     pub fn simple(op: OpCode, line: u32) -> Self {
-        Self { op, operand: 0, line }
+        Self {
+            op,
+            operand: 0,
+            line,
+        }
     }
 }
 
@@ -529,4 +521,3 @@ mod tests {
         assert_eq!(chunk.code[jump_idx].operand, 3);
     }
 }
-
