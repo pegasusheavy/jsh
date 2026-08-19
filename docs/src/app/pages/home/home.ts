@@ -32,7 +32,7 @@ import { faTerminal, faFish, faCubes, faPalette, faRocket, faCode, faBolt, faShi
               <fa-icon [icon]="faRocket"></fa-icon>
               Get Started
             </a>
-            <a href="https://github.com/pegasusheavy/jsh" target="_blank"
+            <a href="https://github.com/quinnjr/jsh" target="_blank"
                class="btn-outline px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
               <fa-icon [icon]="faGithub"></fa-icon>
               View on GitHub
@@ -161,7 +161,7 @@ echo "Hello, $name! v$VERSION"</code></pre>
         <h2 class="text-3xl font-bold mb-8">Quick Install</h2>
         <div class="bg-[var(--color-code-bg)] rounded-xl p-6 border border-[var(--color-border)]">
           <pre class="text-left text-sm"><code># Clone and build
-git clone https://github.com/pegasusheavy/jsh.git
+git clone https://github.com/quinnjr/jsh.git
 cd jsh
 cargo build --release
 

@@ -11,7 +11,7 @@ fn print_version() {
         "fsh".cyan().bold(),
         franken_shell::VERSION
     );
-    println!("Copyright (c) 2025 Pegasus Heavy Industries LLC");
+    println!("Copyright (c) 2025 Joseph R. Quinn");
     println!("Licensed under MIT OR Apache-2.0");
 }
 

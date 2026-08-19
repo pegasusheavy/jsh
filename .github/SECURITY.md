@@ -14,7 +14,7 @@ We take security seriously. If you discover a security vulnerability in jsh, ple
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
-Instead, please send an email to: **security@pegasusheavy.com**
+Instead, please send an email to: **quinn.josephr@protonmail.com**
 
 Include the following information in your report:
 

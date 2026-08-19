@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        ZSH/Bash-compatible shell with enhanced scripting
 
 License:        MIT OR Apache-2.0
-URL:            https://github.com/pegasusheavy/jsh
+URL:            https://github.com/quinnjr/jsh
 Source0:        %{name}-%{version}.tar.gz
 
 BuildRequires:  cargo >= 1.75
@@ -68,7 +68,7 @@ fi
 %dir %{_sysconfdir}/jsh
 
 %changelog
-* Sat Dec 21 2024 Pegasus Heavy Industries LLC <support@pegasusheavy.com> - 0.1.0-1
+* Sat Dec 21 2024 Joseph R. Quinn <quinn.josephr@protonmail.com> - 0.1.0-1
 - Initial release
 - Full Bash/ZSH compatibility
 - Fish shell compatibility

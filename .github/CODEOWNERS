@@ -1,28 +1,28 @@
 # Default owners for everything in the repo
-* @pegasusheavy
+* @quinnjr
 
 # Core shell implementation
-/src/lexer.rs @pegasusheavy
-/src/parser.rs @pegasusheavy
-/src/ast.rs @pegasusheavy
-/src/interpreter.rs @pegasusheavy
+/src/lexer.rs @quinnjr
+/src/parser.rs @quinnjr
+/src/ast.rs @quinnjr
+/src/interpreter.rs @quinnjr
 
 # Builtins
-/src/builtins.rs @pegasusheavy
+/src/builtins.rs @quinnjr
 
 # Shell and REPL
-/src/shell.rs @pegasusheavy
-/src/theme.rs @pegasusheavy
+/src/shell.rs @quinnjr
+/src/theme.rs @quinnjr
 
 # Documentation
-/docs/ @pegasusheavy
-/README.md @pegasusheavy
+/docs/ @quinnjr
+/README.md @quinnjr
 
 # Packaging
-/debian/ @pegasusheavy
-/rpm/ @pegasusheavy
-/packaging/ @pegasusheavy
+/debian/ @quinnjr
+/rpm/ @quinnjr
+/packaging/ @quinnjr
 
 # CI/CD
-/.github/ @pegasusheavy
+/.github/ @quinnjr
 

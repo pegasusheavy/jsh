@@ -44,7 +44,7 @@ docs/
 
 ## 🎨 Theming
 
-The documentation site uses the **Oxide** theme from `@pegasusheavy/tailswatch`, a Rust-inspired dark theme with orange accents.
+The documentation site uses the **Oxide** theme from `tailswatch`, a Rust-inspired dark theme with orange accents.
 
 ### Color Palette
 
@@ -131,8 +131,8 @@ export class MyPage {}
 
 - **Angular 21** - Application framework
 - **Tailwind CSS 4** - Utility-first CSS
-- **@pegasusheavy/tailswatch** - Theme library (Oxide theme)
-- **@pegasusheavy/ngx-tailwindcss** - Angular Tailwind components
+- **tailswatch** - Theme library (Oxide theme)
+- **ngx-tailwindcss** - Angular Tailwind components
 
 ## 🚢 Deployment
 
@@ -161,4 +161,4 @@ npx gh-pages -d dist/docs
 
 This documentation site is part of the jsh project, dual-licensed under MIT and Apache 2.0.
 
-© 2025 Pegasus Heavy Industries LLC
+© 2025 Joseph R. Quinn

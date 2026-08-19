@@ -1,9 +1,9 @@
 blank_issues_enabled: false
 contact_links:
   - name: Discussions
-    url: https://github.com/pegasusheavy/jsh/discussions
+    url: https://github.com/quinnjr/jsh/discussions
     about: Ask questions and discuss jsh
   - name: Documentation
-    url: https://pegasusheavy.github.io/jsh/
+    url: https://quinnjr.github.io/jsh/
     about: Check the documentation before opening an issue
 

@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lazy-loaded routes for optimal performance
 
 #### Theming
-- Integration with `@pegasusheavy/tailswatch` Oxide theme
+- Integration with `tailswatch` Oxide theme
 - Rust-inspired color scheme with orange (#f74c00) accents
 - Dark mode design with proper contrast
 - Custom CSS variables for easy customization
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Infrastructure
 - Angular 21 standalone components
 - Tailwind CSS 4 integration
-- `@pegasusheavy/ngx-tailwindcss` component library
+- `ngx-tailwindcss` component library
 - pnpm package manager configuration
 - TypeScript strict mode
 
@@ -82,11 +82,11 @@ This is the initial release. No migration required.
 
 ## Links
 
-- [jsh Repository](https://github.com/pegasusheavy/jsh)
-- [Report Issues](https://github.com/pegasusheavy/jsh/issues)
-- [Pegasus Heavy Industries](https://github.com/pegasusheavy)
+- [jsh Repository](https://github.com/quinnjr/jsh)
+- [Report Issues](https://github.com/quinnjr/jsh/issues)
+- [Joseph R. Quinn](https://github.com/quinnjr)
 
 ---
 
-*Maintained by Pegasus Heavy Industries LLC*
+*Maintained by Joseph R. Quinn*
 

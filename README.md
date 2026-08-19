@@ -256,7 +256,7 @@ fzf-env        # Browse environment variables
 
 ```bash
 # Clone this monster
-git clone https://github.com/pegasusheavy/franken-shell
+git clone https://github.com/quinnjr/jsh
 cd franken-shell
 
 # Build it
@@ -402,7 +402,7 @@ MIT OR Apache-2.0 (pick your favorite, we won't judge)
 ---
 
 <p align="center">
-  <b>Made with ☕ and questionable decisions by Pegasus Heavy Industries</b>
+  <b>Made with ☕ and questionable decisions by Joseph R. Quinn</b>
   <br>
   <i>The vibe-coded shell that does everything stupidly™</i>
   <br><br>

@@ -37,7 +37,7 @@
 - **Language**: Rust (Edition 2024)
 - **Version**: 0.1.0
 - **License**: MIT OR Apache-2.0
-- **Author**: Pegasus Heavy Industries LLC
+- **Author**: Joseph R. Quinn
 - **Minimum Rust**: 1.85
 - **Platforms**: Linux, macOS, BSD, Unix-like systems
 
@@ -151,7 +151,7 @@ All Bash features plus:
 
 ```bash
 # Clone repository
-git clone https://github.com/pegasusheavy/jsh.git
+git clone https://github.com/quinnjr/jsh.git
 cd jsh
 
 # Build release binary
@@ -169,14 +169,14 @@ sudo cp target/release/jsh /usr/local/bin/
 #### Debian/Ubuntu
 
 ```bash
-wget https://github.com/pegasusheavy/jsh/releases/latest/download/jsh_0.1.0_amd64.deb
+wget https://github.com/quinnjr/jsh/releases/latest/download/jsh_0.1.0_amd64.deb
 sudo apt install ./jsh_0.1.0_amd64.deb
 ```
 
 #### Fedora/RHEL/CentOS
 
 ```bash
-wget https://github.com/pegasusheavy/jsh/releases/latest/download/jsh-0.1.0-1.x86_64.rpm
+wget https://github.com/quinnjr/jsh/releases/latest/download/jsh-0.1.0-1.x86_64.rpm
 sudo dnf install ./jsh-0.1.0-1.x86_64.rpm
 ```
 
@@ -187,7 +187,7 @@ sudo dnf install ./jsh-0.1.0-1.x86_64.rpm
 yay -S jsh
 
 # Or manually
-git clone https://github.com/pegasusheavy/jsh.git
+git clone https://github.com/quinnjr/jsh.git
 cd jsh/packaging
 makepkg -si
 ```
@@ -1794,11 +1794,10 @@ loop {
 
 ### Links
 
-- **Repository**: https://github.com/pegasusheavy/jsh
-- **Documentation**: https://pegasusheavy.github.io/jsh/
-- **Issues**: https://github.com/pegasusheavy/jsh/issues
-- **Releases**: https://github.com/pegasusheavy/jsh/releases
-- **Sponsor**: https://www.patreon.com/c/PegasusHeavyIndustries
+- **Repository**: https://github.com/quinnjr/jsh
+- **Documentation**: https://quinnjr.github.io/jsh/
+- **Issues**: https://github.com/quinnjr/jsh/issues
+- **Releases**: https://github.com/quinnjr/jsh/releases
 
 ### File Structure
 
@@ -1827,5 +1826,5 @@ jsh/
 ### License
 
 Dual-licensed under MIT and Apache 2.0.
-Copyright 2025 Pegasus Heavy Industries LLC.
+Copyright 2025 Joseph R. Quinn.
 

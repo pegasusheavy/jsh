@@ -138,19 +138,11 @@ impl SimpleCommand {
         let mut argv = SmallVec::with_capacity(1 + self.args.len());
 
         // Add command name
-        if let Some(name) = self.name.as_literal() {
-            argv.push(name.to_string());
-        } else {
-            return None;
-        }
+        argv.push(self.name.as_literal()?.to_string());
 
         // Add arguments
         for arg in &self.args {
-            if let Some(lit) = arg.as_literal() {
-                argv.push(lit.to_string());
-            } else {
-                return None;
-            }
+            argv.push(arg.as_literal()?.to_string());
         }
 
         Some(FlatCommand { argv })
